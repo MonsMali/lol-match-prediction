@@ -101,19 +101,32 @@ dmypy.json
 *.pickle
 *.h5
 *.hdf5
+
+# CatBoost
+catboost_info/
+
+# Project-specific: Data files (too large for Git)
+data/
+!data/.gitkeep
+
+# Project-specific: Model files (too large for Git)
+models/
+!models/.gitkeep
+
+# Project-specific: Large datasets
 *.csv
 *.tsv
 *.xlsx
 *.xls
 *.parquet
 
-# CatBoost
-catboost_info/
+# Project-specific: Results that change frequently
+results/temp/
+results/logs/
 
 # Dataset and large files
 Dataset*/
 dataset*/
-data/
 *.db
 *.sqlite
 *.sqlite3
