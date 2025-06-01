@@ -318,3 +318,5 @@ Special thanks to:
 🔄 **Watch** for updates on methodology improvements and new features.
 
 🍴 **Fork** to build upon this research for your own esports analytics projects.
+
+**Note**: This is a research project for academic purposes. The prediction system is designed for educational and analytical use, not for gambling or commercial betting applications.
