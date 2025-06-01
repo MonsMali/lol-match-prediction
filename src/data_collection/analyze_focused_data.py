@@ -1,13 +1,34 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
 
 def analyze_focused_dataset():
     """Analyze the focused dataset to help decide between ML and DL."""
     print("🔍 ANALYZING FOCUSED DATASET FOR MODEL SELECTION")
     print("=" * 60)
     
-    # Load the match-level dataset
-    df = pd.read_csv('Dataset collection/focused_features_match_level.csv')
+    # Load the focused features dataset
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(script_dir))
+    input_path = os.path.join(project_root, "data", "focused_features_match_level.csv")
+
+    # Try alternative paths if not found
+    if not os.path.exists(input_path):
+        alternative_paths = [
+            'Dataset collection/focused_features_match_level.csv',
+            '../Dataset collection/focused_features_match_level.csv'
+        ]
+        for alt_path in alternative_paths:
+            if os.path.exists(alt_path):
+                input_path = alt_path
+                break
+        else:
+            raise FileNotFoundError(f"Could not find focused_features_match_level.csv")
+
+    print(f"📂 Loading data from: {input_path}")
+    df = pd.read_csv(input_path)
     
     print(f"📊 DATASET OVERVIEW:")
     print(f"   Shape: {df.shape}")

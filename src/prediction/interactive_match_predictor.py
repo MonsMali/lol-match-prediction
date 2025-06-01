@@ -1,15 +1,15 @@
 import pandas as pd
 import numpy as np
 import joblib
-import sys
 import os
+import sys
 from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
 
-# Add path for feature engineering
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from advanced_feature_engineering import AdvancedFeatureEngineering
+# Add paths for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from feature_engineering.advanced_feature_engineering import AdvancedFeatureEngineering
 
 class RestartDraftException(Exception):
     """Custom exception to handle draft restarts."""
@@ -26,9 +26,15 @@ class InteractiveLoLPredictor:
     - Best-of-series support
     """
     
-    def __init__(self, model_path="enhanced_models/enhanced_best_model_Logistic_Regression.joblib"):
+    def __init__(self, model_path=None):
         print("🎮 INTERACTIVE LoL MATCH PREDICTOR")
         print("=" * 50)
+        
+        if model_path is None:
+            # Build path to models in the new organized structure
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(os.path.dirname(script_dir))
+            model_path = os.path.join(project_root, "models", "enhanced_models", "enhanced_best_model_Logistic_Regression.joblib")
         
         self.model_path = model_path
         self.model = None
@@ -67,17 +73,31 @@ class InteractiveLoLPredictor:
         print(f"\n📦 LOADING MODEL COMPONENTS")
         
         try:
-            # Try different model paths
+            # Get project root for organized paths
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(os.path.dirname(script_dir))
+            
+            # Try different model paths starting with organized structure
             model_paths = [
-                self.model_path,
-                "enhanced_best_model.joblib",
-                "Experiment/enhanced_best_model.joblib",
-                "enhanced_models/enhanced_scaler.joblib"  # Try scaler separately
+                self.model_path,  # User-provided or default path
+                os.path.join(project_root, "models", "enhanced_models", "enhanced_best_model_Logistic_Regression.joblib"),
+                os.path.join(project_root, "models", "enhanced_best_model.joblib"),
+                os.path.join(project_root, "models", "ultimate_best_model.joblib"),
+                "enhanced_best_model.joblib",  # Legacy paths
+                "Experiment/enhanced_best_model.joblib"
+            ]
+            
+            scaler_paths = [
+                os.path.join(project_root, "models", "enhanced_models", "enhanced_scaler.joblib"),
+                os.path.join(project_root, "models", "enhanced_scaler.joblib"),
+                os.path.join(project_root, "models", "ultimate_scaler.joblib"),
+                "enhanced_models/enhanced_scaler.joblib"  # Legacy path
             ]
             
             model_loaded = False
             for path in model_paths:
                 if os.path.exists(path):
+                    print(f"   📂 Found model at: {path}")
                     deployment_package = joblib.load(path)
                     
                     if isinstance(deployment_package, dict) and 'model' in deployment_package:
@@ -90,15 +110,13 @@ class InteractiveLoLPredictor:
                         if self.scaler is not None:
                             print(f"   ✅ Scaler loaded successfully")
                         else:
-                            print(f"   ⚠️ No scaler in deployment package")
+                            print(f"   ⚠️ No scaler in deployment package, trying separate files...")
                             # Try to load scaler separately
-                            try:
-                                scaler_path = "enhanced_models/enhanced_scaler.joblib"
+                            for scaler_path in scaler_paths:
                                 if os.path.exists(scaler_path):
                                     self.scaler = joblib.load(scaler_path)
-                                    print(f"   ✅ Loaded scaler separately from: {scaler_path}")
-                            except Exception as e:
-                                print(f"   ⚠️ Could not load separate scaler: {e}")
+                                    print(f"   ✅ Loaded scaler from: {scaler_path}")
+                                    break
                         
                         model_loaded = True
                         break
@@ -107,43 +125,48 @@ class InteractiveLoLPredictor:
                         print(f"   ✅ Loaded simple model from: {path}")
                         
                         # Try to load scaler separately for simple models
-                        try:
-                            scaler_path = "enhanced_models/enhanced_scaler.joblib"
+                        for scaler_path in scaler_paths:
                             if os.path.exists(scaler_path):
                                 self.scaler = joblib.load(scaler_path)
-                                print(f"   ✅ Loaded scaler separately from: {scaler_path}")
-                        except Exception as e:
-                            print(f"   ⚠️ Could not load scaler: {e}")
+                                print(f"   ✅ Loaded scaler from: {scaler_path}")
+                                break
                         
                         model_loaded = True
                         break
             
             if not model_loaded:
-                raise Exception("No model found in expected locations")
+                raise Exception(f"No model found in expected locations: {model_paths}")
                 
         except Exception as e:
             print(f"   ❌ Error: {e}")
             raise
     
     def setup_feature_engineering(self):
-        """Setup feature engineering pipeline."""
+        """Initialize feature engineering with proper data loading."""
         print(f"\n🛠️ SETTING UP FEATURE ENGINEERING")
         
         try:
-            # Try different data paths
+            # Try different data paths starting with the new organized structure
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(os.path.dirname(script_dir))
+            
             data_paths = [
-                "Dataset collection/target_leagues_dataset.csv",
+                os.path.join(project_root, "data", "target_leagues_dataset.csv"),  # New organized structure
+                "../../data/target_leagues_dataset.csv",
+                "../data/target_leagues_dataset.csv",
+                "Dataset collection/target_leagues_dataset.csv",  # Legacy paths
                 "../Dataset collection/target_leagues_dataset.csv"
             ]
             
             for path in data_paths:
                 if os.path.exists(path):
+                    print(f"   📂 Found dataset at: {path}")
                     self.feature_engineering = AdvancedFeatureEngineering(path)
                     self.feature_engineering.load_and_analyze_data()
                     print(f"   ✅ Feature engineering ready")
                     return
             
-            raise Exception("Could not find dataset for feature engineering")
+            raise Exception(f"Could not find dataset for feature engineering. Searched paths: {data_paths}")
             
         except Exception as e:
             print(f"   ❌ Error: {e}")
