@@ -34,7 +34,8 @@ class InteractiveLoLPredictor:
             # Build path to models in the new organized structure
             script_dir = os.path.dirname(os.path.abspath(__file__))
             project_root = os.path.dirname(os.path.dirname(script_dir))
-            model_path = os.path.join(project_root, "models", "enhanced_models", "enhanced_best_model_Logistic_Regression.joblib")
+            # UPDATED: Prioritize Bayesian-optimized models from comprehensive comparison
+            model_path = os.path.join(project_root, "models", "bayesian_optimized_models", "bayesian_best_model_Logistic_Regression.joblib")
         
         self.model_path = model_path
         self.model = None
@@ -80,6 +81,11 @@ class InteractiveLoLPredictor:
             # Try different model paths starting with organized structure
             model_paths = [
                 self.model_path,  # User-provided or default path
+                # PRIORITIZE: Bayesian-optimized models (from comprehensive_logistic_regression_comparison.py)
+                os.path.join(project_root, "models", "bayesian_optimized_models", "bayesian_best_model_Logistic_Regression.joblib"),
+                os.path.join(project_root, "models", "bayesian_optimized_models", "stratified_temporal_bayesian_model.joblib"),
+                os.path.join(project_root, "models", "bayesian_optimized_models", "stratified_random_temporal_bayesian_model.joblib"),
+                # FALLBACK: Enhanced models (legacy)
                 os.path.join(project_root, "models", "enhanced_models", "enhanced_best_model_Logistic_Regression.joblib"),
                 os.path.join(project_root, "models", "enhanced_best_model.joblib"),
                 os.path.join(project_root, "models", "ultimate_best_model.joblib"),
@@ -88,6 +94,11 @@ class InteractiveLoLPredictor:
             ]
             
             scaler_paths = [
+                # PRIORITIZE: Bayesian-optimized scalers
+                os.path.join(project_root, "models", "bayesian_optimized_models", "stratified_temporal_bayesian_scaler.joblib"),
+                os.path.join(project_root, "models", "bayesian_optimized_models", "stratified_random_temporal_bayesian_scaler.joblib"),
+                os.path.join(project_root, "models", "bayesian_optimized_models", "pure_temporal_bayesian_scaler.joblib"),
+                # FALLBACK: Enhanced scalers (legacy)
                 os.path.join(project_root, "models", "enhanced_models", "enhanced_scaler.joblib"),
                 os.path.join(project_root, "models", "enhanced_scaler.joblib"),
                 os.path.join(project_root, "models", "ultimate_scaler.joblib"),
@@ -104,7 +115,17 @@ class InteractiveLoLPredictor:
                         self.model = deployment_package['model']
                         self.scaler = deployment_package.get('scaler')
                         
-                        print(f"   ✅ Loaded model: {deployment_package.get('model_name', 'Unknown')}")
+                        model_type = "🧠 BAYESIAN-OPTIMIZED" if "bayesian" in path.lower() else "📊 ENHANCED"
+                        print(f"   ✅ Loaded {model_type} model: {deployment_package.get('model_name', 'Unknown')}")
+                        
+                        # Show Bayesian optimization details if available
+                        if "bayesian" in path.lower():
+                            total_evals = deployment_package.get('total_evaluations', 'Unknown')
+                            strategy = deployment_package.get('strategy', 'Unknown')
+                            print(f"   🎯 Strategy: {strategy}")
+                            print(f"   🔬 Optimization evaluations: {total_evals}")
+                            print(f"   ⚡ Convergence optimized: {deployment_package.get('convergence_optimized', 'Unknown')}")
+                        
                         print(f"   📊 AUC Performance: {deployment_package.get('performance', {}).get('auc', 'Unknown')}")
                         
                         if self.scaler is not None:
@@ -115,20 +136,23 @@ class InteractiveLoLPredictor:
                             for scaler_path in scaler_paths:
                                 if os.path.exists(scaler_path):
                                     self.scaler = joblib.load(scaler_path)
-                                    print(f"   ✅ Loaded scaler from: {scaler_path}")
+                                    scaler_type = "🧠 BAYESIAN" if "bayesian" in scaler_path.lower() else "📊 ENHANCED"
+                                    print(f"   ✅ Loaded {scaler_type} scaler from: {scaler_path}")
                                     break
                         
                         model_loaded = True
                         break
                     else:
                         self.model = deployment_package
-                        print(f"   ✅ Loaded simple model from: {path}")
+                        model_type = "🧠 BAYESIAN" if "bayesian" in path.lower() else "📊 STANDARD"
+                        print(f"   ✅ Loaded {model_type} model from: {path}")
                         
                         # Try to load scaler separately for simple models
                         for scaler_path in scaler_paths:
                             if os.path.exists(scaler_path):
                                 self.scaler = joblib.load(scaler_path)
-                                print(f"   ✅ Loaded scaler from: {scaler_path}")
+                                scaler_type = "🧠 BAYESIAN" if "bayesian" in scaler_path.lower() else "📊 ENHANCED"
+                                print(f"   ✅ Loaded {scaler_type} scaler from: {scaler_path}")
                                 break
                         
                         model_loaded = True
