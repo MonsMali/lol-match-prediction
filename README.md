@@ -1,12 +1,13 @@
 # League of Legends Match Prediction System
 
-> A comprehensive machine learning system for predicting League of Legends match outcomes using advanced feature engineering and multiple prediction models.
+> **Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework**
 
 ## Author
 
 **Luís Conceição**  
 📧 Email: [luis.viegas.conceicao@gmail.com](mailto:luis.viegas.conceicao@gmail.com)  
-🎓 **Master's Thesis Project** - Advanced Machine Learning for Esports Analytics
+🎓 **Master's Thesis** - Advanced Machine Learning for Esports Analytics  
+📄 **Thesis**: [Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework](Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)
 
 ---
 
@@ -20,29 +21,32 @@
 
 ## 📊 Research Overview
 
-This thesis project focuses on developing advanced machine learning models to predict League of Legends match outcomes, introducing novel validation methodologies for competitive gaming environments.
+This Master's thesis focuses on developing **novel temporal validation methodologies for evolving competitive environments**, specifically addressing the unique challenges of League of Legends match prediction where game meta continuously evolves.
 
 ### 🔬 **Key Research Contributions**
 
 #### **1. Methodological Innovations**
-- **Stratified Random Temporal Validation**: Novel approach reducing intra-year meta bias
-- **Advanced Feature Engineering Framework**: 33+ engineered features
-- **Meta-Aware Validation**: Accounting for game evolution in ML validation
+- **Novel Temporal Validation Framework**: Three-strategy approach for evolving competitive environments
+- **Stratified Random Temporal Validation**: Breakthrough approach reducing intra-year meta bias
+- **Meta-Aware Validation**: First systematic approach accounting for game evolution in ML validation
+- **Advanced Feature Engineering Framework**: 33+ engineered features for competitive gaming
 
 #### **2. Performance Achievements**
 - **Best Model**: Logistic Regression with 82.97% AUC-ROC
 - **Dataset**: 41,296 professional matches (2014-2024)
 - **Improvement**: +5.9% over previous state-of-the-art
+- **Cross-Implementation Validation**: Consistent results across 3 independent systems
 
 #### **3. Research Insights**
-- Linear models can outperform complex ensembles with proper feature engineering
+- **"Feature Quality > Model Complexity"** principle validation in competitive gaming
+- Linear models can outperform complex ensembles with domain-specific feature engineering
 - Temporal validation strategies crucial for evolving competitive domains
-- Meta-game evolution significantly impacts prediction accuracy
+- Meta-game evolution significantly impacts prediction accuracy across patches
 
 ## 🏗️ System Architecture
 
 ```
-📦 League of Legends Match Prediction System
+📦 Novel Temporal Validation Framework
 ├── 🔧 src/
 │   ├── 🧠 models/                    # Core ML models
 │   │   ├── ultimate_predictor.py           # Comprehensive model suite
@@ -61,7 +65,9 @@ This thesis project focuses on developing advanced machine learning models to pr
 ├── 📈 visualizations/               # Analysis plots
 ├── 📋 results/                      # Experiment results
 ├── 📚 docs/                         # Documentation
-└── 🧪 tests/                        # Testing framework
+├── 🧪 tests/                        # Testing framework
+└── 📄 Thesis/                       # Complete thesis document
+    └── Novel Temporal Validation for Evolving Competitive Environments.pdf
 ```
 
 ## 🚀 Quick Start
@@ -275,18 +281,22 @@ python -m pytest tests/
 ## 📄 License & Citation
 
 ### Academic Use
-This project is available for academic research. When using this work, please cite:
+This project represents the implementation of a Master's thesis. When using this work, please cite:
 
 ```bibtex
 @mastersthesis{conceicao2024lol,
-  title={Advanced Machine Learning for League of Legends Match Prediction: 
-         Feature Engineering and Temporal Validation Methodologies},
+  title={Novel Temporal Validation for Evolving Competitive Environments: 
+         A League of Legends Machine Learning Framework},
   author={Conceição, Luís},
   year={2024},
   school={Master's Thesis},
-  email={luis.viegas.conceicao@gmail.com}
+  email={luis.viegas.conceicao@gmail.com},
+  note={Available at: https://github.com/MonsMali/lol-match-prediction}
 }
 ```
+
+### Thesis Reference
+**Full Thesis Document**: [Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework](Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)
 
 ## 🌟 Acknowledgments
 
@@ -294,22 +304,23 @@ Special thanks to:
 - **Oracle's Elixir** for comprehensive esports data
 - **League of Legends Esports** community for domain insights
 - **Scikit-learn** and **ML community** for excellent frameworks
-- **Academic advisors** for research guidance
+- **Academic advisors** for research guidance and thesis supervision
 
 ## 📞 Contact
 
 **Luís Conceição**  
 📧 **Email**: [luis.viegas.conceicao@gmail.com](mailto:luis.viegas.conceicao@gmail.com)  
 🔗 **GitHub**: [MonsMali/lol-match-prediction](https://github.com/MonsMali/lol-match-prediction)  
-💼 **LinkedIn**: Connect for research collaboration
+💼 **LinkedIn**: Connect for research collaboration  
+📄 **Thesis**: [Complete Document Available](Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)
 
 ---
 
 ## 🏅 Research Impact
 
-> *"This thesis demonstrates that sophisticated feature engineering can enable simpler models to achieve state-of-the-art performance, while introducing novel temporal validation methodologies applicable to any evolving competitive domain."*
+> *"This thesis demonstrates that sophisticated feature engineering enables simpler models to achieve state-of-the-art performance, while introducing novel temporal validation methodologies applicable to any evolving competitive domain."*
 
-**Key Contributions**: Novel validation strategies • Advanced feature engineering • Production-ready system • Research insights for competitive gaming ML
+**Key Contributions**: Novel temporal validation for competitive gaming • Advanced feature engineering • Production-ready system • Breakthrough insights for evolving environments
 
 ---
 
@@ -319,4 +330,4 @@ Special thanks to:
 
 🍴 **Fork** to build upon this research for your own esports analytics projects.
 
-**Note**: This is a research project for academic purposes. The prediction system is designed for educational and analytical use, not for gambling or commercial betting applications.
+**Note**: This repository implements the complete methodology from the Master's thesis "Novel Temporal Validation for Evolving Competitive Environments". The system is designed for educational and analytical use, not for gambling or commercial betting applications.

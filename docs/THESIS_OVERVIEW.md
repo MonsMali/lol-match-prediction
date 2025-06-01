@@ -1,11 +1,28 @@
-# Thesis Overview - League of Legends Match Prediction System
+# Thesis Overview: Novel Temporal Validation for Evolving Competitive Environments
 
-## Author
-**Luís Conceição**  
-📧 Email: [luis.viegas.conceicao@gmail.com](mailto:luis.viegas.conceicao@gmail.com)  
-🎓 **Master's Thesis Project** - Advanced Machine Learning for Esports Analytics
+## **A League of Legends Machine Learning Framework**
+
+**Author**: Luís Conceição  
+**Email**: luis.viegas.conceicao@gmail.com  
+**Thesis Title**: Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework  
+**Thesis Document**: [Complete PDF Available](../Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)  
+**Year**: 2024  
+**Repository**: https://github.com/MonsMali/lol-match-prediction
 
 ---
+
+## 🎯 **Thesis Abstract**
+
+This Master's thesis introduces **novel temporal validation methodologies for evolving competitive environments**, specifically addressing the unique challenges of machine learning in League of Legends match prediction where game meta continuously evolves through patches and seasonal changes.
+
+### 🔬 **Core Research Question**
+*"How can machine learning models be validated effectively in evolving competitive environments where historical data becomes progressively less representative?"*
+
+### 🚀 **Primary Contributions**
+1. **Novel Temporal Validation Framework** for competitive gaming environments
+2. **Stratified Random Temporal Validation** methodology reducing meta bias
+3. **Advanced Feature Engineering** for esports analytics
+4. **"Feature Quality > Model Complexity"** principle validation
 
 ## **THESIS COMPLETION STATUS** ✅
 
@@ -274,15 +291,89 @@ Advanced feature engineering transforms complex esports patterns into linearly s
 
 ---
 
-## **Contact Information**
+## 📄 **Citation Information**
 
-**Author**: Luís Conceição  
-📧 **Email**: [luis.viegas.conceicao@gmail.com](mailto:luis.viegas.conceicao@gmail.com)  
-🎓 **Institution**: Master's Thesis Project  
-📅 **Completion**: 2024  
+### **BibTeX Reference**
+```bibtex
+@mastersthesis{conceicao2024lol,
+  title={Novel Temporal Validation for Evolving Competitive Environments: 
+         A League of Legends Machine Learning Framework},
+  author={Conceição, Luís},
+  year={2024},
+  school={Master's Thesis},
+  email={luis.viegas.conceicao@gmail.com},
+  note={Available at: https://github.com/MonsMali/lol-match-prediction},
+  pdf={Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework.pdf}
+}
+```
+
+### **APA Reference**
+Conceição, L. (2024). *Novel temporal validation for evolving competitive environments: A League of Legends machine learning framework* [Master's thesis]. Available: https://github.com/MonsMali/lol-match-prediction
+
+### **IEEE Reference**
+L. Conceição, "Novel temporal validation for evolving competitive environments: A League of Legends machine learning framework," Master's thesis, 2024. [Online]. Available: https://github.com/MonsMali/lol-match-prediction
+
+## 📚 **Academic References**
+
+### **Primary Sources**
+- **Complete Thesis**: [Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework](../Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)
+- **Implementation Repository**: https://github.com/MonsMali/lol-match-prediction
+- **Research Data**: Oracle's Elixir professional League of Legends matches (2014-2024)
+
+### **Key Related Work**
+- Temporal validation methodologies in evolving domains
+- Feature engineering for competitive gaming analytics
+- Machine learning for esports prediction systems
+- Meta-game evolution analysis in competitive environments
+
+## 🎓 **Academic Context**
+
+### **Thesis Significance**
+This work represents the **first systematic approach** to addressing temporal validation challenges in evolving competitive gaming environments, with methodologies applicable to:
+- **Esports Analytics**: Any competitive game with evolving meta
+- **Financial Markets**: Evolving trading environments
+- **Social Media**: Changing user behavior patterns
+- **Cybersecurity**: Evolving threat landscapes
+
+### **Research Innovation**
+The **Stratified Random Temporal Validation** methodology introduced in this thesis provides a novel approach to handling temporal dependencies while maintaining statistical validity in evolving environments.
+
+### **Practical Impact**
+- **Academic**: Novel validation framework for temporal data
+- **Industry**: Production-ready esports prediction system
+- **Research**: Open-source implementation for reproducibility
+- **Educational**: Comprehensive documentation for learning
+
+## 📊 **Thesis Structure Reference**
+
+| **Chapter** | **Focus** | **Key Contributions** |
+|------------|-----------|----------------------|
+| **Introduction** | Problem Definition | Novel temporal validation challenges |
+| **Literature Review** | State of the Art | Gap analysis in temporal validation |
+| **Methodology** | Framework Design | Three-strategy validation approach |
+| **Implementation** | System Development | Production-ready prediction system |
+| **Results** | Performance Analysis | 82.97% AUC breakthrough results |
+| **Discussion** | Research Insights | Feature quality vs model complexity |
+| **Conclusion** | Future Work | Broader applicability of methodologies |
+
+## 🔗 **Quick Access Links**
+
+- **📄 Complete Thesis PDF**: [Download Here](../Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)
+- **💻 Implementation Code**: [GitHub Repository](https://github.com/MonsMali/lol-match-prediction)
+- **📊 Performance Results**: [Model Performance Report](MODEL_PERFORMANCE_REPORT.md)
+- **🔧 System Setup**: [Installation Guide](INSTALLATION_GUIDE.md)
+- **📚 API Documentation**: [API Reference](API_DOCUMENTATION.md)
 
 ---
 
-**🎯 THESIS STATUS: BREAKTHROUGH RESULTS ACHIEVED - READY FOR FINAL WRITING**
+## 📞 **Contact Information**
 
-*This overview summarizes the comprehensive achievements of a Master's thesis project that has delivered novel methodological contributions, state-of-the-art performance results, and production-ready system implementation in the field of esports analytics.* 
+**Luís Conceição**  
+📧 **Email**: [luis.viegas.conceicao@gmail.com](mailto:luis.viegas.conceicao@gmail.com)  
+🔗 **GitHub**: [MonsMali](https://github.com/MonsMali)  
+📄 **Thesis**: Novel Temporal Validation for Evolving Competitive Environments  
+🎓 **Degree**: Master's in Advanced Machine Learning
+
+---
+
+*This thesis represents a breakthrough in temporal validation methodologies for evolving competitive environments, with immediate applications in esports analytics and broader implications for any domain with evolving data characteristics.* 
