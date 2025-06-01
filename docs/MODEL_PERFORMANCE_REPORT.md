@@ -1,16 +1,31 @@
 # Model Performance Report
 
-## Executive Summary
+## **Novel Temporal Validation for Evolving Competitive Environments**
+### A League of Legends Machine Learning Framework
 
-This report summarizes the performance achievements of the League of Legends Match Prediction System developed by **Luís Conceição** (luis.viegas.conceicao@gmail.com). The research demonstrates significant breakthroughs in both methodology and performance for esports match prediction.
+**Author**: Luís Conceição  
+**Email**: luis.viegas.conceicao@gmail.com  
+**Thesis Document**: [Complete PDF](../Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)  
+**Repository**: https://github.com/MonsMali/lol-match-prediction  
+**Report Date**: December 2024
 
-### Key Achievements
+---
 
-- 🏆 **Best Performance**: 82.97% AUC-ROC with Logistic Regression
-- 🚀 **Methodology Breakthrough**: Novel temporal validation strategies
-- 🎯 **Feature Engineering**: 33+ advanced engineered features
-- 📊 **Comprehensive Analysis**: 3 validation strategies with Bayesian optimization
-- 💡 **Research Insight**: "Feature Quality > Model Complexity" principle validation
+## 🎯 **Executive Summary**
+
+This comprehensive performance report documents the breakthrough results achieved in the Master's thesis **"Novel Temporal Validation for Evolving Competitive Environments"**, which introduces novel temporal validation methodologies for machine learning in evolving competitive gaming environments.
+
+### 🏆 **Key Achievements**
+
+- **🥇 State-of-the-Art Performance**: 82.97% AUC-ROC with Logistic Regression
+- **🚀 Novel Methodology**: Stratified Random Temporal Validation reducing meta bias
+- **📊 Comprehensive Dataset**: 41,296 professional matches across 9 leagues (2014-2024)
+- **🔬 Rigorous Validation**: Three temporal strategies with Bayesian optimization
+- **⚡ "Feature Quality > Model Complexity"**: Validated research principle
+
+### 🎓 **Research Context**
+
+This performance analysis supports the academic thesis that introduces breakthrough methodologies for machine learning in evolving competitive environments, with applications beyond esports to any domain where historical data becomes progressively less representative due to environmental evolution.
 
 ## Dataset Overview
 
