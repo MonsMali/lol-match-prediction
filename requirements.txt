@@ -1,32 +1,35 @@
-# Core Data Science Libraries
-pandas>=1.5.0
+# Core ML Dependencies
+pandas>=1.3.0
 numpy>=1.21.0
-scikit-learn>=1.1.0
-
-# Machine Learning Models
-catboost>=1.1.0
-xgboost>=1.6.0
-lightgbm>=3.3.0
-
-# Visualization
-matplotlib>=3.5.0
+scikit-learn>=1.0.0
+matplotlib>=3.4.0
 seaborn>=0.11.0
-plotly>=5.10.0
+joblib>=1.1.0
 
-# Model Persistence and Optimization
-joblib>=1.2.0
+# Enhanced ML Packages
+xgboost>=1.5.0
+lightgbm>=3.3.0
+catboost>=1.0.0
 optuna>=3.0.0
 
-# Data Processing
-scipy>=1.9.0
+# Statistical Analysis
+scipy>=1.7.0
 statsmodels>=0.13.0
+
+# Development and Testing (Optional)
+pytest>=6.0.0
+black>=21.0.0
+flake8>=3.9.0
+
+# Jupyter Support (Optional)
+jupyter>=1.0.0
+ipykernel>=6.0.0
 
 # Progress Bars and Utilities
 tqdm>=4.64.0
 
-# Jupyter Notebook Support (optional)
-jupyter>=1.0.0
-ipykernel>=6.15.0
+# Visualization
+plotly>=5.10.0
 
 # Additional Utilities
 requests>=2.28.0 
