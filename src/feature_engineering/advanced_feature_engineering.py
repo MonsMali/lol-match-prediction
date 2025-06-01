@@ -21,27 +21,38 @@ class AdvancedFeatureEngineering:
     - Advanced categorical encoding
     """
     
-    def __init__(self, data_path="Dataset collection/target_leagues_dataset.csv"):
-        # Smart path resolution
+    def __init__(self, data_path=None):
+        if data_path is None:
+            # Default path in the new organized structure
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.dirname(os.path.dirname(script_dir))
+            data_path = os.path.join(project_root, "data", "target_leagues_dataset.csv")
+        
         if not os.path.exists(data_path):
-            # Try relative to current working directory
+            print(f"⚠️ Dataset file not found at: {data_path}")
+            print("Looking for alternative paths...")
+            # Try alternative paths for backwards compatibility
             alternative_paths = [
-                data_path,
+                os.path.join(os.path.dirname(os.path.dirname(script_dir)), "data", "target_leagues_dataset.csv"),
+                "../../data/target_leagues_dataset.csv",
+                "../data/target_leagues_dataset.csv",
                 "../Dataset collection/target_leagues_dataset.csv",
                 "Dataset collection/target_leagues_dataset.csv",
                 os.path.join(os.path.dirname(os.path.abspath(__file__)), "Dataset collection", "target_leagues_dataset.csv")
             ]
             
-            data_found = False
             for path in alternative_paths:
                 if os.path.exists(path):
                     data_path = path
-                    data_found = True
+                    print(f"✅ Found dataset at: {data_path}")
                     break
-            
-            if not data_found:
-                raise FileNotFoundError(f"Could not find dataset file. Tried paths: {alternative_paths}")
+            else:
+                raise FileNotFoundError(f"""Dataset file not found. Please ensure target_leagues_dataset.csv is available.
+                Searched paths:
+                - {data_path}
+                - {alternative_paths}""")
         
+        print(f"📂 Using dataset: {data_path}")
         self.data_path = data_path
         self.df = None
         

@@ -1,13 +1,32 @@
 import pandas as pd
 import numpy as np
+import os
 
 def filter_target_leagues():
     """Filter the focused dataset to include only target leagues."""
     print("🎯 FILTERING DATASET TO TARGET LEAGUES")
     print("=" * 60)
     
-    # Load the current focused dataset
-    df = pd.read_csv('Dataset collection/focused_features_match_level.csv')
+    # Load the focused features dataset
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(script_dir))
+    input_path = os.path.join(project_root, "data", "focused_features_match_level.csv")
+
+    # Try alternative paths if not found
+    if not os.path.exists(input_path):
+        alternative_paths = [
+            'Dataset collection/focused_features_match_level.csv',
+            '../Dataset collection/focused_features_match_level.csv'
+        ]
+        for alt_path in alternative_paths:
+            if os.path.exists(alt_path):
+                input_path = alt_path
+                break
+        else:
+            raise FileNotFoundError(f"Could not find focused_features_match_level.csv")
+
+    print(f"📂 Loading data from: {input_path}")
+    df = pd.read_csv(input_path)
     print(f"📊 Original dataset: {df.shape}")
     
     # Show current league distribution
@@ -86,11 +105,15 @@ def filter_target_leagues():
         print(f"   Difference: {abs(total_filtered - expected_matches):,}")
     
     # Save the filtered dataset
-    output_path = 'Dataset collection/target_leagues_dataset.csv'
+    output_path = os.path.join(project_root, "data", "target_leagues_dataset.csv")
+    
+    # Ensure data directory exists
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
     filtered_df.to_csv(output_path, index=False)
-    print(f"\n💾 SAVED FILTERED DATASET:")
-    print(f"   📁 File: {output_path}")
-    print(f"   📊 Shape: {filtered_df.shape}")
+    print(f"\n💾 SAVED: {output_path}")
+    print(f"📊 Final dataset: {filtered_df.shape}")
+    print(f"🎯 Ready for model training!")
     
     # Show sample of filtered data
     print(f"\n📋 SAMPLE FILTERED DATA:")
