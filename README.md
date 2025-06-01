@@ -162,13 +162,12 @@ The project includes comprehensive visualizations:
 If you use this work in your research, please cite:
 
 ```
-[Your Name] (2025). League of Legends Match Prediction using Advanced Machine Learning.
-Master's Thesis, [Your University].
+Luís Conceição (2025). League of Legends Match Prediction using Advanced Machine Learning.
+Master's Thesis, Aarhus University.
 ```
 
-## 📧 Contact
+## 📧 luis.viegas.conceicao@gmail.com
 
-[Your Name] - [Your Email]
 
 ## 📜 License
 
