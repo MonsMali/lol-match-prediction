@@ -20,6 +20,7 @@ This documentation covers all aspects of the thesis project, from installation t
 ### 📊 **Research Documentation**
 
 #### Core Research
+- **[🎓 Thesis Overview](THESIS_OVERVIEW.md)** - Complete academic thesis structure and achievements
 - **[📊 Model Performance Report](MODEL_PERFORMANCE_REPORT.md)** - Complete performance analysis and research results
 - **[🧠 Feature Engineering Methodology](FOCUSED_FEATURES_METHODOLOGY.md)** - Advanced feature engineering system (70KB, comprehensive)
 - **[⚖️ Validation Strategy Guide](SPLIT_STRATEGY_GUIDE.md)** - Novel temporal validation methodologies
@@ -33,6 +34,7 @@ This documentation covers all aspects of the thesis project, from installation t
 | Document | Purpose | Content | Audience |
 |----------|---------|---------|----------|
 | **Main README** | Project overview | Research highlights, quick start | Everyone |
+| **Thesis Overview** | Academic structure | Complete thesis outline and achievements | Researchers, Academics |
 | **Installation Guide** | Setup instructions | Dependencies, troubleshooting | Users, Developers |
 | **API Documentation** | Technical reference | Classes, methods, examples | Developers |
 | **Performance Report** | Research results | Model performance, insights | Researchers, Academics |
@@ -40,6 +42,11 @@ This documentation covers all aspects of the thesis project, from installation t
 | **Validation Strategy** | Methodology guide | Temporal validation strategies | Researchers |
 
 ## 🎯 Quick Navigation by Use Case
+
+### **I want to understand the complete thesis**
+1. [`THESIS_OVERVIEW.md`](THESIS_OVERVIEW.md) - Complete academic structure and achievements
+2. [`MODEL_PERFORMANCE_REPORT.md`](MODEL_PERFORMANCE_REPORT.md) - Detailed results and analysis
+3. [`FOCUSED_FEATURES_METHODOLOGY.md`](FOCUSED_FEATURES_METHODOLOGY.md) - Feature engineering details
 
 ### **I want to use the system**
 1. [`INSTALLATION_GUIDE.md`](INSTALLATION_GUIDE.md) - Setup and dependencies
@@ -74,12 +81,13 @@ This documentation covers several **novel research contributions**:
 
 ## 📈 Performance Highlights
 
-From [`MODEL_PERFORMANCE_REPORT.md`](MODEL_PERFORMANCE_REPORT.md):
+From [`THESIS_OVERVIEW.md`](THESIS_OVERVIEW.md) and [`MODEL_PERFORMANCE_REPORT.md`](MODEL_PERFORMANCE_REPORT.md):
 
 - **🏆 Best Performance**: 82.97% AUC-ROC with Logistic Regression
 - **📊 Dataset**: 41,296 professional matches (2014-2024)
 - **🎯 Features**: 33 advanced engineered features
 - **🔬 Validation**: Novel temporal strategies with statistical significance
+- **🧠 Bayesian Optimization**: 750 evaluations across three strategies
 
 ## 🛠️ Technical Architecture
 
@@ -100,6 +108,7 @@ From [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md):
 
 ### **Comprehensive Coverage**
 - **Total Documentation**: 100+ pages across all files
+- **Academic Structure**: Complete thesis outline and methodology
 - **Code Examples**: Practical usage in every technical document
 - **Performance Data**: Detailed results with statistical validation
 - **Troubleshooting**: Common issues and solutions
@@ -108,13 +117,15 @@ From [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md):
 - **Methodology Details**: Complete research methodology documentation
 - **Statistical Rigor**: Bootstrap confidence intervals, significance testing
 - **Reproducibility**: Complete setup and testing instructions
+- **Thesis Structure**: Full academic framework and contributions
 
 ## 📞 Support
 
 ### **Getting Help**
-1. **Technical Issues**: Check [`INSTALLATION_GUIDE.md`](INSTALLATION_GUIDE.md) troubleshooting section
-2. **Usage Questions**: Review [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md) examples
-3. **Research Details**: See [`MODEL_PERFORMANCE_REPORT.md`](MODEL_PERFORMANCE_REPORT.md)
+1. **Academic Questions**: Review [`THESIS_OVERVIEW.md`](THESIS_OVERVIEW.md) for complete thesis structure
+2. **Technical Issues**: Check [`INSTALLATION_GUIDE.md`](INSTALLATION_GUIDE.md) troubleshooting section
+3. **Usage Questions**: Review [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md) examples
+4. **Research Details**: See [`MODEL_PERFORMANCE_REPORT.md`](MODEL_PERFORMANCE_REPORT.md)
 
 ### **Contact**
 **Luís Conceição**  
@@ -142,6 +153,7 @@ When using this work in academic research:
 - ✅ **Current**: Updated for latest system version
 - ✅ **Tested**: All code examples verified
 - ✅ **Academic**: Meets thesis documentation standards
+- ✅ **Comprehensive**: Includes complete thesis overview
 
 ---
 
