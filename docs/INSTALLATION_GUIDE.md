@@ -200,6 +200,20 @@ os.environ['PYTHONHASHSEED'] = '0'  # For reproducibility
 export OMP_NUM_THREADS=4  # Adjust based on your CPU
 ```
 
+## Recent Improvements
+
+### Simplified Dataset Path Resolution (Latest Update)
+The codebase now uses a **single, deterministic path** for dataset loading:
+- **Primary Path**: `project_root/Data/complete_target_leagues_dataset.csv`
+- **No Fallbacks**: Eliminates confusion and ensures correct dataset usage
+- **Clear Errors**: If dataset not found, run: `python src/data_processing/create_complete_target_dataset.py`
+
+**Benefits:**
+- ✅ More reliable and predictable
+- ✅ Eliminates potential wrong dataset loading
+- ✅ Simpler code maintenance
+- ✅ Cleaner error messages
+
 ## Data Setup
 
 ### Option 1: Using Provided Dataset
