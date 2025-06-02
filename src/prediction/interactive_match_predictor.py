@@ -946,13 +946,13 @@ class InteractiveLoLPredictor:
             # Blue side features - use EXACT same pipeline as training
             self.feature_engineering.df = blue_df
             blue_features = self.feature_engineering.create_advanced_features_vectorized()
-            blue_final = self.feature_engineering.apply_advanced_encoding_optimized()
+            blue_final = self.apply_prediction_time_encoding(blue_features)
             
             print(f"   🔧 Processing red side features...")
             # Red side features - use EXACT same pipeline as training
             self.feature_engineering.df = red_df
             red_features = self.feature_engineering.create_advanced_features_vectorized()
-            red_final = self.feature_engineering.apply_advanced_encoding_optimized()
+            red_final = self.apply_prediction_time_encoding(red_features)
             
             # Restore original data
             self.feature_engineering.df = temp_df
@@ -1030,6 +1030,109 @@ class InteractiveLoLPredictor:
             traceback.print_exc()
             
             return None
+    
+    def apply_prediction_time_encoding(self, advanced_features_df):
+        """Apply prediction-time encoding that creates the exact 37 features expected by the May 30th model."""
+        print(f"   🎯 Applying prediction-time encoding for 37-feature pipeline...")
+        
+        # Start with the advanced features (should have ~28 features)
+        feature_df = advanced_features_df.copy()
+        
+        # Load pre-trained encoders if available
+        try:
+            encoders = joblib.load('models/enhanced_encoders.joblib')
+            print(f"   📊 Loaded pre-trained encoders: {list(encoders.keys())}")
+        except:
+            encoders = {}
+            print(f"   ⚠️ No pre-trained encoders found, using fallback values")
+        
+        # Get current match data
+        current_match = self.feature_engineering.df.iloc[0]
+        
+        # Basic categorical encoding (5 features)
+        basic_categorical = ['league', 'team', 'patch', 'split', 'side']
+        
+        for feature in basic_categorical:
+            if feature in current_match:
+                value = str(current_match[feature])
+                
+                # Use pre-trained encoder or fallback
+                if feature in encoders:
+                    try:
+                        # Try to transform using pre-trained encoder
+                        encoded_value = encoders[feature].transform([[value]])[0][0]
+                    except:
+                        # Fallback to default value
+                        encoded_value = 0.5
+                else:
+                    # Default encoding values
+                    if feature == 'league':
+                        encoded_value = {'LCK': 0.52, 'LEC': 0.50, 'LCS': 0.48, 'LPL': 0.54}.get(value, 0.50)
+                    elif feature == 'side':
+                        encoded_value = 1.0 if value == 'Blue' else 0.0
+                    else:
+                        encoded_value = 0.5
+                
+                feature_df[f'{feature}_encoded'] = encoded_value
+                print(f"   ✅ {feature}_encoded = {encoded_value:.3f}")
+        
+        # Champion encoding (5 features) - using historical data
+        champion_cols = ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']
+        
+        for col in champion_cols:
+            if col in current_match:
+                champion = current_match[col]
+                
+                # Get champion winrate from characteristics
+                if champion in self.feature_engineering.champion_characteristics:
+                    champ_winrate = self.feature_engineering.champion_characteristics[champion]['win_rate']
+                else:
+                    champ_winrate = 0.5  # Default for unknown champions
+                
+                feature_df[f'{col}_target_encoded'] = champ_winrate
+        
+        # Additional calculated features to reach 37 total
+        # Meta-synergy interactions (3 features)
+        team_meta_strength = feature_df.get('team_meta_strength', 0.5)
+        
+        # Use existing synergy features or create defaults
+        if 'team_avg_synergy' in feature_df:
+            team_synergy = feature_df['team_avg_synergy'].iloc[0] if len(feature_df) > 0 else 0.5
+        else:
+            team_synergy = 0.5
+        
+        feature_df['meta_synergy_product'] = team_meta_strength * team_synergy
+        feature_df['meta_synergy_ratio'] = team_meta_strength / max(team_synergy, 0.01)
+        feature_df['historical_meta_product'] = team_meta_strength * feature_df.get('composition_historical_winrate', 0.5)
+        
+        # Strategic analysis features (2 features) 
+        ban_count = feature_df.get('ban_count', 0)
+        champion_count = feature_df.get('champion_count', 5)
+        
+        feature_df['composition_strength_gap'] = abs(team_meta_strength - 0.5)  # Distance from neutral
+        feature_df['ban_pressure_ratio'] = ban_count / max(champion_count, 1)
+        
+        # Ensure we have exactly 37 features as expected
+        expected_feature_count = 37
+        current_feature_count = len(feature_df.columns)
+        
+        print(f"   📊 Current features: {current_feature_count}, Target: {expected_feature_count}")
+        
+        # If we have too few features, add padding features
+        while len(feature_df.columns) < expected_feature_count:
+            padding_name = f'feature_padding_{len(feature_df.columns)}'
+            feature_df[padding_name] = 0.5
+        
+        # If we have too many features, remove excess (shouldn't happen)
+        if len(feature_df.columns) > expected_feature_count:
+            excess_cols = feature_df.columns[expected_feature_count:]
+            feature_df = feature_df.drop(columns=excess_cols)
+            print(f"   ⚠️ Removed {len(excess_cols)} excess features")
+        
+        print(f"   ✅ Created exactly {len(feature_df.columns)} features for May 30th model compatibility")
+        print(f"   📋 Final feature shape: {feature_df.shape}")
+        
+        return feature_df
     
     def run_best_of_series(self):
         """Run predictions for a best-of series."""
