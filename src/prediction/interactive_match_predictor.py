@@ -939,30 +939,20 @@ class InteractiveLoLPredictor:
             blue_df = pd.DataFrame([blue_data])
             red_df = pd.DataFrame([red_data])
             
-            # Generate features
-            temp_df = self.feature_engineering.df
+            # Store original dataframe temporarily
+            temp_df = self.feature_engineering.df.copy()
             
             print(f"   🔧 Processing blue side features...")
-            # Blue side features
+            # Blue side features - use EXACT same pipeline as training
             self.feature_engineering.df = blue_df
-            try:
-                blue_features = self.feature_engineering.create_advanced_features_vectorized()
-                blue_final = self.apply_prediction_encoding()
-            except Exception as e:
-                print(f"   ⚠️ Blue side error: {e}")
-                print(f"   🔄 Trying fallback encoding...")
-                blue_final = self.feature_engineering.apply_advanced_encoding()
+            blue_features = self.feature_engineering.create_advanced_features_vectorized()
+            blue_final = self.feature_engineering.apply_advanced_encoding_optimized()
             
             print(f"   🔧 Processing red side features...")
-            # Red side features
+            # Red side features - use EXACT same pipeline as training
             self.feature_engineering.df = red_df
-            try:
-                red_features = self.feature_engineering.create_advanced_features_vectorized()
-                red_final = self.apply_prediction_encoding()
-            except Exception as e:
-                print(f"   ⚠️ Red side error: {e}")
-                print(f"   🔄 Trying fallback encoding...")
-                red_final = self.feature_engineering.apply_advanced_encoding()
+            red_features = self.feature_engineering.create_advanced_features_vectorized()
+            red_final = self.feature_engineering.apply_advanced_encoding_optimized()
             
             # Restore original data
             self.feature_engineering.df = temp_df
@@ -1040,139 +1030,6 @@ class InteractiveLoLPredictor:
             traceback.print_exc()
             
             return None
-    
-    def apply_prediction_encoding(self):
-        """Apply encoding for prediction using historical data to ensure realistic feature values."""
-        print(f"   🔧 Applying prediction-time encoding with historical context...")
-        
-        # Get the advanced features that were already created
-        if not hasattr(self.feature_engineering, 'advanced_features_df'):
-            print(f"   ⚠️ No advanced features found, creating empty DataFrame")
-            self.feature_engineering.advanced_features_df = pd.DataFrame(index=self.feature_engineering.df.index)
-        
-        feature_df = self.feature_engineering.advanced_features_df.copy()
-        
-        # Load expected features
-        try:
-            expected_features = joblib.load("enhanced_models/enhanced_feature_columns.joblib")
-            print(f"   📊 Loaded expected features: {len(expected_features)} columns")
-        except:
-            expected_features = None
-            print(f"   ⚠️ Could not load expected feature columns")
-        
-        # Get actual team and champion data from the current match
-        current_match = self.feature_engineering.df.iloc[0]
-        
-        # Calculate real team performance if available
-        team_name = current_match.get('team', 'Unknown')
-        league_name = current_match.get('league', 'Unknown')
-        
-        # Use historical data from feature engineering to get real values
-        historical_df = self.feature_engineering.original_df if hasattr(self.feature_engineering, 'original_df') else self.feature_engineering.df
-        
-        # Team performance encoding (use historical data if available)
-        if team_name != 'Unknown' and len(historical_df) > 1:
-            # Get historical performance for this team
-            team_matches = historical_df[historical_df['team'] == team_name]
-            if len(team_matches) > 0:
-                team_winrate = team_matches['result'].mean()
-                print(f"   📊 Found historical data for {team_name}: {len(team_matches)} matches, {team_winrate:.3f} winrate")
-            else:
-                team_winrate = 0.50  # Default for new teams
-                print(f"   ⚠️ No historical data for {team_name}, using neutral winrate")
-        else:
-            team_winrate = 0.50
-        
-        # League performance encoding
-        if league_name != 'Unknown' and len(historical_df) > 1:
-            league_matches = historical_df[historical_df['league'] == league_name]
-            if len(league_matches) > 0:
-                league_winrate = league_matches['result'].mean()
-            else:
-                league_winrate = 0.52  # Slightly competitive default
-        else:
-            league_winrate = 0.52
-        
-        # Basic categorical features with historical context
-        basic_categorical = ['league', 'team', 'patch', 'split']
-        
-        for feature in basic_categorical:
-            if feature in self.feature_engineering.df.columns:
-                if feature == 'team':
-                    encoded_value = team_winrate
-                elif feature == 'league':
-                    encoded_value = league_winrate
-                elif feature == 'patch':
-                    encoded_value = 0.51  # Balanced patch assumption
-                elif feature == 'split':
-                    encoded_value = 0.50  # Neutral split effect
-                else:
-                    encoded_value = 0.50
-                
-                feature_df[f'{feature}_target_encoded'] = encoded_value
-                print(f"   ✅ {feature}_target_encoded = {encoded_value:.3f}")
-        
-        # Champion encoding with historical context
-        champion_cols = ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']
-        
-        for col in champion_cols:
-            if col in self.feature_engineering.df.columns:
-                champion_name = self.feature_engineering.df[col].iloc[0]
-                
-                # Try to get champion winrate from historical data
-                if champion_name and champion_name != 'Unknown' and len(historical_df) > 1:
-                    champion_matches = historical_df[historical_df[col] == champion_name]
-                    if len(champion_matches) > 0:
-                        champion_winrate = champion_matches['result'].mean()
-                        print(f"   📊 {champion_name} ({col}): {len(champion_matches)} historical matches, {champion_winrate:.3f} winrate")
-                    else:
-                        # Use champion characteristics if available
-                        if hasattr(self.feature_engineering, 'champion_characteristics') and champion_name in self.feature_engineering.champion_characteristics:
-                            champion_winrate = self.feature_engineering.champion_characteristics[champion_name].get('win_rate', 0.5)
-                            print(f"   📊 {champion_name} ({col}): Using characteristics winrate {champion_winrate:.3f}")
-                        else:
-                            champion_winrate = 0.5  # Neutral for unknown
-                            print(f"   ⚠️ {champion_name} ({col}): No data, using neutral")
-                else:
-                    champion_winrate = 0.5
-                
-                feature_df[f'{col}_target_encoded'] = champion_winrate
-        
-        # Ensure we have all expected features with better defaults
-        if expected_features:
-            for feature_name in expected_features:
-                if feature_name not in feature_df.columns:
-                    print(f"   ⚠️ Missing feature: {feature_name}, adding contextual default")
-                    
-                    # Add missing features with contextual defaults
-                    if 'target_encoded' in feature_name:
-                        if 'team' in feature_name:
-                            feature_df[feature_name] = team_winrate
-                        elif 'league' in feature_name:
-                            feature_df[feature_name] = league_winrate
-                        else:
-                            feature_df[feature_name] = 0.5
-                    elif 'winrate' in feature_name or 'strength' in feature_name:
-                        feature_df[feature_name] = 0.5
-                    elif 'count' in feature_name:
-                        feature_df[feature_name] = 5
-                    elif 'year' in feature_name:
-                        feature_df[feature_name] = 2024
-                    elif 'playoffs' in feature_name:
-                        feature_df[feature_name] = 0
-                    elif 'side_blue' in feature_name:
-                        feature_df[feature_name] = 1 if current_match.get('side') == 'Blue' else 0
-                    else:
-                        feature_df[feature_name] = 0
-            
-            # Ensure column order matches expected
-            feature_df = feature_df.reindex(columns=expected_features, fill_value=0)
-            print(f"   ✅ Aligned features to expected {len(expected_features)} columns")
-        
-        print(f"   ✅ Applied contextual prediction encoding")
-        print(f"   📊 Final feature shape: {feature_df.shape}")
-        print(f"   📋 Key features: team_encoded={team_winrate:.3f}, league_encoded={league_winrate:.3f}")
-        return feature_df
     
     def run_best_of_series(self):
         """Run predictions for a best-of series."""
