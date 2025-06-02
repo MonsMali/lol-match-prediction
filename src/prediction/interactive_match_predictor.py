@@ -1095,19 +1095,31 @@ class InteractiveLoLPredictor:
         # Meta-synergy interactions (3 features)
         team_meta_strength = feature_df.get('team_meta_strength', 0.5)
         
+        # Convert to scalar if Series
+        if hasattr(team_meta_strength, 'iloc'):
+            team_meta_strength = team_meta_strength.iloc[0]
+        
         # Use existing synergy features or create defaults
         if 'team_avg_synergy' in feature_df:
-            team_synergy = feature_df['team_avg_synergy'].iloc[0] if len(feature_df) > 0 else 0.5
+            team_synergy = feature_df['team_avg_synergy']
+            if hasattr(team_synergy, 'iloc'):
+                team_synergy = team_synergy.iloc[0]
         else:
             team_synergy = 0.5
         
         feature_df['meta_synergy_product'] = team_meta_strength * team_synergy
         feature_df['meta_synergy_ratio'] = team_meta_strength / max(team_synergy, 0.01)
-        feature_df['historical_meta_product'] = team_meta_strength * feature_df.get('composition_historical_winrate', 0.5)
+        
+        # Fix composition_historical_winrate access
+        comp_winrate = feature_df.get('composition_historical_winrate', 0.5)
+        if hasattr(comp_winrate, 'iloc'):
+            comp_winrate = comp_winrate.iloc[0]
+        
+        feature_df['historical_meta_product'] = team_meta_strength * comp_winrate
         
         # Strategic analysis features (2 features) 
-        ban_count = feature_df.get('ban_count', 0)
-        champion_count = feature_df.get('champion_count', 5)
+        ban_count = feature_df.get('ban_count', pd.Series([0])).iloc[0] if hasattr(feature_df.get('ban_count', 0), 'iloc') else feature_df.get('ban_count', 0)
+        champion_count = feature_df.get('champion_count', pd.Series([5])).iloc[0] if hasattr(feature_df.get('champion_count', 5), 'iloc') else feature_df.get('champion_count', 5)
         
         feature_df['composition_strength_gap'] = abs(team_meta_strength - 0.5)  # Distance from neutral
         feature_df['ban_pressure_ratio'] = ban_count / max(champion_count, 1)
