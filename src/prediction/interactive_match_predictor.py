@@ -1035,7 +1035,7 @@ class InteractiveLoLPredictor:
         """Apply prediction-time encoding that creates the exact 37 features expected by the May 30th model."""
         print(f"   🎯 Applying prediction-time encoding for 37-feature pipeline...")
         
-        # Start with the advanced features (should have ~28 features)
+        # Start with the advanced features (28 features from vectorized creation)
         feature_df = advanced_features_df.copy()
         
         # Load pre-trained encoders if available
@@ -1049,8 +1049,22 @@ class InteractiveLoLPredictor:
         # Get current match data
         current_match = self.feature_engineering.df.iloc[0]
         
-        # Basic categorical encoding (5 features)
-        basic_categorical = ['league', 'team', 'patch', 'split', 'side']
+        # Expected feature names from the trained model (exact list):
+        expected_features = [
+            'team_avg_win_rate', 'team_avg_early_game_strength', 'team_avg_late_game_strength', 
+            'team_scaling', 'composition_balance', 'team_avg_flexibility', 'team_avg_winrate', 
+            'team_early_strength', 'team_late_strength', 'team_flexibility', 'team_meta_strength',
+            'team_meta_consistency', 'team_popularity', 'meta_advantage', 'ban_count',
+            'ban_diversity', 'high_priority_bans', 'team_overall_winrate', 'team_recent_winrate', 
+            'team_form_trend', 'team_experience', 'playoffs', 'side_blue', 'year', 'champion_count',
+            'meta_form_interaction', 'scaling_experience_interaction', 'composition_historical_winrate',
+            'league_target_encoded', 'team_target_encoded', 'patch_target_encoded', 'split_target_encoded',
+            'top_champion_target_encoded', 'jng_champion_target_encoded', 'mid_champion_target_encoded',
+            'bot_champion_target_encoded', 'sup_champion_target_encoded'
+        ]
+        
+        # Basic categorical encoding (4 features - no side_target_encoded!)
+        basic_categorical = ['league', 'team', 'patch', 'split']
         
         for feature in basic_categorical:
             if feature in current_match:
@@ -1059,24 +1073,20 @@ class InteractiveLoLPredictor:
                 # Use pre-trained encoder or fallback
                 if feature in encoders:
                     try:
-                        # Try to transform using pre-trained encoder
                         encoded_value = encoders[feature].transform([[value]])[0][0]
                     except:
-                        # Fallback to default value
                         encoded_value = 0.5
                 else:
                     # Default encoding values
                     if feature == 'league':
                         encoded_value = {'LCK': 0.52, 'LEC': 0.50, 'LCS': 0.48, 'LPL': 0.54}.get(value, 0.50)
-                    elif feature == 'side':
-                        encoded_value = 1.0 if value == 'Blue' else 0.0
                     else:
                         encoded_value = 0.5
                 
                 feature_df[f'{feature}_target_encoded'] = encoded_value
                 print(f"   ✅ {feature}_target_encoded = {encoded_value:.3f}")
         
-        # Champion encoding (5 features) - using historical data
+        # Champion encoding (5 features) - ALL champions!
         champion_cols = ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']
         
         for col in champion_cols:
@@ -1090,61 +1100,34 @@ class InteractiveLoLPredictor:
                     champ_winrate = 0.5  # Default for unknown champions
                 
                 feature_df[f'{col}_target_encoded'] = champ_winrate
+                print(f"   ✅ {col}_target_encoded = {champ_winrate:.3f}")
         
-        # Additional calculated features to reach 37 total
-        # Meta-synergy interactions (3 features)
-        team_meta_strength = feature_df.get('team_meta_strength', 0.5)
+        # Ensure we have EXACTLY the expected features in the right order
+        final_features = pd.DataFrame(index=feature_df.index)
         
-        # Convert to scalar if Series
-        if hasattr(team_meta_strength, 'iloc'):
-            team_meta_strength = team_meta_strength.iloc[0]
+        for expected_feature in expected_features:
+            if expected_feature in feature_df.columns:
+                final_features[expected_feature] = feature_df[expected_feature]
+            else:
+                # Create missing features with sensible defaults
+                if 'winrate' in expected_feature or 'strength' in expected_feature:
+                    final_features[expected_feature] = 0.5
+                elif 'count' in expected_feature:
+                    final_features[expected_feature] = 5
+                elif expected_feature == 'year':
+                    final_features[expected_feature] = 2024
+                elif expected_feature == 'playoffs':
+                    final_features[expected_feature] = 0
+                elif expected_feature == 'side_blue':
+                    final_features[expected_feature] = 1 if current_match.get('side') == 'Blue' else 0
+                else:
+                    final_features[expected_feature] = 0.5
+                print(f"   🔧 Created missing feature: {expected_feature} = {final_features[expected_feature].iloc[0]}")
         
-        # Use existing synergy features or create defaults
-        if 'team_avg_synergy' in feature_df:
-            team_synergy = feature_df['team_avg_synergy']
-            if hasattr(team_synergy, 'iloc'):
-                team_synergy = team_synergy.iloc[0]
-        else:
-            team_synergy = 0.5
+        print(f"   ✅ Created exactly {len(final_features.columns)} features matching May 30th model")
+        print(f"   📋 Final feature shape: {final_features.shape}")
         
-        feature_df['meta_synergy_product'] = team_meta_strength * team_synergy
-        feature_df['meta_synergy_ratio'] = team_meta_strength / max(team_synergy, 0.01)
-        
-        # Fix composition_historical_winrate access
-        comp_winrate = feature_df.get('composition_historical_winrate', 0.5)
-        if hasattr(comp_winrate, 'iloc'):
-            comp_winrate = comp_winrate.iloc[0]
-        
-        feature_df['historical_meta_product'] = team_meta_strength * comp_winrate
-        
-        # Strategic analysis features (2 features) 
-        ban_count = feature_df.get('ban_count', pd.Series([0])).iloc[0] if hasattr(feature_df.get('ban_count', 0), 'iloc') else feature_df.get('ban_count', 0)
-        champion_count = feature_df.get('champion_count', pd.Series([5])).iloc[0] if hasattr(feature_df.get('champion_count', 5), 'iloc') else feature_df.get('champion_count', 5)
-        
-        feature_df['composition_strength_gap'] = abs(team_meta_strength - 0.5)  # Distance from neutral
-        feature_df['ban_pressure_ratio'] = ban_count / max(champion_count, 1)
-        
-        # Ensure we have exactly 37 features as expected
-        expected_feature_count = 37
-        current_feature_count = len(feature_df.columns)
-        
-        print(f"   📊 Current features: {current_feature_count}, Target: {expected_feature_count}")
-        
-        # If we have too few features, add padding features
-        while len(feature_df.columns) < expected_feature_count:
-            padding_name = f'feature_padding_{len(feature_df.columns)}'
-            feature_df[padding_name] = 0.5
-        
-        # If we have too many features, remove excess (shouldn't happen)
-        if len(feature_df.columns) > expected_feature_count:
-            excess_cols = feature_df.columns[expected_feature_count:]
-            feature_df = feature_df.drop(columns=excess_cols)
-            print(f"   ⚠️ Removed {len(excess_cols)} excess features")
-        
-        print(f"   ✅ Created exactly {len(feature_df.columns)} features for May 30th model compatibility")
-        print(f"   📋 Final feature shape: {feature_df.shape}")
-        
-        return feature_df
+        return final_features
     
     def run_best_of_series(self):
         """Run predictions for a best-of series."""
