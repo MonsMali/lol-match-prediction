@@ -1073,8 +1073,8 @@ class InteractiveLoLPredictor:
                     else:
                         encoded_value = 0.5
                 
-                feature_df[f'{feature}_encoded'] = encoded_value
-                print(f"   ✅ {feature}_encoded = {encoded_value:.3f}")
+                feature_df[f'{feature}_target_encoded'] = encoded_value
+                print(f"   ✅ {feature}_target_encoded = {encoded_value:.3f}")
         
         # Champion encoding (5 features) - using historical data
         champion_cols = ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']
