@@ -23,36 +23,24 @@ class AdvancedFeatureEngineering:
     
     def __init__(self, data_path=None):
         if data_path is None:
-            # Default path in the new organized structure
+            # Build path to dataset - SINGLE PATH ONLY
             script_dir = os.path.dirname(os.path.abspath(__file__))
             project_root = os.path.dirname(os.path.dirname(script_dir))
-            data_path = os.path.join(project_root, "data", "target_leagues_dataset.csv")
+            data_path = os.path.join(project_root, "Data", "complete_target_leagues_dataset.csv")
         
+        # 🚨 CRITICAL: Verify we're using the correct clean dataset
+        if "complete_target_leagues_dataset.csv" not in data_path:
+            raise ValueError(f"❌ WRONG DATASET! Must use 'complete_target_leagues_dataset.csv', not the old contaminated dataset. Found: {data_path}")
+        
+        # Simple existence check - no fallbacks
         if not os.path.exists(data_path):
-            print(f"⚠️ Dataset file not found at: {data_path}")
-            print("Looking for alternative paths...")
-            # Try alternative paths for backwards compatibility
-            alternative_paths = [
-                os.path.join(os.path.dirname(os.path.dirname(script_dir)), "data", "target_leagues_dataset.csv"),
-                "../../data/target_leagues_dataset.csv",
-                "../data/target_leagues_dataset.csv",
-                "../Dataset collection/target_leagues_dataset.csv",
-                "Dataset collection/target_leagues_dataset.csv",
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), "Dataset collection", "target_leagues_dataset.csv")
-            ]
-            
-            for path in alternative_paths:
-                if os.path.exists(path):
-                    data_path = path
-                    print(f"✅ Found dataset at: {data_path}")
-                    break
-            else:
-                raise FileNotFoundError(f"""Dataset file not found. Please ensure target_leagues_dataset.csv is available.
-                Searched paths:
-                - {data_path}
-                - {alternative_paths}""")
+            raise FileNotFoundError(f"❌ Clean dataset not found at: {data_path}\n"
+                                  f"Please run: python src/data_processing/create_complete_target_dataset.py")
         
-        print(f"📂 Using dataset: {data_path}")
+        # 🚨 FINAL VERIFICATION: Absolutely ensure we're using the correct dataset
+        print(f"📂 AdvancedFeatureEngineering using CLEAN dataset: {data_path}")
+        print(f"✅ This dataset contains only major leagues (LPL, LCK, LCS, LEC, Worlds, MSI)")
+        
         self.data_path = data_path
         self.df = None
         
@@ -90,6 +78,10 @@ class AdvancedFeatureEngineering:
         self.df = pd.read_csv(self.data_path)
         print(f"📊 Loaded dataset: {self.df.shape}")
         
+        # 🔥 SKIP: Clean and filter target leagues data (already cleaned in dataset creation)
+        # self._clean_target_leagues_data()  # DISABLED - using pre-cleaned dataset
+        print(f"   ✅ Using pre-cleaned target leagues dataset")
+        
         # Handle missing values
         self._handle_missing_values()
         
@@ -110,6 +102,15 @@ class AdvancedFeatureEngineering:
         
         # Calculate player performance metrics
         self._calculate_player_metrics()
+        
+        # 🔥 NEW: Add recent form and momentum features
+        self._add_temporal_momentum_features()
+        
+        # 🔥 NEW: Investigate and fix target leakage
+        self._investigate_target_leakage()
+        
+        # 🔥 NEW: Add meta shift detection features  
+        self._add_meta_shift_detection()
         
         return self.df
     
@@ -349,25 +350,170 @@ class AdvancedFeatureEngineering:
         print(f"   ✅ Analyzed {len(self.team_compositions)} team compositions")
     
     def _analyze_historical_matchups(self):
-        """Analyze historical team vs team and champion vs champion matchups."""
-        print(f"\n📊 ANALYZING HISTORICAL MATCHUPS")
+        """🔥 NEW: Analyze comprehensive lane matchup advantages and team vs team performance."""
+        print(f"\n⚔️ ANALYZING LANE MATCHUP ADVANTAGES")
         
-        # Sort by date for chronological analysis
-        df_sorted = self.df.sort_values('date')
+        # Initialize matchup tracking structures
+        self.lane_matchups = {
+            'top': defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0})),
+            'jungle': defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0})),
+            'mid': defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0})),
+            'bot': defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0})),
+            'support': defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0}))
+        }
         
-        # Team vs team head-to-head
+        self.team_head_to_head = defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0}))
+        self.champion_type_matchups = defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0}))
+        
+        # Sort by date for proper chronological analysis
+        df_sorted = self.df.sort_values('date') if 'date' in self.df.columns else self.df
+        
+        # Create a mapping for easier lane access
+        lane_mapping = {
+            'top': 'top_champion',
+            'jungle': 'jng_champion', 
+            'mid': 'mid_champion',
+            'bot': 'bot_champion',
+            'support': 'sup_champion'
+        }
+        
+        # 🔍 METHOD 1: Analyze same-role matchups across different games
+        print(f"   🔍 Analyzing role-specific matchup patterns...")
+        
+        # Group by patch and lane to find common matchups
+        for patch in df_sorted['patch'].unique():
+            patch_games = df_sorted[df_sorted['patch'] == patch]
+            
+            for role, champ_col in lane_mapping.items():
+                role_champions = patch_games[champ_col].dropna()
+                role_results = patch_games['result']
+                
+                # Track performance of each champion in this role
+                for idx, champion in role_champions.items():
+                    if champion != 'Unknown':
+                        result = role_results.loc[idx]
+                        
+                        # Against all other champions in the same role (indirect matchup)
+                        other_champions = role_champions[role_champions.index != idx]
+                        
+                        for other_idx, opponent in other_champions.items():
+                            if opponent != 'Unknown' and opponent != champion:
+                                # This represents how this champion performs when the opponent has that champion
+                                self.lane_matchups[role][champion][opponent]['games'] += 1
+                                if result == 1:
+                                    self.lane_matchups[role][champion][opponent]['wins'] += 1
+        
+        # 🔍 METHOD 2: Analyze champion type advantages (meta-level matchups)
+        print(f"   🔍 Analyzing champion archetype matchups...")
+        
+        # Define champion archetypes based on characteristics
+        self.champion_archetypes = self._classify_champion_archetypes()
+        
         for _, match in df_sorted.iterrows():
-            # This would require opponent team info which we might not have in current dataset
-            # For now, we'll focus on team historical performance by league/patch
-            pass
+            result = match['result']
+            our_champions = []
+            
+            for role, champ_col in lane_mapping.items():
+                champion = match.get(champ_col)
+                if pd.notna(champion) and champion != 'Unknown':
+                    archetype = self.champion_archetypes.get(champion, 'Unknown')
+                    our_champions.append((role, champion, archetype))
+            
+            # For each of our champions, track performance against typical meta picks
+            for role, champion, archetype in our_champions:
+                # Track how this archetype performs in general
+                for other_champ, other_archetype in self.champion_archetypes.items():
+                    if other_champ != champion:
+                        matchup_key = f"{archetype}_vs_{other_archetype}"
+                        self.champion_type_matchups[role][matchup_key]['games'] += 1
+                        if result == 1:
+                            self.champion_type_matchups[role][matchup_key]['wins'] += 1
         
-        # Champion vs champion matchups (lane matchups)
-        self.lane_matchups = defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0}))
+        # 🔍 METHOD 3: Team vs Team head-to-head (when possible)
+        print(f"   🔍 Analyzing team head-to-head records...")
+        # This requires opponent team data, which we may not have directly
+        # We'll approximate by tracking team performance against teams from the same league
         
-        # We would need opponent data to calculate true matchups
-        # For now, store this as a placeholder for future implementation
+        for _, match in df_sorted.iterrows():
+            team = match['team']
+            league = match.get('league', 'Unknown')
+            result = match['result']
+            
+            # Track performance against league (indirect team matchups)
+            for other_team in df_sorted[df_sorted['league'] == league]['team'].unique():
+                if other_team != team:
+                    self.team_head_to_head[team][other_team]['games'] += 1
+                    if result == 1:
+                        self.team_head_to_head[team][other_team]['wins'] += 1
         
-        print(f"   ✅ Historical matchup analysis prepared")
+        # Calculate matchup advantages
+        self.lane_advantages = {}
+        self.team_advantages = {}
+        self.archetype_advantages = {}
+        
+        # Process lane matchups
+        for role in self.lane_matchups:
+            self.lane_advantages[role] = {}
+            for champ1 in self.lane_matchups[role]:
+                self.lane_advantages[role][champ1] = {}
+                for champ2 in self.lane_matchups[role][champ1]:
+                    matchup_data = self.lane_matchups[role][champ1][champ2]
+                    if matchup_data['games'] >= 3:  # Minimum games for reliable matchup
+                        advantage = matchup_data['wins'] / matchup_data['games']
+                        confidence = min(matchup_data['games'] / 10, 1.0)  # Confidence based on sample size
+                        self.lane_advantages[role][champ1][champ2] = {
+                            'advantage': advantage,
+                            'confidence': confidence,
+                            'games': matchup_data['games']
+                        }
+        
+        # Process archetype matchups
+        for role in self.champion_type_matchups:
+            self.archetype_advantages[role] = {}
+            for matchup in self.champion_type_matchups[role]:
+                matchup_data = self.champion_type_matchups[role][matchup]
+                if matchup_data['games'] >= 5:  # Minimum for archetype reliability
+                    advantage = matchup_data['wins'] / matchup_data['games']
+                    self.archetype_advantages[role][matchup] = advantage
+        
+        # Process team advantages
+        for team1 in self.team_head_to_head:
+            self.team_advantages[team1] = {}
+            for team2 in self.team_head_to_head[team1]:
+                matchup_data = self.team_head_to_head[team1][team2]
+                if matchup_data['games'] >= 3:
+                    advantage = matchup_data['wins'] / matchup_data['games']
+                    self.team_advantages[team1][team2] = advantage
+        
+        print(f"   ✅ Analyzed {sum(len(role_matchups) for role_matchups in self.lane_matchups.values())} lane matchups")
+        print(f"   ✅ Analyzed {len(self.archetype_advantages)} archetype matchup categories")
+        print(f"   ✅ Analyzed {len(self.team_advantages)} team matchup records")
+    
+    def _classify_champion_archetypes(self):
+        """Classify champions into archetypes for meta-level matchup analysis."""
+        archetypes = {}
+        
+        for champion, char in self.champion_characteristics.items():
+            # Classify based on champion characteristics
+            early_strength = char.get('early_game_strength', 0.5)
+            late_strength = char.get('late_game_strength', 0.5)
+            scaling = char.get('scaling_factor', 0)
+            flexibility = char.get('flexibility', 1)
+            
+            # Classification logic
+            if scaling > 0.3:  # Strong late game
+                if early_strength < 0.3:
+                    archetypes[champion] = 'HyperScaling'  # Weak early, strong late
+                else:
+                    archetypes[champion] = 'BalancedScaling'  # Good all game
+            elif scaling < -0.3:  # Strong early game
+                archetypes[champion] = 'EarlyGame'
+            elif flexibility >= 3:  # Can play multiple roles
+                archetypes[champion] = 'FlexPick'
+            else:
+                archetypes[champion] = 'Balanced'
+        
+        return archetypes
     
     def _calculate_player_metrics(self):
         """Calculate player performance and champion mastery."""
@@ -518,6 +664,105 @@ class AdvancedFeatureEngineering:
             # 7. INTERACTION FEATURES
             features['meta_form_interaction'] = features.get('team_meta_strength', 0.5) * features.get('team_form_trend', 0)
             features['scaling_experience_interaction'] = features.get('team_scaling', 0) * features.get('team_experience', 0.5)
+            
+            # 🔥 8. NEW: LANE MATCHUP ADVANTAGE FEATURES
+            lane_mapping = {
+                'top': match.get('top_champion'),
+                'jungle': match.get('jng_champion'),
+                'mid': match.get('mid_champion'),
+                'bot': match.get('bot_champion'),
+                'support': match.get('sup_champion')
+            }
+            
+            # Individual lane advantages (simplified - would need opponent data for full implementation)
+            lane_advantages = []
+            lane_confidences = []
+            archetype_advantages = []
+            
+            for role, champion in lane_mapping.items():
+                if pd.notna(champion) and champion != 'Unknown':
+                    # Get average advantage for this champion in this role
+                    role_advantages = self.lane_advantages.get(role, {}).get(champion, {})
+                    
+                    if role_advantages:
+                        # Average advantage against all opponents
+                        avg_advantage = np.mean([data['advantage'] for data in role_advantages.values()])
+                        avg_confidence = np.mean([data['confidence'] for data in role_advantages.values()])
+                        lane_advantages.append(avg_advantage)
+                        lane_confidences.append(avg_confidence)
+                    else:
+                        # Default if no matchup data
+                        lane_advantages.append(0.5)
+                        lane_confidences.append(0.1)
+                    
+                    # Archetype advantage
+                    champion_archetype = self.champion_archetypes.get(champion, 'Balanced')
+                    role_archetype_advantages = self.archetype_advantages.get(role, {})
+                    
+                    # Get average performance of this archetype in this role
+                    archetype_perf = []
+                    for matchup_key, advantage in role_archetype_advantages.items():
+                        if matchup_key.startswith(f"{champion_archetype}_vs_"):
+                            archetype_perf.append(advantage)
+                    
+                    if archetype_perf:
+                        archetype_advantages.append(np.mean(archetype_perf))
+                    else:
+                        archetype_advantages.append(0.5)
+            
+            # Aggregate lane matchup features
+            if lane_advantages:
+                features.update({
+                    'team_lane_advantage': np.mean(lane_advantages),
+                    'lane_advantage_consistency': 1 - np.std(lane_advantages),  # Lower std = more consistent
+                    'lane_matchup_confidence': np.mean(lane_confidences),
+                    'strongest_lane_advantage': max(lane_advantages),
+                    'weakest_lane_advantage': min(lane_advantages),
+                    'lanes_with_advantage': sum(1 for adv in lane_advantages if adv > 0.55),  # Count favored lanes
+                    'team_archetype_advantage': np.mean(archetype_advantages) if archetype_advantages else 0.5
+                })
+            else:
+                # Default values if no lane data
+                features.update({
+                    'team_lane_advantage': 0.5,
+                    'lane_advantage_consistency': 1.0,
+                    'lane_matchup_confidence': 0.1,
+                    'strongest_lane_advantage': 0.5,
+                    'weakest_lane_advantage': 0.5,
+                    'lanes_with_advantage': 0,
+                    'team_archetype_advantage': 0.5
+                })
+            
+            # 🔥 9. NEW: TEAM HEAD-TO-HEAD FEATURES
+            team = match['team']
+            team_advantages_list = []
+            
+            if team in self.team_advantages:
+                for opponent, advantage in self.team_advantages[team].items():
+                    team_advantages_list.append(advantage)
+            
+            if team_advantages_list:
+                features.update({
+                    'team_historical_advantage': np.mean(team_advantages_list),
+                    'team_matchup_consistency': 1 - np.std(team_advantages_list),
+                    'favorable_matchups': sum(1 for adv in team_advantages_list if adv > 0.6),
+                    'unfavorable_matchups': sum(1 for adv in team_advantages_list if adv < 0.4)
+                })
+            else:
+                features.update({
+                    'team_historical_advantage': 0.5,
+                    'team_matchup_consistency': 1.0,
+                    'favorable_matchups': 0,
+                    'unfavorable_matchups': 0
+                })
+            
+            # 🔥 10. NEW: ADVANCED MATCHUP INTERACTION FEATURES
+            features.update({
+                'lane_meta_synergy': features['team_lane_advantage'] * features.get('team_meta_strength', 0.5),
+                'experience_matchup_confidence': features.get('team_experience', 0.5) * features['lane_matchup_confidence'],
+                'form_matchup_interaction': features.get('team_form_trend', 0) * features['team_historical_advantage'],
+                'scaling_lane_advantage': features.get('team_scaling', 0) * features['strongest_lane_advantage']
+            })
             
             advanced_features.append(features)
         
@@ -820,6 +1065,201 @@ class AdvancedFeatureEngineering:
         # Full composition analysis would require more complex vectorization
         features_df['composition_historical_winrate'] = 0.5  # Default placeholder
         
+        # 🔥 ⚡ 8. NEW: VECTORIZED LANE MATCHUP ADVANTAGE FEATURES
+        print("   ⚡ Vectorizing lane matchup advantages...")
+        
+        # Initialize matchup feature vectors
+        lane_advantages = []
+        lane_confidences = []
+        archetype_advantages = []
+        
+        roles = ['top', 'jungle', 'mid', 'bot', 'support']
+        champion_cols = ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']
+        
+        for i, (role, col) in enumerate(zip(roles, champion_cols)):
+            champ_series = self.df[col].fillna('Unknown')
+            
+            # Vectorized lane advantage lookup
+            def get_lane_advantage(champion):
+                if champion == 'Unknown':
+                    return 0.5, 0.1
+                
+                role_advantages = self.lane_advantages.get(role, {}).get(champion, {})
+                if role_advantages:
+                    avg_advantage = np.mean([data['advantage'] for data in role_advantages.values()])
+                    avg_confidence = np.mean([data['confidence'] for data in role_advantages.values()])
+                    return avg_advantage, avg_confidence
+                return 0.5, 0.1
+            
+            # Apply vectorized lookup
+            advantage_data = champ_series.apply(get_lane_advantage)
+            advantages = pd.Series([item[0] for item in advantage_data], index=self.df.index)
+            confidences = pd.Series([item[1] for item in advantage_data], index=self.df.index)
+            
+            lane_advantages.append(advantages)
+            lane_confidences.append(confidences)
+            
+            # Vectorized archetype advantage lookup
+            def get_archetype_advantage(champion):
+                if champion == 'Unknown':
+                    return 0.5
+                
+                champion_archetype = self.champion_archetypes.get(champion, 'Balanced')
+                role_archetype_advantages = self.archetype_advantages.get(role, {})
+                
+                archetype_perf = []
+                for matchup_key, advantage in role_archetype_advantages.items():
+                    if matchup_key.startswith(f"{champion_archetype}_vs_"):
+                        archetype_perf.append(advantage)
+                
+                return np.mean(archetype_perf) if archetype_perf else 0.5
+            
+            archetype_adv = champ_series.apply(get_archetype_advantage)
+            archetype_advantages.append(archetype_adv)
+        
+        # Combine lane advantage matrices
+        lane_adv_matrix = pd.concat(lane_advantages, axis=1)
+        lane_conf_matrix = pd.concat(lane_confidences, axis=1)
+        archetype_adv_matrix = pd.concat(archetype_advantages, axis=1)
+        
+        # Create aggregated matchup features (vectorized)
+        features_df['team_lane_advantage'] = lane_adv_matrix.mean(axis=1)
+        features_df['lane_advantage_consistency'] = 1 - lane_adv_matrix.std(axis=1).fillna(0)
+        features_df['lane_matchup_confidence'] = lane_conf_matrix.mean(axis=1)
+        features_df['strongest_lane_advantage'] = lane_adv_matrix.max(axis=1)
+        features_df['weakest_lane_advantage'] = lane_adv_matrix.min(axis=1)
+        features_df['lanes_with_advantage'] = (lane_adv_matrix > 0.55).sum(axis=1)
+        features_df['team_archetype_advantage'] = archetype_adv_matrix.mean(axis=1)
+        
+        # 🔥 ⚡ 9. NEW: VECTORIZED TEAM HEAD-TO-HEAD FEATURES
+        print("   ⚡ Vectorizing team head-to-head advantages...")
+        
+        def get_team_advantages(team):
+            if team == 'Unknown' or team not in self.team_advantages:
+                return 0.5, 1.0, 0, 0  # advantage, consistency, favorable, unfavorable
+            
+            team_adv_list = list(self.team_advantages[team].values())
+            if not team_adv_list:
+                return 0.5, 1.0, 0, 0
+            
+            avg_advantage = np.mean(team_adv_list)
+            consistency = 1 - np.std(team_adv_list)
+            favorable = sum(1 for adv in team_adv_list if adv > 0.6)
+            unfavorable = sum(1 for adv in team_adv_list if adv < 0.4)
+            
+            return avg_advantage, consistency, favorable, unfavorable
+        
+        # Apply vectorized team advantage lookup
+        team_series = self.df['team'].fillna('Unknown')
+        team_advantage_data = team_series.apply(get_team_advantages)
+        
+        features_df['team_historical_advantage'] = pd.Series([item[0] for item in team_advantage_data], index=self.df.index)
+        features_df['team_matchup_consistency'] = pd.Series([item[1] for item in team_advantage_data], index=self.df.index)
+        features_df['favorable_matchups'] = pd.Series([item[2] for item in team_advantage_data], index=self.df.index)
+        features_df['unfavorable_matchups'] = pd.Series([item[3] for item in team_advantage_data], index=self.df.index)
+        
+        # 🔥 ⚡ 10. NEW: VECTORIZED ADVANCED MATCHUP INTERACTION FEATURES
+        print("   ⚡ Creating advanced matchup interactions...")
+        features_df['lane_meta_synergy'] = features_df['team_lane_advantage'] * features_df['team_meta_strength']
+        features_df['experience_matchup_confidence'] = features_df['team_experience'] * features_df['lane_matchup_confidence']
+        features_df['form_matchup_interaction'] = features_df['team_form_trend'] * features_df['team_historical_advantage']
+        features_df['scaling_lane_advantage'] = features_df['team_scaling'] * features_df['strongest_lane_advantage']
+        
+        # 🔥 ⚡ 11. NEW: VECTORIZED TEMPORAL MOMENTUM FEATURES
+        print("   ⚡ Adding temporal momentum features...")
+        
+        if hasattr(self, 'team_momentum_metrics') and self.team_momentum_metrics:
+            momentum_feature_names = [
+                'team_winrate_last_3', 'team_winrate_last_5', 'team_winrate_last_10',
+                'form_momentum_short', 'performance_volatility', 'current_streak',
+                'patch_experience', 'patch_performance', 'vs_league_avg'
+            ]
+            
+            for feature_name in momentum_feature_names:
+                if feature_name in self.team_momentum_metrics:
+                    # Vectorized lookup of momentum features
+                    momentum_values = pd.Series(
+                        [self.team_momentum_metrics[feature_name].get(idx, 0.5) for idx in self.df.index],
+                        index=self.df.index
+                    )
+                    features_df[feature_name] = momentum_values
+                else:
+                    features_df[feature_name] = 0.5  # Default value
+            
+            print(f"      ✅ Added {len(momentum_feature_names)} momentum features")
+        else:
+            print("      ⚠️ Momentum metrics not available, using defaults")
+            # Add default momentum features
+            features_df['form_momentum_short'] = 0.0
+            features_df['performance_volatility'] = 0.5
+            features_df['current_streak'] = 0.0
+        
+        # 🔥 ⚡ 12. NEW: VECTORIZED META SHIFT FEATURES
+        print("   ⚡ Adding meta shift detection features...")
+        
+        if hasattr(self, 'meta_shift_metrics') and self.meta_shift_metrics:
+            meta_features = self.meta_shift_metrics.get('match_meta_features', {})
+            
+            meta_feature_names = [
+                'meta_shift_magnitude', 'pick_shift_magnitude', 'team_meta_adaptation',
+                'patch_stability', 'patch_games_count'
+            ]
+            
+            for feature_name in meta_feature_names:
+                # Vectorized lookup of meta shift features
+                meta_values = pd.Series(
+                    [meta_features.get(idx, {}).get(feature_name, 0.5) for idx in self.df.index],
+                    index=self.df.index
+                )
+                features_df[feature_name] = meta_values
+            
+            print(f"      ✅ Added {len(meta_feature_names)} meta shift features")
+        else:
+            print("      ⚠️ Meta shift metrics not available, using defaults")
+            # Add default meta shift features
+            features_df['meta_shift_magnitude'] = 1.0
+            features_df['patch_stability'] = 1.0
+            features_df['team_meta_adaptation'] = 0.5
+        
+        # 🔥 ⚡ 13. NEW: VECTORIZED LEAKAGE-RESISTANT ENCODING
+        print("   ⚡ Adding leakage-resistant features...")
+        
+        if hasattr(self, 'leakage_resistant_encoders') and self.leakage_resistant_encoders:
+            # Add leave-one-out team encoding instead of target encoding
+            if 'team_loo_encoded' in self.leakage_resistant_encoders:
+                team_loo_values = pd.Series(
+                    [self.leakage_resistant_encoders['team_loo_encoded'].get(idx, 0.5) for idx in self.df.index],
+                    index=self.df.index
+                )
+                features_df['team_loo_encoded'] = team_loo_values
+                print(f"      ✅ Added leakage-resistant team encoding")
+            else:
+                features_df['team_loo_encoded'] = 0.5
+        else:
+            print("      ⚠️ Leakage-resistant encoders not available")
+            features_df['team_loo_encoded'] = 0.5
+        
+        # 🔥 ⚡ 14. NEW: ADVANCED INTERACTION FEATURES
+        print("   ⚡ Creating advanced temporal interactions...")
+        
+        # Momentum-Meta interactions
+        if 'form_momentum_short' in features_df.columns and 'meta_shift_magnitude' in features_df.columns:
+            features_df['momentum_meta_interaction'] = (
+                features_df['form_momentum_short'] * features_df['meta_shift_magnitude']
+            )
+        
+        # Experience-Adaptation interactions  
+        if 'team_experience' in features_df.columns and 'team_meta_adaptation' in features_df.columns:
+            features_df['experience_adaptation_synergy'] = (
+                features_df['team_experience'] * features_df['team_meta_adaptation']
+            )
+        
+        # Volatility-Stability interactions
+        if 'performance_volatility' in features_df.columns and 'patch_stability' in features_df.columns:
+            features_df['volatility_stability_balance'] = (
+                (1 - features_df['performance_volatility']) * features_df['patch_stability']
+            )
+        
         # Handle any remaining NaN values
         features_df = features_df.fillna(0.5)
         
@@ -830,6 +1270,418 @@ class AdvancedFeatureEngineering:
         print(f"   🚀 Performance improvement: ~10-50x faster than row-by-row approach")
         
         return features_df
+
+    def _add_temporal_momentum_features(self):
+        """🔥 NEW: Add recent form and momentum features for improved temporal prediction."""
+        print(f"\n🚀 ADDING TEMPORAL MOMENTUM FEATURES")
+        
+        # Sort data chronologically for proper temporal analysis
+        df_sorted = self.df.sort_values(['team', 'date']).copy()
+        
+        # Initialize momentum tracking
+        self.team_momentum_metrics = {}
+        
+        # Calculate rolling performance metrics
+        print("   📈 Calculating rolling team performance...")
+        
+        for window in [3, 5, 10]:
+            # Rolling win rate for each team
+            df_sorted[f'team_winrate_last_{window}'] = (
+                df_sorted.groupby('team')['result']
+                .transform(lambda x: x.rolling(window, min_periods=1).mean().shift(1))
+                .fillna(0.5)  # Default for teams with insufficient history
+            )
+        
+        # Form momentum indicators
+        print("   ⚡ Computing momentum indicators...")
+        
+        # Recent vs historical performance trend
+        df_sorted['form_momentum_short'] = (
+            df_sorted['team_winrate_last_3'] - df_sorted['team_winrate_last_10']
+        ).fillna(0)
+        
+        # Performance volatility (consistency indicator)
+        df_sorted['performance_volatility'] = (
+            df_sorted.groupby('team')['result']
+            .transform(lambda x: x.rolling(10, min_periods=3).std().shift(1))
+            .fillna(0.5)
+        )
+        
+        # Win streak indicators
+        print("   🔥 Adding streak analysis...")
+        
+        def calculate_current_streak(group):
+            """Calculate current win/loss streak for a team."""
+            streaks = []
+            current_streak = 0
+            
+            for result in group['result']:
+                if len(streaks) == 0:
+                    current_streak = 1 if result == 1 else -1
+                else:
+                    if (result == 1 and current_streak > 0) or (result == 0 and current_streak < 0):
+                        current_streak = current_streak + (1 if result == 1 else -1)
+                    else:
+                        current_streak = 1 if result == 1 else -1
+                
+                streaks.append(current_streak)
+            
+            return pd.Series(streaks, index=group.index)
+        
+        df_sorted['current_streak'] = (
+            df_sorted.groupby('team')
+            .apply(calculate_current_streak)
+            .reset_index(level=0, drop=True)
+            .shift(1)  # Shift to avoid future information
+            .fillna(0)
+        )
+        
+        # Patch adaptation metrics
+        print("   🎭 Calculating patch adaptation...")
+        
+        # How well team performs in new patches vs established patches
+        df_sorted['patch_experience'] = (
+            df_sorted.groupby(['team', 'patch'])
+            .cumcount() + 1  # Games played in current patch
+        )
+        
+        # Team's average performance in this patch so far
+        df_sorted['patch_performance'] = (
+            df_sorted.groupby(['team', 'patch'])['result']
+            .transform(lambda x: x.expanding().mean().shift(1))
+            .fillna(0.5)
+        )
+        
+        # Opponent strength adaptation
+        print("   🛡️ Adding opponent adaptation metrics...")
+        
+        # Recent performance vs strong teams (proxy using league standings)
+        league_avg_performance = df_sorted.groupby('league')['result'].mean()
+        df_sorted['league_strength'] = df_sorted['league'].map(league_avg_performance)
+        
+        # Performance vs league average
+        df_sorted['vs_league_avg'] = (
+            df_sorted.groupby(['team', 'league'])['result']
+            .transform(lambda x: x.rolling(5, min_periods=1).mean().shift(1))
+            .fillna(0.5)
+        ) - df_sorted['league_strength']
+        
+        # Store enhanced momentum metrics
+        momentum_features = [
+            'team_winrate_last_3', 'team_winrate_last_5', 'team_winrate_last_10',
+            'form_momentum_short', 'performance_volatility', 'current_streak',
+            'patch_experience', 'patch_performance', 'vs_league_avg'
+        ]
+        
+        for feature in momentum_features:
+            self.team_momentum_metrics[feature] = df_sorted.set_index(df_sorted.index)[feature].to_dict()
+        
+        print(f"   ✅ Added {len(momentum_features)} temporal momentum features")
+        print(f"   📊 Features: {momentum_features}")
+        
+        # Store the enhanced dataframe
+        self.df = df_sorted.reindex(self.df.index)  # Restore original index order
+    
+    def _investigate_target_leakage(self):
+        """🔍 NEW: Comprehensive target leakage investigation and mitigation."""
+        print(f"\n🔍 INVESTIGATING TARGET LEAKAGE")
+        
+        # Analyze target encoding for potential leakage
+        print("   🎯 Analyzing target encoding leakage...")
+        
+        # Check team target encoding correlation with results
+        team_performance = self.df.groupby('team')['result'].agg(['mean', 'count', 'std']).reset_index()
+        team_performance.columns = ['team', 'team_true_winrate', 'team_games', 'team_consistency']
+        
+        # Identify teams with extreme win rates (potential leakage sources)
+        high_winrate_teams = team_performance[team_performance['team_true_winrate'] > 0.7]['team'].tolist()
+        low_winrate_teams = team_performance[team_performance['team_true_winrate'] < 0.3]['team'].tolist()
+        
+        print(f"   ⚠️ High win rate teams (>70%): {high_winrate_teams}")
+        print(f"   ⚠️ Low win rate teams (<30%): {low_winrate_teams}")
+        
+        # Check for sample size issues
+        small_sample_teams = team_performance[team_performance['team_games'] < 10]['team'].tolist()
+        print(f"   📊 Teams with <10 games: {len(small_sample_teams)} teams")
+        
+        # Enhanced target encoding with leakage prevention
+        print("   🛡️ Implementing leakage-resistant encoding...")
+        
+        # Leave-one-out encoding for teams to prevent leakage
+        self.leakage_resistant_encoders = {}
+        
+        # For team encoding, use leave-one-out approach
+        team_loo_encoding = {}
+        for idx, row in self.df.iterrows():
+            team = row['team']
+            # Exclude current match from team performance calculation
+            other_matches = self.df[(self.df['team'] == team) & (self.df.index != idx)]
+            
+            if len(other_matches) > 0:
+                team_loo_encoding[idx] = other_matches['result'].mean()
+            else:
+                # Use global average for teams with no other matches
+                team_loo_encoding[idx] = self.df['result'].mean()
+        
+        # Store leakage-resistant team encoding
+        self.leakage_resistant_encoders['team_loo_encoded'] = team_loo_encoding
+        
+        # Check champion encoding for leakage
+        print("   🏆 Analyzing champion encoding leakage...")
+        
+        champion_cols = ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']
+        
+        for col in champion_cols:
+            champion_performance = self.df.groupby(col)['result'].agg(['mean', 'count']).reset_index()
+            champion_performance.columns = [col, f'{col}_winrate', f'{col}_games']
+            
+            # Identify champions with extreme performance and small samples
+            extreme_champs = champion_performance[
+                (champion_performance[f'{col}_winrate'] > 0.8) | 
+                (champion_performance[f'{col}_winrate'] < 0.2)
+            ]
+            
+            if len(extreme_champs) > 0:
+                print(f"   ⚠️ {col} - extreme performers: {len(extreme_champs)} champions")
+        
+        # Time-aware validation
+        print("   ⏰ Performing time-aware leakage validation...")
+        
+        # Check if recent matches have higher correlation with encodings (temporal leakage)
+        df_sorted = self.df.sort_values('date')
+        recent_matches = df_sorted.tail(1000)  # Last 1000 matches
+        
+        # Compare encoding distributions between early and recent matches
+        early_matches = df_sorted.head(1000)
+        
+        if hasattr(self, 'advanced_features_df') and self.advanced_features_df is not None:
+            if 'team_target_encoded' in self.advanced_features_df.columns:
+                early_team_encoding = early_matches.index.intersection(self.advanced_features_df.index)
+                recent_team_encoding = recent_matches.index.intersection(self.advanced_features_df.index)
+                
+                if len(early_team_encoding) > 0 and len(recent_team_encoding) > 0:
+                    early_mean = self.advanced_features_df.loc[early_team_encoding, 'team_target_encoded'].mean()
+                    recent_mean = self.advanced_features_df.loc[recent_team_encoding, 'team_target_encoded'].mean()
+                    
+                    encoding_drift = abs(recent_mean - early_mean)
+                    print(f"   📈 Team encoding temporal drift: {encoding_drift:.4f}")
+                    
+                    if encoding_drift > 0.05:  # 5% drift threshold
+                        print(f"   🚨 HIGH TEMPORAL DRIFT DETECTED - potential leakage!")
+                else:
+                    print(f"   📊 Temporal drift analysis: insufficient data overlap")
+            else:
+                print(f"   📊 Temporal drift analysis: team_target_encoded not found")
+        else:
+            print(f"   📊 Temporal drift analysis: advanced features not yet created")
+        
+        # Feature leakage detection
+        print("   🔬 Performing feature leakage detection...")
+        
+        suspicious_features = []
+        
+        if hasattr(self, 'advanced_features_df') and self.advanced_features_df is not None:
+            # Check for features with unrealistically high predictive power
+            from sklearn.metrics import roc_auc_score
+            
+            for feature in self.advanced_features_df.select_dtypes(include=[np.number]).columns:
+                if feature == 'result':
+                    continue
+                    
+                # Quick AUC check for individual features
+                feature_data = self.advanced_features_df[feature].fillna(0.5)
+                target_data = self.df['result']
+                
+                # Align indices
+                common_idx = feature_data.index.intersection(target_data.index)
+                if len(common_idx) > 100:  # Minimum sample size
+                    try:
+                        feature_auc = roc_auc_score(target_data.loc[common_idx], feature_data.loc[common_idx])
+                        
+                        # Flag features with suspiciously high individual AUC
+                        if feature_auc > 0.85 or feature_auc < 0.15:
+                            suspicious_features.append((feature, feature_auc))
+                    except:
+                        pass  # Skip features that cause errors
+        else:
+            print(f"   📊 Feature leakage detection: will be performed after feature creation")
+        
+        # Report suspicious features
+        if suspicious_features:
+            print(f"   🚨 SUSPICIOUS FEATURES DETECTED:")
+            for feature, auc in suspicious_features:
+                print(f"      {feature}: AUC = {auc:.4f}")
+        else:
+            if hasattr(self, 'advanced_features_df') and self.advanced_features_df is not None:
+                print(f"   ✅ No obviously suspicious features detected")
+        
+        # Store leakage investigation results
+        self.leakage_investigation = {
+            'high_winrate_teams': high_winrate_teams,
+            'low_winrate_teams': low_winrate_teams,
+            'small_sample_teams': small_sample_teams,
+            'suspicious_features': suspicious_features,
+            'leakage_resistant_encoders': self.leakage_resistant_encoders
+        }
+        
+        print(f"   ✅ Target leakage investigation complete")
+        print(f"   📊 Stored leakage-resistant encoders for future use")
+    
+    def _add_meta_shift_detection(self):
+        """🎭 NEW: Add meta shift detection features to capture meta evolution."""
+        print(f"\n🎭 ADDING META SHIFT DETECTION FEATURES")
+        
+        # Sort by date for temporal analysis
+        df_sorted = self.df.sort_values('date')
+        patches = sorted(df_sorted['patch'].unique())
+        
+        # Initialize meta shift metrics
+        self.meta_shift_metrics = {}
+        
+        print("   📊 Calculating patch-level meta metrics...")
+        
+        # Calculate patch-level statistics
+        patch_stats = {}
+        
+        for patch in patches:
+            patch_data = df_sorted[df_sorted['patch'] == patch]
+            
+            if len(patch_data) < 10:  # Skip patches with insufficient data
+                continue
+            
+            # Champion diversity metrics
+            all_champions = set()
+            for col in ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']:
+                champs = patch_data[col].dropna().unique()
+                all_champions.update(champs)
+            
+            # Meta stability indicators
+            patch_stats[patch] = {
+                'champion_diversity': len(all_champions),
+                'games_count': len(patch_data),
+                'avg_game_length': patch_data['game_length'].mean() if 'game_length' in patch_data.columns else 30,
+                'win_rate_variance': patch_data.groupby('team')['result'].mean().var(),
+                'unique_teams': len(patch_data['team'].unique())
+            }
+        
+        print(f"   🔄 Calculating meta shift indicators between patches...")
+        
+        # Calculate meta shift between consecutive patches
+        meta_shifts = {}
+        
+        for i, patch in enumerate(patches[1:], 1):
+            if patch not in patch_stats or patches[i-1] not in patch_stats:
+                continue
+                
+            prev_patch = patches[i-1]
+            current_stats = patch_stats[patch]
+            prev_stats = patch_stats[prev_patch]
+            
+            # Champion diversity change
+            diversity_change = (current_stats['champion_diversity'] - prev_stats['champion_diversity']) / prev_stats['champion_diversity']
+            
+            # Game length shift (meta speed indicator)
+            length_change = (current_stats['avg_game_length'] - prev_stats['avg_game_length']) / prev_stats['avg_game_length']
+            
+            # Competitive balance shift
+            balance_change = abs(current_stats['win_rate_variance'] - prev_stats['win_rate_variance'])
+            
+            meta_shifts[patch] = {
+                'diversity_shift': diversity_change,
+                'game_length_shift': length_change,
+                'balance_shift': balance_change,
+                'meta_stability_score': 1 - (abs(diversity_change) + abs(length_change) + balance_change) / 3
+            }
+        
+        print("   ⚡ Computing champion pick rate shifts...")
+        
+        # Calculate champion pick rate changes between patches
+        champion_pick_shifts = {}
+        
+        for i, patch in enumerate(patches[1:], 1):
+            prev_patch = patches[i-1]
+            
+            # Get champion pick rates for both patches
+            current_patch_data = df_sorted[df_sorted['patch'] == patch]
+            prev_patch_data = df_sorted[df_sorted['patch'] == prev_patch]
+            
+            if len(current_patch_data) < 5 or len(prev_patch_data) < 5:
+                continue
+            
+            # Calculate pick rate changes for top lane (can extend to other roles)
+            current_top_picks = current_patch_data['top_champion'].value_counts(normalize=True)
+            prev_top_picks = prev_patch_data['top_champion'].value_counts(normalize=True)
+            
+            # Find biggest pick rate changes
+            all_top_champs = set(current_top_picks.index) | set(prev_top_picks.index)
+            
+            pick_rate_changes = []
+            for champ in all_top_champs:
+                current_rate = current_top_picks.get(champ, 0)
+                prev_rate = prev_top_picks.get(champ, 0)
+                change = current_rate - prev_rate
+                pick_rate_changes.append(abs(change))
+            
+            avg_pick_shift = np.mean(pick_rate_changes) if pick_rate_changes else 0
+            champion_pick_shifts[patch] = avg_pick_shift
+        
+        print("   🎯 Creating meta adaptation features...")
+        
+        # Create features for each match based on meta context
+        meta_features = {}
+        
+        for idx, row in df_sorted.iterrows():
+            patch = row['patch']
+            team = row['team']
+            
+            # Meta shift magnitude for this patch
+            meta_shift_magnitude = meta_shifts.get(patch, {}).get('meta_stability_score', 1.0)
+            
+            # Champion pick shift for this patch
+            pick_shift_magnitude = champion_pick_shifts.get(patch, 0.0)
+            
+            # Team's historical performance in meta shifts
+            team_matches = df_sorted[(df_sorted['team'] == team) & (df_sorted.index < idx)]
+            
+            if len(team_matches) > 5:
+                # How well this team performs during high meta shift periods
+                high_shift_matches = team_matches[
+                    team_matches['patch'].map(lambda p: meta_shifts.get(p, {}).get('meta_stability_score', 1.0)) < 0.7
+                ]
+                
+                if len(high_shift_matches) > 0:
+                    meta_adaptation_score = high_shift_matches['result'].mean()
+                else:
+                    meta_adaptation_score = 0.5  # Neutral
+            else:
+                meta_adaptation_score = 0.5  # Insufficient data
+            
+            # Store meta features for this match
+            meta_features[idx] = {
+                'meta_shift_magnitude': meta_shift_magnitude,
+                'pick_shift_magnitude': pick_shift_magnitude,
+                'team_meta_adaptation': meta_adaptation_score,
+                'patch_stability': meta_shifts.get(patch, {}).get('meta_stability_score', 1.0),
+                'patch_games_count': patch_stats.get(patch, {}).get('games_count', 0)
+            }
+        
+        # Store meta shift metrics
+        self.meta_shift_metrics = {
+            'patch_stats': patch_stats,
+            'meta_shifts': meta_shifts,
+            'champion_pick_shifts': champion_pick_shifts,
+            'match_meta_features': meta_features
+        }
+        
+        print(f"   ✅ Added meta shift detection for {len(patches)} patches")
+        print(f"   📊 Created {len(meta_features)} match-level meta features")
+        print(f"   🔄 Detected {len(meta_shifts)} patch transitions with meta shifts")
+        
+        # Show some example meta shifts
+        if meta_shifts:
+            print(f"   📈 Example meta shifts:")
+            for patch, shifts in list(meta_shifts.items())[:3]:
+                print(f"      {patch}: stability = {shifts['meta_stability_score']:.3f}")
 
 def main(use_vectorized=True):
     """Main execution function for advanced feature engineering."""

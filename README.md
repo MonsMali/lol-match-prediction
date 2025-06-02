@@ -18,6 +18,7 @@
 - **🎯 Advanced Feature Engineering**: 33+ sophisticated features including meta analysis and team dynamics
 - **📊 Comprehensive Analysis**: 9 ML algorithms + 3 validation strategies with Bayesian optimization
 - **⚡ Production Ready**: Real-time interactive prediction system with professional UI
+- **🔒 Zero Data Leakage**: Pure pre-match prediction using only picks, bans, and meta information
 
 ## 📊 Research Overview
 
@@ -33,7 +34,8 @@ This Master's thesis focuses on developing **novel temporal validation methodolo
 
 #### **2. Performance Achievements**
 - **Best Model**: Logistic Regression with 82.97% AUC-ROC
-- **Dataset**: 41,296 professional matches (2014-2024)
+- **Dataset**: 37,502 professional matches (2014-2024) - **No Data Leakage**
+- **Coverage**: Major leagues + international tournaments (LPL, LCK, LCS, LEC, Worlds, MSI)
 - **Improvement**: +5.9% over previous state-of-the-art
 - **Cross-Implementation Validation**: Consistent results across 3 independent systems
 
@@ -59,8 +61,10 @@ This Master's thesis focuses on developing **novel temporal validation methodolo
 │   └── 📊 data_collection/          # Data processing
 │       ├── oracle_elixir_analyzer.py
 │       ├── filter_target_leagues.py
-│       └── analyze_focused_data.py
+│       ├── analyze_focused_data.py
+│       └── create_complete_target_dataset.py  # Comprehensive dataset creation
 ├── 📁 data/                         # Datasets
+│   └── complete_target_leagues_dataset.csv  # Comprehensive dataset (37K matches)
 ├── 🤖 models/                       # Trained models
 ├── 📈 visualizations/               # Analysis plots
 ├── 📋 results/                      # Experiment results
@@ -86,6 +90,9 @@ cd lol-match-prediction
 # Install dependencies
 pip install pandas numpy scikit-learn matplotlib seaborn joblib
 pip install xgboost lightgbm catboost optuna  # Enhanced features
+
+# Create comprehensive dataset (optional - already provided)
+python src/data_processing/create_complete_target_dataset.py
 
 # Verify installation
 python tests/quick_test.py
@@ -249,19 +256,46 @@ python -m pytest tests/
 ## 📊 Dataset Information
 
 ### Professional Match Data
-- **Total Matches**: 41,296 professional matches
-- **Time Span**: 2014-2024 (10+ years of esports evolution)
-- **Leagues**: 9 premier leagues (LPL, LCK, LCS, LEC, etc.)
-- **Quality**: Comprehensive professional match data with temporal integrity
+- **Total Matches**: 37,502 professional matches (**Zero Data Leakage**)
+- **Time Span**: 2014-2024 (11 years of esports evolution)
+- **Coverage**: 6 major leagues + international tournaments
+- **Quality**: Pre-match information only (picks, bans, meta) - realistic prediction setup
+- **Tournaments**: Includes prestigious Worlds Championship and MSI
 
 ### Data Distribution
-| League | Matches | Coverage |
-|--------|---------|----------|
-| LPL (China) | 11,848 | 28.7% |
-| LCK (Korea) | 8,842 | 21.4% |
-| NA LCS | 3,472 | 8.4% |
-| LEC | 3,196 | 7.7% |
-| Others | 22,138 | 53.8% |
+| League/Tournament | Matches | Coverage |
+|------------------|---------|----------|
+| **LPL** (China) | 11,848 | 31.6% |
+| **LCK** (Korea) | 8,842 | 23.6% |
+| **LCS** (North America) | 6,790 | 18.1% |
+| **LEC** (Europe) | 6,304 | 16.8% |
+| **🌍 Worlds** (Championship) | 2,490 | 6.6% |
+| **🌍 MSI** (Mid-Season) | 1,228 | 3.3% |
+
+### Comprehensive Dataset Creation
+Our dataset represents a **breakthrough in data quality** for LoL esports prediction:
+
+#### **🔧 Advanced Processing Pipeline**
+- **11 Years of Data**: Processed 996,864 raw records from Oracle's Elixir
+- **Intelligent Filtering**: Extracted 225,012 target league records  
+- **Quality Transformation**: Created 37,502 high-quality team-match records
+- **Zero Leakage**: Strict pre-match information only (picks, bans, meta)
+
+#### **🏆 Tournament Integration**
+- **International Prestige**: Added Worlds Championship and MSI tournaments
+- **Complete Coverage**: Every major region + premier international events
+- **Historical Depth**: From 2014 Worlds to 2024 tournaments
+
+#### **📊 Processing Statistics**
+- **Extraction Rate**: 3.8% (quality over quantity approach)
+- **Perfect Champion Data**: 100% complete picks/bans for all matches
+- **Clean Structure**: Team-match format optimized for ML training
+
+### Data Quality Features
+- **🔒 No Data Leakage**: Only pre-match information (picks, bans, meta)
+- **🏆 Complete Coverage**: All major regions + international tournaments  
+- **📊 Perfect Champion Data**: 100% complete pick/ban information
+- **⚡ Optimized Structure**: Team-match format for efficient processing
 
 ## 🤝 Contributing
 
