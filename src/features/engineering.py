@@ -181,327 +181,348 @@ class AdvancedFeatureEngineering:
         print(f"    Dataset shape after cleaning: {self.df.shape}")
     
     def _analyze_champion_characteristics(self):
-        """Analyze champion characteristics and roles."""
+        """Analyze champion characteristics and roles (vectorized)."""
         print(f"\n ANALYZING CHAMPION CHARACTERISTICS")
-        
-        # Define champion characteristics (this would ideally come from Riot API)
-        # For now, we'll infer from position and calculate from data
-        
-        champion_stats = defaultdict(lambda: {
-            'games': 0, 'wins': 0, 'positions': set(), 
-            'avg_game_length': [], 'early_game_wins': 0, 'late_game_wins': 0
-        })
-        
-        for _, match in self.df.iterrows():
-            # Get champion positions
-            champions = [
-                ('top_champion', 'Top'),
-                ('jng_champion', 'Jungle'), 
-                ('mid_champion', 'Mid'),
-                ('bot_champion', 'ADC'),
-                ('sup_champion', 'Support')
-            ]
-            
-            result = match['result']
-            game_length = match.get('game_length', 30)  # Default if not available
-            
-            for champ_col, position in champions:
-                champion = match.get(champ_col)
-                if pd.notna(champion) and champion != 'Unknown':
-                    champion_stats[champion]['games'] += 1
-                    champion_stats[champion]['positions'].add(position)
-                    
-                    if result == 1:
-                        champion_stats[champion]['wins'] += 1
-                        
-                        # Classify early vs late game based on game length
-                        if game_length < 25:
-                            champion_stats[champion]['early_game_wins'] += 1
-                        elif game_length > 35:
-                            champion_stats[champion]['late_game_wins'] += 1
-                    
-                    champion_stats[champion]['avg_game_length'].append(game_length)
-        
-        # Calculate champion characteristics
-        for champion, stats in champion_stats.items():
-            if stats['games'] >= 5:  # Minimum games for reliability
-                win_rate = stats['wins'] / stats['games']
-                avg_length = np.mean(stats['avg_game_length']) if stats['avg_game_length'] else 30
-                
-                # Calculate scaling (early vs late game preference)
-                total_wins = stats['wins']
-                early_ratio = stats['early_game_wins'] / total_wins if total_wins > 0 else 0
-                late_ratio = stats['late_game_wins'] / total_wins if total_wins > 0 else 0
-                
-                self.champion_characteristics[champion] = {
-                    'win_rate': win_rate,
-                    'avg_game_length': avg_length,
-                    'early_game_strength': early_ratio,
-                    'late_game_strength': late_ratio,
-                    'scaling_factor': late_ratio - early_ratio,  # Positive = late game, negative = early game
-                    'flexibility': len(stats['positions']),  # How many positions can play
-                    'primary_position': max(stats['positions']) if stats['positions'] else 'Unknown'
-                }
-        
+
+        champion_col_positions = [
+            ('top_champion', 'Top'),
+            ('jng_champion', 'Jungle'),
+            ('mid_champion', 'Mid'),
+            ('bot_champion', 'ADC'),
+            ('sup_champion', 'Support')
+        ]
+
+        # Melt champion columns into long format: one row per (match, champion, position)
+        frames = []
+        for col, position in champion_col_positions:
+            temp = self.df[['result', 'game_length']].copy()
+            temp['champion'] = self.df[col]
+            temp['position'] = position
+            frames.append(temp)
+
+        long_df = pd.concat(frames, ignore_index=True)
+        long_df['game_length'] = long_df['game_length'].fillna(30)
+
+        # Filter out Unknown/NaN champions
+        long_df = long_df[long_df['champion'].notna() & (long_df['champion'] != 'Unknown')]
+
+        # Vectorized aggregation per champion
+        grouped = long_df.groupby('champion')
+
+        games = grouped['result'].count()
+        wins = grouped['result'].sum()
+        avg_game_length = grouped['game_length'].mean()
+
+        # Early/late game wins (only for winning matches)
+        win_rows = long_df[long_df['result'] == 1]
+        early_wins = win_rows[win_rows['game_length'] < 25].groupby('champion')['result'].count()
+        late_wins = win_rows[win_rows['game_length'] > 35].groupby('champion')['result'].count()
+
+        # Position flexibility: number of unique positions per champion
+        positions_per_champ = long_df.groupby('champion')['position'].apply(set)
+
+        # Build characteristics dict for champions with >= 5 games
+        reliable = games[games >= 5].index
+        for champion in reliable:
+            total_games = games[champion]
+            total_wins = wins[champion]
+            win_rate = total_wins / total_games
+
+            e_wins = early_wins.get(champion, 0)
+            l_wins = late_wins.get(champion, 0)
+            early_ratio = e_wins / total_wins if total_wins > 0 else 0
+            late_ratio = l_wins / total_wins if total_wins > 0 else 0
+
+            pos_set = positions_per_champ[champion]
+
+            self.champion_characteristics[champion] = {
+                'win_rate': win_rate,
+                'avg_game_length': avg_game_length[champion],
+                'early_game_strength': early_ratio,
+                'late_game_strength': late_ratio,
+                'scaling_factor': late_ratio - early_ratio,
+                'flexibility': len(pos_set),
+                'primary_position': max(pos_set) if pos_set else 'Unknown'
+            }
+
         print(f"    Analyzed {len(self.champion_characteristics)} champions")
     
     def _calculate_meta_indicators(self):
-        """Calculate meta strength and popularity by patch."""
+        """Calculate meta strength and popularity by patch (vectorized)."""
         print(f"\n CALCULATING META INDICATORS")
-        
-        # Group by patch and champion
-        patch_champion_stats = defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0, 'picks': 0, 'bans': 0}))
-        
-        for _, match in self.df.iterrows():
-            patch = match['patch']
-            result = match['result']
-            
-            # Track champion picks
-            champions = [
-                match['top_champion'], match['jng_champion'], match['mid_champion'],
-                match['bot_champion'], match['sup_champion']
-            ]
-            
-            # Track champion bans
-            bans = [match[f'ban{i}'] for i in range(1, 6)]
-            
-            # Update pick stats
-            for champion in champions:
-                if pd.notna(champion) and champion != 'Unknown':
-                    patch_champion_stats[patch][champion]['games'] += 1
-                    patch_champion_stats[patch][champion]['picks'] += 1
-                    if result == 1:
-                        patch_champion_stats[patch][champion]['wins'] += 1
-            
-            # Update ban stats
-            for champion in bans:
-                if pd.notna(champion) and champion != 'NoBan':
-                    patch_champion_stats[patch][champion]['bans'] += 1
-        
-        # Calculate meta indicators for each patch
-        for patch in patch_champion_stats:
-            total_games_in_patch = len(self.df[self.df['patch'] == patch])
-            
-            for champion in patch_champion_stats[patch]:
-                stats = patch_champion_stats[patch][champion]
-                
-                # Win rate
-                win_rate = stats['wins'] / stats['games'] if stats['games'] > 0 else 0.5
-                
-                # Popularity (pick + ban rate)
-                pick_rate = stats['picks'] / (total_games_in_patch * 2) if total_games_in_patch > 0 else 0  # *2 for both teams
-                ban_rate = stats['bans'] / (total_games_in_patch * 2) if total_games_in_patch > 0 else 0
-                popularity = pick_rate + ban_rate
-                
-                # Meta strength (combination of win rate and popularity)
-                meta_strength = (win_rate * 0.7) + (min(popularity, 0.5) * 0.3)  # Cap popularity influence
-                
-                self.champion_meta_strength[(patch, champion)] = meta_strength
-                self.champion_popularity[(patch, champion)] = {
-                    'pick_rate': pick_rate,
-                    'ban_rate': ban_rate,
-                    'popularity': popularity
-                }
-        
+
+        champion_cols = ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']
+        ban_cols = [f'ban{i}' for i in range(1, 6)]
+
+        # Melt picks into long format
+        pick_frames = []
+        for col in champion_cols:
+            temp = self.df[['patch', 'result']].copy()
+            temp['champion'] = self.df[col]
+            pick_frames.append(temp)
+        picks_long = pd.concat(pick_frames, ignore_index=True)
+        picks_long = picks_long[picks_long['champion'].notna() & (picks_long['champion'] != 'Unknown')]
+
+        # Aggregate pick stats per (patch, champion)
+        pick_stats = picks_long.groupby(['patch', 'champion']).agg(
+            games=('result', 'count'),
+            wins=('result', 'sum')
+        ).reset_index()
+
+        # Melt bans into long format
+        ban_frames = []
+        for col in ban_cols:
+            temp = self.df[['patch']].copy()
+            temp['champion'] = self.df[col]
+            ban_frames.append(temp)
+        bans_long = pd.concat(ban_frames, ignore_index=True)
+        bans_long = bans_long[bans_long['champion'].notna() & (bans_long['champion'] != 'NoBan')]
+
+        ban_stats = bans_long.groupby(['patch', 'champion']).size().reset_index(name='bans')
+
+        # Total games per patch
+        games_per_patch = self.df.groupby('patch').size().reset_index(name='total_games')
+
+        # Merge everything
+        merged = pick_stats.merge(ban_stats, on=['patch', 'champion'], how='left')
+        merged['bans'] = merged['bans'].fillna(0)
+        merged = merged.merge(games_per_patch, on='patch', how='left')
+
+        # Calculate rates
+        merged['win_rate'] = merged['wins'] / merged['games']
+        merged['win_rate'] = merged['win_rate'].fillna(0.5)
+        merged['pick_rate'] = merged['games'] / (merged['total_games'] * 2)
+        merged['ban_rate'] = merged['bans'] / (merged['total_games'] * 2)
+        merged['popularity'] = merged['pick_rate'] + merged['ban_rate']
+        merged['meta_strength'] = (merged['win_rate'] * 0.7) + (merged['popularity'].clip(upper=0.5) * 0.3)
+
+        # Store results
+        for _, row in merged.iterrows():
+            patch, champion = row['patch'], row['champion']
+            self.champion_meta_strength[(patch, champion)] = row['meta_strength']
+            self.champion_popularity[(patch, champion)] = {
+                'pick_rate': row['pick_rate'],
+                'ban_rate': row['ban_rate'],
+                'popularity': row['popularity']
+            }
+
         print(f"    Calculated meta indicators for {len(self.champion_meta_strength)} champion-patch combinations")
     
     def _analyze_pickban_strategy(self):
-        """Analyze pick/ban order strategy."""
+        """Analyze pick/ban order strategy (vectorized)."""
         print(f"\n ANALYZING PICK/BAN STRATEGY")
-        
-        # This would require draft order data which we might not have
-        # For now, we'll analyze ban priority and target banning
-        
+
         self.ban_priority = defaultdict(lambda: {'early_bans': 0, 'total_bans': 0})
         self.target_ban_analysis = defaultdict(lambda: defaultdict(int))
-        
-        for _, match in self.df.iterrows():
-            team = match['team']
-            
-            # Analyze ban order (assuming ban1 is first priority)
-            bans = [match[f'ban{i}'] for i in range(1, 6)]
-            
-            for i, ban in enumerate(bans):
-                if pd.notna(ban) and ban != 'NoBan':
-                    self.ban_priority[ban]['total_bans'] += 1
-                    
-                    if i < 2:  # First two bans are high priority
-                        self.ban_priority[ban]['early_bans'] += 1
-                    
-                    # Track which teams ban which champions
-                    self.target_ban_analysis[team][ban] += 1
-        
+
+        ban_cols = [f'ban{i}' for i in range(1, 6)]
+
+        # Melt bans into long format with ban position
+        ban_frames = []
+        for i, col in enumerate(ban_cols):
+            temp = pd.DataFrame({
+                'team': self.df['team'],
+                'champion': self.df[col],
+                'ban_position': i
+            })
+            ban_frames.append(temp)
+        bans_long = pd.concat(ban_frames, ignore_index=True)
+        bans_long = bans_long[bans_long['champion'].notna() & (bans_long['champion'] != 'NoBan')]
+
+        # Total bans per champion
+        total_bans = bans_long.groupby('champion').size()
+        # Early bans (position 0 or 1) per champion
+        early_bans = bans_long[bans_long['ban_position'] < 2].groupby('champion').size()
+
+        for champion in total_bans.index:
+            self.ban_priority[champion]['total_bans'] = int(total_bans[champion])
+            self.ban_priority[champion]['early_bans'] = int(early_bans.get(champion, 0))
+
+        # Target ban analysis: which teams ban which champions
+        team_ban_counts = bans_long.groupby(['team', 'champion']).size()
+        for (team, champion), count in team_ban_counts.items():
+            self.target_ban_analysis[team][champion] = int(count)
+
         print(f"    Analyzed ban strategy for {len(self.ban_priority)} champions")
     
     def _calculate_team_dynamics(self):
-        """Calculate advanced team composition and synergy metrics."""
+        """Calculate advanced team composition and synergy metrics (vectorized)."""
         print(f"\n CALCULATING TEAM DYNAMICS")
-        
-        # Calculate team synergies
-        team_composition_stats = defaultdict(lambda: {'games': 0, 'wins': 0})
-        
-        for _, match in self.df.iterrows():
-            champions = [
-                match['top_champion'], match['jng_champion'], match['mid_champion'],
-                match['bot_champion'], match['sup_champion']
-            ]
-            
-            valid_champions = [c for c in champions if pd.notna(c) and c != 'Unknown']
-            
-            if len(valid_champions) >= 3:  # Need at least 3 champions for composition analysis
-                # Sort champions to create consistent composition signatures
-                comp_signature = tuple(sorted(valid_champions))
-                team_composition_stats[comp_signature]['games'] += 1
-                
-                if match['result'] == 1:
-                    team_composition_stats[comp_signature]['wins'] += 1
-        
-        # Store composition win rates
-        self.team_compositions = {}
-        for comp, stats in team_composition_stats.items():
-            if stats['games'] >= 2:  # Minimum games for composition reliability
-                win_rate = stats['wins'] / stats['games']
-                self.team_compositions[comp] = win_rate
-        
+
+        champion_cols = ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']
+
+        # Build composition signature per row: sorted tuple of valid champions
+        champ_matrix = self.df[champion_cols].copy()
+        champ_matrix = champ_matrix.fillna('Unknown')
+
+        # Count valid (non-Unknown) champions per row
+        valid_mask = champ_matrix != 'Unknown'
+        valid_count = valid_mask.sum(axis=1)
+
+        # Create composition signature string (sorted, joined) for rows with >= 3 valid champions
+        def make_signature(row):
+            valid = sorted([v for v in row if v != 'Unknown'])
+            return '|'.join(valid) if len(valid) >= 3 else None
+
+        comp_signatures = champ_matrix.apply(make_signature, axis=1)
+
+        # Filter to rows with valid compositions
+        valid_comps = comp_signatures.dropna()
+        if len(valid_comps) > 0:
+            comp_df = pd.DataFrame({
+                'signature': valid_comps,
+                'result': self.df.loc[valid_comps.index, 'result']
+            })
+
+            comp_stats = comp_df.groupby('signature')['result'].agg(['count', 'sum'])
+            comp_stats.columns = ['games', 'wins']
+
+            # Store composition win rates for compositions with >= 2 games
+            reliable = comp_stats[comp_stats['games'] >= 2]
+            self.team_compositions = {}
+            for sig, row in reliable.iterrows():
+                comp_tuple = tuple(sig.split('|'))
+                self.team_compositions[comp_tuple] = row['wins'] / row['games']
+        else:
+            self.team_compositions = {}
+
         print(f"    Analyzed {len(self.team_compositions)} team compositions")
     
     def _analyze_historical_matchups(self):
-        """ NEW: Analyze comprehensive lane matchup advantages and team vs team performance."""
+        """ NEW: Analyze comprehensive lane matchup advantages and team vs team performance (vectorized)."""
         print(f"\n ANALYZING LANE MATCHUP ADVANTAGES")
-        
-        # Initialize matchup tracking structures
-        self.lane_matchups = {
-            'top': defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0})),
-            'jungle': defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0})),
-            'mid': defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0})),
-            'bot': defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0})),
-            'support': defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0}))
-        }
-        
+
+        # Initialize structures
+        self.lane_matchups = {r: defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0}))
+                             for r in ['top', 'jungle', 'mid', 'bot', 'support']}
         self.team_head_to_head = defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0}))
         self.champion_type_matchups = defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0}))
-        
-        # Sort by date for proper chronological analysis
-        df_sorted = self.df.sort_values('date') if 'date' in self.df.columns else self.df
-        
-        # Create a mapping for easier lane access
+
         lane_mapping = {
-            'top': 'top_champion',
-            'jungle': 'jng_champion', 
-            'mid': 'mid_champion',
-            'bot': 'bot_champion',
-            'support': 'sup_champion'
+            'top': 'top_champion', 'jungle': 'jng_champion',
+            'mid': 'mid_champion', 'bot': 'bot_champion', 'support': 'sup_champion'
         }
-        
-        #  METHOD 1: Analyze same-role matchups across different games
+
+        #  METHOD 1: Role-specific matchup patterns (vectorized via groupby)
         print(f"    Analyzing role-specific matchup patterns...")
-        
-        # Group by patch and lane to find common matchups
-        for patch in df_sorted['patch'].unique():
-            patch_games = df_sorted[df_sorted['patch'] == patch]
-            
-            for role, champ_col in lane_mapping.items():
-                role_champions = patch_games[champ_col].dropna()
-                role_results = patch_games['result']
-                
-                # Track performance of each champion in this role
-                for idx, champion in role_champions.items():
-                    if champion != 'Unknown':
-                        result = role_results.loc[idx]
-                        
-                        # Against all other champions in the same role (indirect matchup)
-                        other_champions = role_champions[role_champions.index != idx]
-                        
-                        for other_idx, opponent in other_champions.items():
-                            if opponent != 'Unknown' and opponent != champion:
-                                # This represents how this champion performs when the opponent has that champion
-                                self.lane_matchups[role][champion][opponent]['games'] += 1
-                                if result == 1:
-                                    self.lane_matchups[role][champion][opponent]['wins'] += 1
-        
-        #  METHOD 2: Analyze champion type advantages (meta-level matchups)
+
+        for role, champ_col in lane_mapping.items():
+            # Per-patch champion performance in this role
+            role_df = self.df[['patch', champ_col, 'result']].copy()
+            role_df = role_df[role_df[champ_col].notna() & (role_df[champ_col] != 'Unknown')]
+            role_df.columns = ['patch', 'champion', 'result']
+
+            # For each (patch, champion): count games and wins
+            champ_patch_stats = role_df.groupby(['patch', 'champion'])['result'].agg(['count', 'sum'])
+            champ_patch_stats.columns = ['games', 'wins']
+
+            # For indirect matchups: within each patch, compute cross-product of champions
+            # This is equivalent to the original nested loop but using merge
+            for patch in role_df['patch'].unique():
+                patch_data = role_df[role_df['patch'] == patch]
+                if len(patch_data) < 2:
+                    continue
+
+                # Get champion stats for this patch-role
+                champ_stats = patch_data.groupby('champion')['result'].agg(['count', 'sum'])
+                champ_stats.columns = ['games', 'wins']
+
+                # Total games and wins in patch for this role (each game contributes 1 champion)
+                total_games = len(patch_data)
+
+                # For each pair of champions in this role-patch:
+                # champion A's record "against" champion B = A's games and wins in this patch
+                # (indirect matchup - same as original logic)
+                champions_in_patch = champ_stats.index.tolist()
+                for champ in champions_in_patch:
+                    g = int(champ_stats.loc[champ, 'games'])
+                    w = int(champ_stats.loc[champ, 'wins'])
+                    for opponent in champions_in_patch:
+                        if opponent != champ:
+                            self.lane_matchups[role][champ][opponent]['games'] += g
+                            self.lane_matchups[role][champ][opponent]['wins'] += w
+
+        #  METHOD 2: Champion archetype matchups (vectorized)
         print(f"    Analyzing champion archetype matchups...")
-        
-        # Define champion archetypes based on characteristics
         self.champion_archetypes = self._classify_champion_archetypes()
-        
-        for _, match in df_sorted.iterrows():
-            result = match['result']
-            our_champions = []
-            
-            for role, champ_col in lane_mapping.items():
-                champion = match.get(champ_col)
-                if pd.notna(champion) and champion != 'Unknown':
-                    archetype = self.champion_archetypes.get(champion, 'Unknown')
-                    our_champions.append((role, champion, archetype))
-            
-            # For each of our champions, track performance against typical meta picks
-            for role, champion, archetype in our_champions:
-                # Track how this archetype performs in general
-                for other_champ, other_archetype in self.champion_archetypes.items():
-                    if other_champ != champion:
+
+        # For each role, get archetype of each champion played
+        for role, champ_col in lane_mapping.items():
+            role_data = self.df[[champ_col, 'result']].copy()
+            role_data = role_data[role_data[champ_col].notna() & (role_data[champ_col] != 'Unknown')]
+            role_data['archetype'] = role_data[champ_col].map(
+                lambda c: self.champion_archetypes.get(c, 'Unknown')
+            )
+
+            # For each archetype, track performance against all other archetypes
+            all_archetypes = set(self.champion_archetypes.values())
+            archetype_stats = role_data.groupby('archetype')['result'].agg(['count', 'sum'])
+            archetype_stats.columns = ['games', 'wins']
+
+            for archetype in archetype_stats.index:
+                g = int(archetype_stats.loc[archetype, 'games'])
+                w = int(archetype_stats.loc[archetype, 'wins'])
+                for other_archetype in all_archetypes:
+                    if other_archetype != archetype:
                         matchup_key = f"{archetype}_vs_{other_archetype}"
-                        self.champion_type_matchups[role][matchup_key]['games'] += 1
-                        if result == 1:
-                            self.champion_type_matchups[role][matchup_key]['wins'] += 1
-        
-        #  METHOD 3: Team vs Team head-to-head (when possible)
+                        self.champion_type_matchups[role][matchup_key]['games'] += g
+                        self.champion_type_matchups[role][matchup_key]['wins'] += w
+
+        #  METHOD 3: Team vs Team head-to-head (vectorized)
         print(f"    Analyzing team head-to-head records...")
-        # This requires opponent team data, which we may not have directly
-        # We'll approximate by tracking team performance against teams from the same league
-        
-        for _, match in df_sorted.iterrows():
-            team = match['team']
-            league = match.get('league', 'Unknown')
-            result = match['result']
-            
-            # Track performance against league (indirect team matchups)
-            for other_team in df_sorted[df_sorted['league'] == league]['team'].unique():
+
+        # For each team-league combination, track games and wins
+        team_league_stats = self.df.groupby(['team', 'league'])['result'].agg(['count', 'sum'])
+        team_league_stats.columns = ['games', 'wins']
+        team_league_stats = team_league_stats.reset_index()
+
+        # Teams per league
+        teams_per_league = self.df.groupby('league')['team'].apply(set).to_dict()
+
+        for _, row in team_league_stats.iterrows():
+            team = row['team']
+            league = row['league']
+            g = int(row['games'])
+            w = int(row['wins'])
+
+            for other_team in teams_per_league.get(league, set()):
                 if other_team != team:
-                    self.team_head_to_head[team][other_team]['games'] += 1
-                    if result == 1:
-                        self.team_head_to_head[team][other_team]['wins'] += 1
-        
+                    self.team_head_to_head[team][other_team]['games'] += g
+                    self.team_head_to_head[team][other_team]['wins'] += w
+
         # Calculate matchup advantages
         self.lane_advantages = {}
         self.team_advantages = {}
         self.archetype_advantages = {}
-        
-        # Process lane matchups
+
         for role in self.lane_matchups:
             self.lane_advantages[role] = {}
             for champ1 in self.lane_matchups[role]:
                 self.lane_advantages[role][champ1] = {}
                 for champ2 in self.lane_matchups[role][champ1]:
                     matchup_data = self.lane_matchups[role][champ1][champ2]
-                    if matchup_data['games'] >= 3:  # Minimum games for reliable matchup
+                    if matchup_data['games'] >= 3:
                         advantage = matchup_data['wins'] / matchup_data['games']
-                        confidence = min(matchup_data['games'] / 10, 1.0)  # Confidence based on sample size
+                        confidence = min(matchup_data['games'] / 10, 1.0)
                         self.lane_advantages[role][champ1][champ2] = {
-                            'advantage': advantage,
-                            'confidence': confidence,
-                            'games': matchup_data['games']
+                            'advantage': advantage, 'confidence': confidence, 'games': matchup_data['games']
                         }
-        
-        # Process archetype matchups
+
         for role in self.champion_type_matchups:
             self.archetype_advantages[role] = {}
             for matchup in self.champion_type_matchups[role]:
                 matchup_data = self.champion_type_matchups[role][matchup]
-                if matchup_data['games'] >= 5:  # Minimum for archetype reliability
-                    advantage = matchup_data['wins'] / matchup_data['games']
-                    self.archetype_advantages[role][matchup] = advantage
-        
-        # Process team advantages
+                if matchup_data['games'] >= 5:
+                    self.archetype_advantages[role][matchup] = matchup_data['wins'] / matchup_data['games']
+
         for team1 in self.team_head_to_head:
             self.team_advantages[team1] = {}
             for team2 in self.team_head_to_head[team1]:
                 matchup_data = self.team_head_to_head[team1][team2]
                 if matchup_data['games'] >= 3:
-                    advantage = matchup_data['wins'] / matchup_data['games']
-                    self.team_advantages[team1][team2] = advantage
-        
-        print(f"    Analyzed {sum(len(role_matchups) for role_matchups in self.lane_matchups.values())} lane matchups")
+                    self.team_advantages[team1][team2] = matchup_data['wins'] / matchup_data['games']
+
+        print(f"    Analyzed {sum(len(rm) for rm in self.lane_matchups.values())} lane matchups")
         print(f"    Analyzed {len(self.archetype_advantages)} archetype matchup categories")
         print(f"    Analyzed {len(self.team_advantages)} team matchup records")
     
@@ -532,46 +553,36 @@ class AdvancedFeatureEngineering:
         return archetypes
     
     def _calculate_player_metrics(self):
-        """Calculate player performance and champion mastery."""
+        """Calculate player performance and champion mastery (vectorized)."""
         print(f"\n CALCULATING PLAYER METRICS")
-        
-        # This would require player-specific data
-        # For now, we'll create team-level aggregated metrics
-        
+
         # Sort chronologically for rolling metrics
-        df_sorted = self.df.sort_values('date')
-        
-        team_performance = defaultdict(lambda: {'games': 0, 'wins': 0, 'recent_games': [], 'recent_wins': []})
-        
-        for _, match in df_sorted.iterrows():
-            team = match['team']
-            result = match['result']
-            
-            team_performance[team]['games'] += 1
-            team_performance[team]['recent_games'].append(result)
-            
-            if result == 1:
-                team_performance[team]['wins'] += 1
-                team_performance[team]['recent_wins'].append(1)
-            else:
-                team_performance[team]['recent_wins'].append(0)
-            
-            # Keep only last 10 games for recent performance
-            if len(team_performance[team]['recent_games']) > 10:
-                team_performance[team]['recent_games'].pop(0)
-                team_performance[team]['recent_wins'].pop(0)
-            
-            # Store current performance
-            overall_winrate = team_performance[team]['wins'] / team_performance[team]['games']
-            recent_winrate = np.mean(team_performance[team]['recent_wins']) if team_performance[team]['recent_wins'] else 0.5
-            
+        df_sorted = self.df.sort_values('date').copy()
+
+        # Use groupby + expanding/rolling for team-level metrics
+        df_sorted['cumulative_games'] = df_sorted.groupby('team').cumcount() + 1
+        df_sorted['cumulative_wins'] = df_sorted.groupby('team')['result'].cumsum()
+        df_sorted['overall_winrate'] = df_sorted['cumulative_wins'] / df_sorted['cumulative_games']
+
+        # Rolling last-10 win rate
+        df_sorted['recent_winrate'] = (
+            df_sorted.groupby('team')['result']
+            .transform(lambda x: x.rolling(10, min_periods=1).mean())
+        )
+
+        df_sorted['form_trend'] = df_sorted['recent_winrate'] - df_sorted['overall_winrate']
+
+        # Store the FINAL snapshot per team (last row for each team after sorting)
+        last_per_team = df_sorted.groupby('team').last()
+        for team in last_per_team.index:
+            row = last_per_team.loc[team]
             self.team_historical_performance[team] = {
-                'overall_winrate': overall_winrate,
-                'recent_winrate': recent_winrate,
-                'form_trend': recent_winrate - overall_winrate,  # Positive = improving form
-                'games_played': team_performance[team]['games']
+                'overall_winrate': row['overall_winrate'],
+                'recent_winrate': row['recent_winrate'],
+                'form_trend': row['form_trend'],
+                'games_played': int(row['cumulative_games'])
             }
-        
+
         print(f"    Calculated performance metrics for {len(self.team_historical_performance)} teams")
     
     def create_advanced_features(self):
@@ -1423,24 +1434,22 @@ class AdvancedFeatureEngineering:
         # Enhanced target encoding with leakage prevention
         print("    Implementing leakage-resistant encoding...")
         
-        # Leave-one-out encoding for teams to prevent leakage
+        # Leave-one-out encoding for teams to prevent leakage (vectorized)
         self.leakage_resistant_encoders = {}
-        
-        # For team encoding, use leave-one-out approach
-        team_loo_encoding = {}
-        for idx, row in self.df.iterrows():
-            team = row['team']
-            # Exclude current match from team performance calculation
-            other_matches = self.df[(self.df['team'] == team) & (self.df.index != idx)]
-            
-            if len(other_matches) > 0:
-                team_loo_encoding[idx] = other_matches['result'].mean()
-            else:
-                # Use global average for teams with no other matches
-                team_loo_encoding[idx] = self.df['result'].mean()
-        
-        # Store leakage-resistant team encoding
-        self.leakage_resistant_encoders['team_loo_encoded'] = team_loo_encoding
+
+        # Vectorized LOO: for each row, (team_sum - row_result) / (team_count - 1)
+        team_stats = self.df.groupby('team')['result'].agg(['sum', 'count'])
+        team_sum = self.df['team'].map(team_stats['sum'])
+        team_count = self.df['team'].map(team_stats['count'])
+
+        global_mean = self.df['result'].mean()
+
+        # LOO encoding: exclude current row's result
+        loo_values = (team_sum - self.df['result']) / (team_count - 1)
+        # For teams with only 1 game, use global mean
+        loo_values = loo_values.where(team_count > 1, global_mean)
+
+        self.leakage_resistant_encoders['team_loo_encoded'] = loo_values.to_dict()
         
         # Check champion encoding for leakage
         print("    Analyzing champion encoding leakage...")
@@ -1642,44 +1651,46 @@ class AdvancedFeatureEngineering:
             champion_pick_shifts[patch] = avg_pick_shift
         
         print("    Creating meta adaptation features...")
-        
-        # Create features for each match based on meta context
+
+        # Vectorized: map patch-level features to each match
+        meta_stability_map = {p: s.get('meta_stability_score', 1.0) for p, s in meta_shifts.items()}
+        pick_shift_map = champion_pick_shifts
+        patch_games_map = {p: s.get('games_count', 0) for p, s in patch_stats.items()}
+
+        df_sorted['_meta_shift_magnitude'] = df_sorted['patch'].map(meta_stability_map).fillna(1.0)
+        df_sorted['_pick_shift_magnitude'] = df_sorted['patch'].map(pick_shift_map).fillna(0.0)
+        df_sorted['_patch_stability'] = df_sorted['patch'].map(meta_stability_map).fillna(1.0)
+        df_sorted['_patch_games_count'] = df_sorted['patch'].map(patch_games_map).fillna(0)
+
+        # Flag high-shift patches (stability < 0.7)
+        df_sorted['_is_high_shift'] = df_sorted['_patch_stability'] < 0.7
+
+        # For meta adaptation: expanding mean of results during high-shift patches per team
+        df_sorted['_high_shift_result'] = df_sorted['result'].where(df_sorted['_is_high_shift'], np.nan)
+        df_sorted['_meta_adaptation'] = (
+            df_sorted.groupby('team')['_high_shift_result']
+            .transform(lambda x: x.expanding(min_periods=1).mean().shift(1))
+        ).fillna(0.5)
+
+        # Only use adaptation score when team has > 5 prior games
+        df_sorted['_team_cumgames'] = df_sorted.groupby('team').cumcount()
+        df_sorted['_meta_adaptation'] = df_sorted['_meta_adaptation'].where(
+            df_sorted['_team_cumgames'] > 5, 0.5
+        )
+
+        # Build meta_features dict from vectorized columns
         meta_features = {}
-        
-        for idx, row in df_sorted.iterrows():
-            patch = row['patch']
-            team = row['team']
-            
-            # Meta shift magnitude for this patch
-            meta_shift_magnitude = meta_shifts.get(patch, {}).get('meta_stability_score', 1.0)
-            
-            # Champion pick shift for this patch
-            pick_shift_magnitude = champion_pick_shifts.get(patch, 0.0)
-            
-            # Team's historical performance in meta shifts
-            team_matches = df_sorted[(df_sorted['team'] == team) & (df_sorted.index < idx)]
-            
-            if len(team_matches) > 5:
-                # How well this team performs during high meta shift periods
-                high_shift_matches = team_matches[
-                    team_matches['patch'].map(lambda p: meta_shifts.get(p, {}).get('meta_stability_score', 1.0)) < 0.7
-                ]
-                
-                if len(high_shift_matches) > 0:
-                    meta_adaptation_score = high_shift_matches['result'].mean()
-                else:
-                    meta_adaptation_score = 0.5  # Neutral
-            else:
-                meta_adaptation_score = 0.5  # Insufficient data
-            
-            # Store meta features for this match
+        for idx in df_sorted.index:
             meta_features[idx] = {
-                'meta_shift_magnitude': meta_shift_magnitude,
-                'pick_shift_magnitude': pick_shift_magnitude,
-                'team_meta_adaptation': meta_adaptation_score,
-                'patch_stability': meta_shifts.get(patch, {}).get('meta_stability_score', 1.0),
-                'patch_games_count': patch_stats.get(patch, {}).get('games_count', 0)
+                'meta_shift_magnitude': df_sorted.at[idx, '_meta_shift_magnitude'],
+                'pick_shift_magnitude': df_sorted.at[idx, '_pick_shift_magnitude'],
+                'team_meta_adaptation': df_sorted.at[idx, '_meta_adaptation'],
+                'patch_stability': df_sorted.at[idx, '_patch_stability'],
+                'patch_games_count': df_sorted.at[idx, '_patch_games_count']
             }
+
+        # Clean up temporary columns
+        df_sorted.drop(columns=[c for c in df_sorted.columns if c.startswith('_')], inplace=True)
         
         # Store meta shift metrics
         self.meta_shift_metrics = {
@@ -1875,71 +1886,44 @@ class AdvancedFeatureEngineering:
         return features_df
 
     def _add_side_selection_features(self, features_df):
-        """Add blue/red side selection features."""
+        """Add blue/red side selection features (vectorized)."""
 
-        # Calculate side-specific win rates per team
-        side_performance = defaultdict(lambda: {
-            'blue_games': 0, 'blue_wins': 0,
-            'red_games': 0, 'red_wins': 0
-        })
+        df = self.df.copy()
+        side_col = df['side'].fillna('Blue')
+        is_blue = side_col == 'Blue'
 
-        # Sort chronologically for proper temporal calculation
-        df_sorted = self.df.sort_values('date') if 'date' in self.df.columns else self.df
+        # Aggregate side-specific stats per team
+        df['_is_blue'] = is_blue.astype(int)
+        df['_is_red'] = (~is_blue).astype(int)
+        df['_blue_win'] = (is_blue & (df['result'] == 1)).astype(int)
+        df['_red_win'] = (~is_blue & (df['result'] == 1)).astype(int)
 
-        # Track side performance over time
-        for idx, row in df_sorted.iterrows():
-            team = row['team']
-            side = row.get('side', 'Blue')
-            result = row['result']
+        team_side = df.groupby('team').agg(
+            blue_games=('_is_blue', 'sum'),
+            blue_wins=('_blue_win', 'sum'),
+            red_games=('_is_red', 'sum'),
+            red_wins=('_red_win', 'sum')
+        )
 
-            if side == 'Blue':
-                side_performance[team]['blue_games'] += 1
-                if result == 1:
-                    side_performance[team]['blue_wins'] += 1
-            else:
-                side_performance[team]['red_games'] += 1
-                if result == 1:
-                    side_performance[team]['red_wins'] += 1
+        # Map back to each row
+        team_series = self.df['team']
+        blue_games = team_series.map(team_side['blue_games']).fillna(0)
+        blue_wins = team_series.map(team_side['blue_wins']).fillna(0)
+        red_games = team_series.map(team_side['red_games']).fillna(0)
+        red_wins = team_series.map(team_side['red_wins']).fillna(0)
 
-        # Calculate side-specific features
-        blue_side_advantage = []
-        red_side_advantage = []
-        side_preference = []
+        features_df['blue_side_winrate'] = (blue_wins / blue_games).where(blue_games > 0, 0.5)
+        features_df['red_side_winrate'] = (red_wins / red_games).where(red_games > 0, 0.5)
+        features_df['side_preference'] = features_df['blue_side_winrate'] - features_df['red_side_winrate']
 
-        for idx, row in self.df.iterrows():
-            team = row['team']
-            side = row.get('side', 'Blue')
-            perf = side_performance.get(team, {
-                'blue_games': 0, 'blue_wins': 0,
-                'red_games': 0, 'red_wins': 0
-            })
+        # Current side advantage
+        is_blue_orig = self.df['side'].fillna('Blue') == 'Blue'
+        features_df['current_side_advantage'] = np.where(
+            is_blue_orig,
+            features_df['blue_side_winrate'],
+            features_df['red_side_winrate']
+        )
 
-            # Blue side win rate
-            blue_wr = perf['blue_wins'] / perf['blue_games'] if perf['blue_games'] > 0 else 0.5
-            red_wr = perf['red_wins'] / perf['red_games'] if perf['red_games'] > 0 else 0.5
-
-            blue_side_advantage.append(blue_wr)
-            red_side_advantage.append(red_wr)
-
-            # Side preference: positive = prefers blue, negative = prefers red
-            side_preference.append(blue_wr - red_wr)
-
-        features_df['blue_side_winrate'] = blue_side_advantage
-        features_df['red_side_winrate'] = red_side_advantage
-        features_df['side_preference'] = side_preference
-
-        # Current side advantage (for this match)
-        current_side_advantage = []
-        for idx, row in self.df.iterrows():
-            side = row.get('side', 'Blue')
-            if side == 'Blue':
-                current_side_advantage.append(features_df.loc[idx, 'blue_side_winrate'])
-            else:
-                current_side_advantage.append(features_df.loc[idx, 'red_side_winrate'])
-
-        features_df['current_side_advantage'] = current_side_advantage
-
-        # Side-meta interaction
         features_df['side_meta_interaction'] = (
             features_df['current_side_advantage'] * features_df['team_meta_strength']
         )
@@ -1948,72 +1932,40 @@ class AdvancedFeatureEngineering:
         return features_df
 
     def _add_patch_transition_features(self, features_df):
-        """Add patch transition and adaptation features."""
+        """Add patch transition and adaptation features (vectorized)."""
 
-        # Track games per patch per team
-        patch_experience = defaultdict(lambda: defaultdict(int))
-        patch_performance = defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0}))
+        df = self.df.copy()
+        df['patch'] = df['patch'].fillna('Unknown')
 
-        # Sort chronologically
-        df_sorted = self.df.sort_values('date') if 'date' in self.df.columns else self.df
+        # Sort by date within each team-patch group
+        df_sorted = df.sort_values('date') if 'date' in df.columns else df
 
-        # First pass: collect patch data
-        for idx, row in df_sorted.iterrows():
-            team = row['team']
-            patch = row.get('patch', 'Unknown')
-            result = row['result']
+        # Games on patch before this match (cumcount within team+patch, needs date ordering)
+        df_sorted['_games_on_patch'] = df_sorted.groupby(['team', 'patch']).cumcount()
+        # Map back to original index
+        features_df['games_on_patch'] = df_sorted['_games_on_patch'].reindex(self.df.index)
 
-            patch_experience[team][patch] += 1
-            patch_performance[team][patch]['games'] += 1
-            if result == 1:
-                patch_performance[team][patch]['wins'] += 1
+        features_df['early_patch_indicator'] = (features_df['games_on_patch'] < 3).astype(int)
 
-        # Calculate patch transition features
-        games_on_patch = []
-        patch_adaptation_rate = []
-        early_patch_indicator = []
-        patch_win_rate = []
+        # Patch win rate per (team, patch) - overall aggregate
+        patch_perf = df.groupby(['team', 'patch'])['result'].agg(['sum', 'count'])
+        patch_perf.columns = ['wins', 'games']
+        patch_perf['patch_wr'] = (patch_perf['wins'] / patch_perf['games']).fillna(0.5)
 
-        # Track current games on patch per team
-        current_patch_games = defaultdict(lambda: defaultdict(int))
+        # Map patch win rate to each row
+        df['_team_patch'] = list(zip(df['team'], df['patch']))
+        patch_wr_map = patch_perf['patch_wr'].to_dict()
+        features_df['patch_win_rate'] = df['_team_patch'].map(patch_wr_map).fillna(0.5).values
 
-        for idx, row in self.df.iterrows():
-            team = row['team']
-            patch = row.get('patch', 'Unknown')
-
-            # Games on current patch before this match
-            games_before = current_patch_games[team][patch]
-            games_on_patch.append(games_before)
-
-            # Early patch indicator (first 3 games on patch)
-            early_patch_indicator.append(1 if games_before < 3 else 0)
-
-            # Update counter
-            current_patch_games[team][patch] += 1
-
-            # Patch adaptation rate (performance trend on patch)
-            perf = patch_performance[team][patch]
-            if perf['games'] > 0:
-                patch_win_rate.append(perf['wins'] / perf['games'])
-            else:
-                patch_win_rate.append(0.5)
-
-            # Compare to overall team performance
-            overall_wr = self.team_historical_performance.get(team, {}).get('overall_winrate', 0.5)
-            patch_wr = perf['wins'] / perf['games'] if perf['games'] > 0 else 0.5
-            patch_adaptation_rate.append(patch_wr - overall_wr)
-
-        features_df['games_on_patch'] = games_on_patch
-        features_df['early_patch_indicator'] = early_patch_indicator
-        features_df['patch_adaptation_rate'] = patch_adaptation_rate
-        features_df['patch_win_rate'] = patch_win_rate
-
-        # Normalize games on patch (max 20 for scaling)
-        features_df['games_on_patch_normalized'] = features_df['games_on_patch'].apply(
-            lambda x: min(x / 20, 1.0)
+        # Patch adaptation rate = patch_wr - overall_wr
+        overall_wr = df['team'].map(
+            lambda t: self.team_historical_performance.get(t, {}).get('overall_winrate', 0.5)
         )
+        features_df['patch_adaptation_rate'] = features_df['patch_win_rate'] - overall_wr.values
 
-        # Patch experience advantage
+        # Normalize games on patch (max 20)
+        features_df['games_on_patch_normalized'] = (features_df['games_on_patch'] / 20).clip(upper=1.0)
+
         features_df['patch_experience_advantage'] = (
             features_df['games_on_patch_normalized'] * (1 - features_df['early_patch_indicator'])
         )
@@ -2070,55 +2022,37 @@ class AdvancedFeatureEngineering:
         return features_df
 
     def _add_h2h_features(self, features_df):
-        """Add enhanced head-to-head features."""
+        """Add enhanced head-to-head features (vectorized)."""
 
-        # Calculate recent H2H performance (approximate since we don't have opponent in same row)
-        # We'll use league-based proxy: how team performs against teams in same league
+        df = self.df.copy()
+        df['league'] = df['league'].fillna('Unknown')
 
-        league_performance = defaultdict(lambda: defaultdict(lambda: {'games': 0, 'wins': 0}))
+        # League-specific win rate per (team, league)
+        league_perf = df.groupby(['team', 'league'])['result'].agg(['sum', 'count'])
+        league_perf.columns = ['wins', 'games']
+        league_perf['league_wr'] = (league_perf['wins'] / league_perf['games']).fillna(0.5)
 
-        # Sort chronologically
-        df_sorted = self.df.sort_values('date') if 'date' in self.df.columns else self.df
+        # Map to each row via (team, league) tuple
+        team_league_keys = list(zip(df['team'], df['league']))
+        league_wr_map = league_perf['league_wr'].to_dict()
+        features_df['league_specific_winrate'] = pd.Series(
+            [league_wr_map.get(k, 0.5) for k in team_league_keys],
+            index=self.df.index
+        )
 
-        for idx, row in df_sorted.iterrows():
-            team = row['team']
-            league = row.get('league', 'Unknown')
-            result = row['result']
+        # League dominance = league_wr - overall_wr
+        overall_wr = df['team'].map(
+            lambda t: self.team_historical_performance.get(t, {}).get('overall_winrate', 0.5)
+        )
+        features_df['league_dominance'] = features_df['league_specific_winrate'] - overall_wr.values
 
-            league_performance[team][league]['games'] += 1
-            if result == 1:
-                league_performance[team][league]['wins'] += 1
+        # Cross-league experience: number of leagues per team
+        leagues_per_team = df.groupby('team')['league'].nunique()
+        features_df['cross_league_experience'] = (
+            df['team'].map(leagues_per_team).fillna(1).values / 5
+        ).clip(0, 1)
 
-        # Calculate H2H-like features
-        league_specific_wr = []
-        league_dominance = []
-        cross_league_experience = []
-
-        for idx, row in self.df.iterrows():
-            team = row['team']
-            league = row.get('league', 'Unknown')
-
-            # League-specific win rate
-            perf = league_performance[team][league]
-            if perf['games'] > 0:
-                wr = perf['wins'] / perf['games']
-            else:
-                wr = 0.5
-            league_specific_wr.append(wr)
-
-            # League dominance (compared to overall)
-            overall_wr = self.team_historical_performance.get(team, {}).get('overall_winrate', 0.5)
-            league_dominance.append(wr - overall_wr)
-
-            # Cross-league experience (number of different leagues played)
-            num_leagues = len([l for l, p in league_performance[team].items() if p['games'] > 0])
-            cross_league_experience.append(min(num_leagues / 5, 1.0))
-
-        features_df['league_specific_winrate'] = league_specific_wr
-        features_df['league_dominance'] = league_dominance
-        features_df['cross_league_experience'] = cross_league_experience
-
-        # H2H momentum (simplified)
+        # H2H momentum
         features_df['h2h_momentum'] = (
             features_df['league_specific_winrate'] * features_df.get('team_recent_winrate', 0.5)
         )

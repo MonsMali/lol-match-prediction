@@ -128,13 +128,14 @@ class UltimateLoLPredictor:
 
         # Load and engineer features
         df = self.feature_engineering.load_and_analyze_data()
-        advanced_features = self.feature_engineering.create_advanced_features()
 
-        # Use enhanced v2 features if requested
+        # Use enhanced v2 features if requested (skips slow iterrows-based create_advanced_features)
         if use_enhanced_v2 and hasattr(self.feature_engineering, 'create_enhanced_features_v2'):
             print("\nApplying Enhanced Feature Engineering v2...")
             advanced_features = self.feature_engineering.create_enhanced_features_v2()
             print(f"   Enhanced features added: side selection, patch transition, extended interactions")
+        else:
+            advanced_features = self.feature_engineering.create_advanced_features()
 
         final_features = self.feature_engineering.apply_advanced_encoding()
 
@@ -497,6 +498,17 @@ class UltimateLoLPredictor:
                         'learning_rate': [0.1]
                     },
                     'use_scaled': False
+                },
+                'Logistic Regression': {
+                    'model': LogisticRegression(
+                        random_state=42, max_iter=1000, class_weight='balanced'
+                    ),
+                    'params': {
+                        'C': [0.1, 1.0, 10.0],
+                        'penalty': ['l1', 'l2'],
+                        'solver': ['liblinear']
+                    },
+                    'use_scaled': True
                 }
             }
         else:
