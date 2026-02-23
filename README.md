@@ -53,28 +53,62 @@ This Master's thesis focuses on developing **novel temporal validation methodolo
 ```
 Novel Temporal Validation Framework
 ├── src/
-│   ├── models/                    # Core ML models
-│   │   ├── ultimate_predictor.py           # Comprehensive model suite
-│   │   ├── enhanced_ultimate_predictor.py  # Bayesian optimization
-│   │   └── comprehensive_logistic_regression_comparison.py
-│   ├── feature_engineering/       # Advanced feature systems
-│   │   └── advanced_feature_engineering.py
-│   ├── prediction/               # Interactive prediction
-│   │   └── interactive_match_predictor.py
-│   └── data_collection/          # Data processing
-│       ├── oracle_elixir_analyzer.py
-│       ├── filter_target_leagues.py
-│       ├── analyze_focused_data.py
-│       └── create_complete_target_dataset.py  # Comprehensive dataset creation
-├── data/                         # Datasets
-│   └── complete_target_leagues_dataset.csv  # Comprehensive dataset (37K matches)
-├── models/                       # Trained models
-├── visualizations/               # Analysis plots
-├── results/                      # Experiment results
-├── docs/                         # Documentation
-├── tests/                        # Testing framework
-└── Thesis/                       # Complete thesis document
-    └── Novel Temporal Validation for Evolving Competitive Environments.pdf
+│   ├── config.py                        # Centralized path configuration
+│   ├── data/                            # Data processing (consolidated)
+│   │   ├── analyzer.py                  # Oracle Elixir analysis
+│   │   ├── downloader.py               # Data downloading
+│   │   ├── extractor.py                # Feature extraction
+│   │   ├── filter.py                   # League filtering
+│   │   ├── pipeline.py                 # End-to-end data pipeline
+│   │   ├── processor.py               # Dataset creation
+│   │   ├── quality.py                 # Data quality checks
+│   │   └── schema.py                  # Data schema definitions
+│   ├── features/                       # Feature engineering
+│   │   ├── engineering.py             # AdvancedFeatureEngineering (33+ features)
+│   │   └── edge_cases.py             # Edge case handling
+│   ├── models/                        # Model training
+│   │   ├── trainer.py                 # UltimateLoLPredictor
+│   │   ├── optimizer.py               # Bayesian optimization
+│   │   ├── explainability.py          # SHAP / model interpretability
+│   │   └── robustness.py             # Robustness evaluation
+│   ├── prediction/                    # Inference
+│   │   ├── predictor.py               # InteractiveLoLPredictor
+│   │   └── confidence.py             # Prediction confidence scoring
+│   ├── evaluation/                    # Model evaluation
+│   │   └── metrics.py                # Comprehensive metrics suite
+│   ├── training/                      # Training pipeline
+│   │   ├── config.py                 # Training configuration
+│   │   ├── trainer.py                # Training orchestration
+│   │   ├── scheduler.py              # Training scheduling
+│   │   ├── drift.py                  # Data/concept drift detection
+│   │   └── versioning.py            # Model versioning
+│   ├── data_collection/              # Legacy (backward compatible)
+│   ├── data_processing/              # Legacy (backward compatible)
+│   └── feature_engineering/          # Legacy (backward compatible)
+├── scripts/                          # Utility scripts
+│   ├── run_training.py               # Training runner with result tracking
+│   ├── compare_results.py            # Baseline comparison utility
+│   ├── process_new_data.py           # Process new Oracle's Elixir data
+│   └── refresh_data.py               # Data refresh pipeline
+├── notebooks/                        # Jupyter notebooks
+│   └── colab_training.ipynb          # Google Colab training notebook
+├── data/
+│   ├── raw/                          # Original Oracle's Elixir CSV files
+│   └── processed/                    # Processed datasets
+│       └── complete_target_leagues_dataset.csv  # 40,945 matches (2014-2026)
+├── models/
+│   ├── production/                   # Best models for deployment
+│   │   ├── best_model.joblib         # Logistic Regression (best performer)
+│   │   ├── scaler.joblib             # Feature scaler
+│   │   └── encoders.joblib           # Categorical encoders
+│   └── experiments/                  # Experimental model runs
+├── outputs/
+│   ├── results/                      # Training run history and baselines
+│   └── visualizations/              # Generated plots
+├── docs/                            # Documentation
+├── tests/                           # Testing framework
+├── Thesis/                          # Complete thesis document
+└── results/                         # Previous experiment results
 ```
 
 ## Quick Start
