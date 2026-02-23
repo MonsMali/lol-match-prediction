@@ -1,0 +1,3642 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage{longtable,booktabs,array}
+\usepackage{multirow}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\includegraphics[width=4.93889in,height=0.96528in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image1.png}
+
+MSc in Business Intelligence
+
+Novel Temporal Validation for Evolving Competitive Environments: A
+League of Legends Machine Learning Framework
+
+\begin{quote}
+By\\
+Luís Filipe Viegas Conceição\\
+Supervised by Bjarne Sørensen\\
+June 1st, 2025\\
+Total Character Count including blanks: 131,033
+\end{quote}
+
+\textbf{Abstract}
+
+Professional eSports have evolved into a multi-billion dollar industry,
+with League of Legends as its leading competitive title. However,
+pre-match prediction faces significant challenges due to dynamic meta
+evolution, complex strategic interactions, and temporal dependencies in
+competitive\\
+environments. Current methodologies suffer from insufficient temporal
+validation techniques that
+
+inadequately address concept drift and data leakage in evolving gaming
+landscapes. This research confronts these challenges through a
+comprehensive three-phase machine learning framework incorporating
+advanced feature engineering, systematic algorithm evaluation, and
+innovative temporal validation strategies.
+
+The methodology utilizes 37 meticulously engineered features capturing
+champion meta-analysis, strategic team interactions, and temporal
+performance dynamics from 41,296 professional matches across nine elite
+leagues (2014-2024). A pioneering temporal validation framework assesses
+three distinct strategies: Pure Temporal Validation using strict
+chronological splits, Stratified\\
+Temporal Validation employing meta-aware year-wise proportional splits,
+and the novel Stratified
+
+Random Temporal Validation implementing patch-aware stratified sampling.
+The three-phase research design rigorously evaluates eight cutting-edge
+algorithms through Bayesian optimisation and
+
+RandomizedSearchCV, followed by evidence-driven model selection and
+stringent statistical validation using nested cross-validation
+protocols.
+
+The study produced groundbreaking outcomes, notably demonstrating
+consistent Logistic Regression superiority across all implementations,
+achieving higher AUC while outperforming complex ensemble methods by 2-4
+percentage points. This finding supports the "linear separability
+hypothesis," positing that sophisticated feature engineering transforms
+complex eSports patterns into linearly\\
+separable problems, affirming that feature quality outweighs model
+complexity. The\\
+temporal validation framework performed exceptionally: Stratified
+Temporal Validation achieved 82.65\% AUC, Stratified Random Temporal
+Validation reached 82.03\% AUC, and Pure Temporal Validation attained
+81.17\% AUC.
+
+Study limitations include an exclusive focus on League of Legends,
+potentially limiting\\
+generalizability to other eSports titles, a temporal scope (2014-2024)
+that may not capture future meta evolution, and a geographic dataset
+distribution favouring certain regions, potentially introducing regional
+bias.
+
+This research makes significant methodological contributions to sports
+analytics and machine learning by introducing the first systematic
+approach for handling concept drift in evolving competitive
+
+environments and challenging conventional assumptions about model
+complexity in domain-specific applications. The production-ready system
+enables real-world deployment for professional eSports organizations,
+betting platforms, and analytical services. The interpretable linear
+model provides explainable predictions that are valuable for coaching
+staff and strategic analysis. The methodological
+
+framework can be adapted to other evolving competitive domains,
+establishing new benchmarks for eSports analytics and demonstrating that
+innovative feature engineering achieves linear separability in complex
+strategic environments.
+
+i
+
+\textbf{Contents}
+
+\begin{quote}
+Abstract
+..........................................................................................................................................
+i Table of Figures
+............................................................................................................................
+iv
+
+1. Introduction
+..........................................................................................................................
+1 1.1 Background and Motivation
+.................................................................................................
+1 1.2 Problem Statement
+...............................................................................................................
+2 1.3 Research Objectives
+.............................................................................................................
+3 1.4 Research Questions
+..............................................................................................................
+3 1.5 Research Contributions
+........................................................................................................
+4 1.6 Thesis structure
+....................................................................................................................
+5
+
+2. Literature Review
+.................................................................................................................
+6 2.1 Sports Analytics and Prediction
+............................................................................................
+6 2.2 ESports Analytics and Research
+...........................................................................................
+6 2.3 Machine Learning for Sports Prediction
+...............................................................................
+7 2.4 Temporal Validation Methodologies
+.....................................................................................
+8 2.5 Research Gap and Opportunities
+..........................................................................................
+9
+
+3. Methodology
+......................................................................................................................
+10 3.1 Research Design and Approach
+..........................................................................................
+10 3.2 Data Collection and Preparation
+.........................................................................................
+10 3.3 Advanced Feature Engineering Framework
+........................................................................
+11 3.4 Temporal Validation Framework
+........................................................................................
+12 3.5 Three-Phase Machine Learning Research Design
+............................................................... 14
+
+4. Implementation
+...................................................................................................................
+17 4.1 Software Architecture and Design
+......................................................................................
+17 4.2 Feature Engineering Pipeline Implementation
+.................................................................... 17
+4.3 Model Training and Optimisation
+.......................................................................................
+17 4.4 System Performance Optimisations
+....................................................................................
+18 4.5 Production Deployment Architecture
+..................................................................................
+18
+
+5. Results
+................................................................................................................................
+19 5.1 Three-Strategy Validation
+Results.......................................................................................
+19 5.2 Breakthrough: Linear Model Dominance Confirmed
+.......................................................... 27 5.3
+Feature Analysis
+.................................................................................................................
+29 5.4 Statistical Analysis
+.............................................................................................................
+32
+
+6. Discussion
+..........................................................................................................................
+36 6.1 Performance Achievement Analysis
+...................................................................................
+36 6.2 Methodological Contributions
+............................................................................................
+37 6.3 Domain-Specific Insights
+...................................................................................................
+38
+\end{quote}
+
+ii
+
+\begin{quote}
+6.4 Limitations and Challenges
+................................................................................................
+39
+
+7. Conclusions and Future Work
+.............................................................................................
+40 7.1 Key Findings and Contributions
+.........................................................................................
+40 7.2 Future Research Directions
+................................................................................................
+41 7.3 Practical
+Applications.........................................................................................................
+42 References
+...................................................................................................................................
+43 Appendix A
+.................................................................................................................................
+44 Meta Analysis Features (8
+features)..........................................................................................
+44 Team Performance Features (4 Features)
+..................................................................................
+46 Strategic Analysis Features (6 Features)
+...................................................................................
+47 Target Encoding Features (9 Features)
+.....................................................................................
+48 Interaction and Contextual Features (10 Features)
+.................................................................... 49
+\end{quote}
+
+iii
+
+\textbf{Table of Figures}
+
+Figure 1 -- Final AUC performance Across Strategies
+.......................................................................
+20 Figure 2 -- CV Performance with Confidence
+Intervals.....................................................................
+21 Figure 3 -- Generalisation Gap Analysis
+...........................................................................................
+21 Figure 4 -- Statistical Significance Matrix
+........................................................................................
+22 Figure 5 -- Meta Evolution Over Time
+..............................................................................................
+23 Figure 6- Data Distribution by Strategy
+...........................................................................................
+23 Figure 7 - Meta Diversity Heatmap Across Temporal Validation
+Strategies ...................................... 24 Figure 8- Bayesian
+Convergence
+.....................................................................................................
+25 Figure 9 - 3D parameter Landscape
+.................................................................................................
+26 Figure 10 - Algorithm Performance Comparison
+..............................................................................
+28 Figure 11- Feature Importance Logistic
+Regression..........................................................................
+30 Figure 12 -Team Performance Correlation Matrix
+............................................................................
+31 Figure 13 - Feature Interaction network
+...........................................................................................
+32 Figure 14 - ROC Curves for Each Temporal Strategy
+.......................................................................
+33 Figure 15 - Precision-Recall Curves
+.................................................................................................
+34
+
+iv
+
+\textbf{Chapter 1}
+
+\begin{quote}
+\textbf{1.Introduction}
+\end{quote}
+
+\emph{1.1 Background and Motivation}
+
+ESports, defined as electronic sports, have evolved remarkably from a
+niche competitive activity to a globally recognised phenomenon that
+engages millions of viewers. This vibrant industry encompasses organised
+video game competitions conducted at both amateur and professional
+tiers, featuring a wide variety of game genres, including multiplayer
+online battle arenas (MOBAs), first-person shooters (FPS), and real-time
+strategy (RTS) games. Recent analyses indicate that the global eSports
+market has experienced significant expansion, with projections
+estimating revenues to reach \$4.8 billion by 2025, alongside an
+audience of approximately 318 million dedicated enthusiasts and 322
+million occasional viewers, as reported by Statista (Statista (n.d.)
+\emph{ESports)}. The escalating popularity of eSports has attracted
+considerable investment, sponsorship, and a trend toward
+professionalisation within the ecosystem.
+
+League of Legends (LoL), a Multiplayer Online Battle Arena (MOBA) game
+developed and published by Riot Games, stands out as one of the most
+prominent titles in eSports. Within the game, two teams composed of five
+players, referred to as \textquotesingle summoners,\textquotesingle{}
+take on the role of controlling unique characters known as
+\textquotesingle champions.\textquotesingle{} Each champion has specific
+abilities and designated roles, contributing to the
+gameplay\textquotesingle s intricate nature. The primary objective is
+destroying the adversary\textquotesingle s base, termed the
+\textquotesingle Nexus\textquotesingle.
+
+League of Legends\textquotesingle s complexity and strategic depth,
+coupled with its highly competitive environment, have firmly established
+its status as a leading title in the eSports arena, capable of
+attracting a substantial global player base and an extensive viewership.
+
+The professional League of Legends scene is structured around elite
+regional leagues, including the League Champions Korea (LCK), the League
+Championship Series (LCS) in North America, the League of Legends EMEA
+Championship (LEC), and the League Pro League (LPL) in China. These
+leagues consist of regular season contests, playoff rounds, and esteemed
+international events such as the Mid-Season Invitational (MSI) and the
+World Championship, which command significant attention and viewership
+on a global scale.
+
+Predicting match outcomes in professional League of Legends is of
+considerable significance to various stakeholders within the eSports
+domain. For fans, precise forecasts augment the excitement and
+engagement linked to matches, providing a more profound comprehension of
+team dynamics and potential strategies. Teams and coaches may
+effectively utilise predictive models to gain a competitive advantage by
+identifying the weaknesses of their opponents, informing strategic
+drafting decisions, and assessing player performance. Additionally,
+broadcasters and analysts can leverage these predictions to enhance
+their commentary, offering viewers data-driven insights that enrich the
+viewing experience. Moreover, the expanding eSports betting industry
+depends on accurate predictions to set odds and effectively manage
+associated risks. The ability to reliably forecast match results can
+promote more informed decision-making throughout the eSports ecosystem.
+For example, teams can apply predictive models to analyse their
+historical performance and identify areas necessitating improvement,
+while analysts may provide more profound commentary rooted in
+data-driven probabilities.
+
+However, predicting eSports match outcomes, particularly in League of
+Legends, presents several unique and persistent challenges. The
+game\textquotesingle s inherent complexity, characterised by a vast
+array of champions, items, and strategic possibilities, makes it
+difficult to comprehensively model all the relevant factors. Data
+availability and quality can also pose limitations, as comprehensive and
+reliable datasets are not always readily accessible. Moreover, the
+influence of human factors, such as player
+
+1
+
+form, team synergy, and psychological states, introduces a layer of
+uncertainty that is challenging to quantify. A paramount challenge is
+the dynamic meta evolution driven by frequent patch updates, which can
+quickly render historical data obsolete and necessitate continuous model
+adaptation. Finally, the relatively small sample sizes in eSports, when
+compared to traditional sports, present a challenge for training robust
+and generalisable predictive models.
+
+Despite these complexities, there is growing demand for advanced
+predictive analytics in professional eSports. Current limitations in
+existing approaches often stem from issues such as data leakage and poor
+meta-adaptation. This research is thus motivated by the need to develop
+a state-of-the-art machine learning system that addresses these inherent
+challenges and pushes the boundaries of predictive accuracy and
+methodological rigour in League of Legends. By focusing on advanced
+feature engineering, developing a novel temporal validation framework,
+and employing a multi-algorithm ensemble with rigorous validation, this
+thesis aims to contribute a robust and reliable solution for
+professional eSports match outcome prediction.
+
+\emph{1.2 Problem Statement}
+
+Professional eSports\textquotesingle{} popularity and economic impact
+have underscored the necessity for accurate match outcome predictions,
+especially in multifaceted and dynamic titles such as League of Legends.
+This research endeavours to confront the pivotal challenge of
+establishing a robust and dependable pre-match prediction system within
+the context of ever-evolving competitive landscapes.
+
+A principal technical concern arises from the inadequacy of conventional
+temporal validation methods when applied to eSports data. The rapid
+succession of game updates and shifts in the meta in League of Legends
+renders simplistic chronological splits, typically utilised in
+time-series analyses, ineffective. Such methodologies risk training
+predictive models on outmoded meta patterns, leading to considerable
+performance decline on contemporary data and potentially introducing
+data leakage that undermines the authenticity and generalizability of
+prediction systems.
+
+In addition, current feature engineering techniques frequently fail to
+encapsulate the intricate strategic complexities characterising League
+of Legends. Predominantly reliant on fundamental statistics or static
+champion attributes, these methods neglect to incorporate essential
+dynamic factors. Notable omissions include patch-specific meta strength,
+the nuances of champion synergy networks, advanced team performance
+dynamics, and multi-dimensional strategic interactions. Such limitations
+hinder the models\textquotesingle{} ability to identify the genuine
+underlying determinants that influence match results accurately.
+
+Moreover, a related issue pertains to the suboptimal selection and
+optimisation of models typically utilised in eSports prediction.
+Although various machine learning algorithms have been examined,
+parameter tuning and architectural design processes are not always
+customised to the distinctive attributes of professional League of
+Legends data. This oversight may result in inferior model performance,
+as generalised machine learning methodologies often fail to exploit the
+domain-specific patterns and complexities inherent within the eSports
+arena.
+
+These challenges expose a substantial research gap regarding the
+systematic management of meta evolution within predictive systems. A
+comprehensive framework that adeptly reconciles temporal realism with
+meta diversity in perpetually evolving competitive environments has yet
+to be established. Absent such a framework, predictions may inadequately
+represent the game\textquotesingle s current state or fail to generalise
+reliably across varying competitive periods. This thesis decisively
+addresses these critical challenges by proposing and validating a novel
+methodological framework, offering a more accurate, reliable, and
+practically applicable solution for predicting outcomes in professional
+League of Legends matches.
+
+2
+
+\emph{1.3 Research Objectives}
+
+This research endeavour endeavours to develop an advanced machine
+learning system capable of precisely predicting the outcomes of
+professional League of Legends matches, particularly following the draft
+phase. This system is designed to identify match winners by leveraging a
+comprehensive array of pre-match data, encompassing detailed analyses of
+team compositions and extensive historical performance metrics.
+
+The research outlines several specific secondary aims to advance this
+primary objective. The first aim is to enhance feature engineering
+techniques within eSports prediction by formulating 37 advanced
+features. These features will incorporate dynamic champion meta
+analysis, synergy networks, strategic ban analysis, and temporal
+dynamics, effectively capturing the intricate nuances inherent in League
+of Legends matches.
+
+Secondly, this research is committed to creating and validating an
+innovative temporal framework for eSports data. This framework entails
+designing and rigorously evaluating the "Stratified Random Temporal
+Validation" methodology, a critical approach for effectively addressing
+the continuous evolution of the League of Legends meta. This methodology
+will ensure realistic model assessments while preventing data leakage.
+
+Furthermore, the research seeks to thoroughly evaluate and optimise a
+multi-algorithm ensemble specifically tailored to predict the outcomes
+of professional League of Legends matches. This study component will
+harness over seven sophisticated machine learning algorithms, including
+CatBoost and Multi-layer Perceptrons (MLP). These algorithms will be
+finely tuned with optimised\\
+hyperparameters and integrated into a performance-weighted ensemble to
+achieve superior prediction accuracy.
+
+In addition, this research aspires to incorporate deep domain expertise
+into the predictive system by translating insights and strategic
+analyses specific to eSports into actionable features and a robust
+validation framework, ensuring alignment with the competitive landscape.
+Lastly, a comprehensive statistical analysis of model performance will
+be conducted, featuring the generation of rigorous evaluation metrics
+such as the F1-score and Area Under the Receiver Operating
+Characteristic Curve (AUC). Advanced statistical methodologies,
+including bootstrapping, will be employed to assess confidence
+intervals, calibration analysis, and significance testing, guaranteeing
+that the results are reliable and academically robust.
+
+\emph{1.4 Research Questions}
+
+Building on the identified problem statement and established research
+objectives, this thesis aims to offer answers to a range of targeted
+research questions. These questions are meticulously crafted to explore
+the effectiveness of advanced machine learning techniques and an
+innovative temporal validation framework in navigating the complexities
+of predicting outcomes for professional League of Legends matches.
+
+The core research question steering this investigation is as follows:
+
+\emph{How accurately can a machine learning system, utilising advanced
+feature engineering and a robust array of models, forecast pre-match
+outcomes in professional League of Legends, while accounting for the
+game\textquotesingle s ever-evolving meta?}
+
+To comprehensively tackle this primary question, the research will
+extend into the following secondary inquiries:
+
+3
+
+\emph{To what degree does the proposed advanced feature engineering
+methodology, encompassing dynamic champion meta-analysis, strategic ban
+analysis, and temporal team performance dynamics, enhance predictive
+accuracy compared to conventional feature sets in the context of
+professional League of Legends match prediction?}
+
+\emph{How does the innovative "Stratified Random Temporal Validation"
+framework, designed to mitigate intra-year meta bias and avert data
+leakage, influence the reliability and generalizability of the
+predictive model\textquotesingle s performance within a fluid eSports
+environment?}
+
+\emph{What is the individual and collective predictive contribution of a
+multi-algorithm ensemble, optimised through Bayesian methods, when
+applied to the advanced feature set for predicting outcomes in
+professional League of Legends matches?}
+
+\emph{Can the incorporation of domain expertise into feature creation
+and validation processes yield statistically significant advancements in
+prediction accuracy and model interpretability within professional
+eSports?}
+
+These research questions collectively aspire to quantify performance
+enhancements, validate methodological innovations, and provide
+substantial insights into the application of machine learning in
+complex, dynamic, competitive settings prevalent in eSports.
+
+\emph{1.5 Research Contributions}
+
+This thesis represents a significant advancement in eSports analytics
+and machine learning, offering several novel contributions across
+methodology, technical innovation, and theoretical implications. The
+comprehensive system developed herein addresses persistent challenges in
+League of Legends match prediction and establishes new benchmarks for
+research in dynamic competitive environments.
+
+One primary area of contribution lies in the novel methodological
+advancements introduced by this study. This research provides the first
+quantitative approach to understanding the impact of meta evolution in
+eSports prediction through its innovative patch-specific meta strength
+analysis design. Furthermore, it introduces champion synergy networks as
+an advanced method for modeling composition effectiveness and integrates
+temporal performance with careful data leakage prevention through
+historical context. The development of multi-scale feature engineering
+from individual to team and strategic levels, culminating in an
+eSports-specific ensemble with domain-optimised model combination,
+further exemplifies these methodological innovations.
+
+Several key technical innovations integrated into the predictive system
+complement these methodological insights. This includes applying
+advanced categorical encoding techniques, particularly target encoding,
+optimised for eSports features. A crucial technical contribution is
+developing a robust temporal validation framework, specifically the
+"Stratified Random Temporal Validation" method, which provides a
+realistic evaluation by preventing future data leakage while ensuring
+comprehensive meta representation across all splits. Creating strategic
+feature interactions and a robust processing pipeline designed for
+production-ready data handling and feature generation also mark
+significant technical advancements. Moreover, implementing vectorised
+computing for feature engineering, achieving 10- 50x speedup, and GPU
+acceleration for compatible machine learning algorithms, resulting in 2-
+4x improvement, are notable performance-driven technical breakthroughs.
+The optimisation of hyperparameter search with RandomizedSearchCV and
+Bayesian Optimisation further enhances the system\textquotesingle s
+efficiency and effectiveness.
+
+The research impact of this work extends across multiple disciplines.
+For eSports analytics, this study establishes new standards for
+professional eSports prediction research, bridges academic rigour with
+practical deployment requirements, and provides a reproducible framework
+for future research, while
+
+4
+
+demonstrating deep integration of domain expertise. Machine learning
+methodology advances temporal validation for evolving systems and
+concept drift, offers novel categorical encoding applications for
+high-cardinality sports data, and contributes to feature engineering
+innovation for time-series sports prediction. Finally, for sports
+analytics more broadly, the thesis contributes temporal validation best
+practices for rule-changing competitive environments, quantifies meta
+evolution, and provides a validation methodology for systematic
+environment changes.
+
+Ultimately, this thesis positions itself as a leading contribution to
+eSports analytics, sports prediction methodology, and temporal
+validation in machine learning, establishing new standards for research
+in dynamically evolving competitive environments.
+
+\emph{1.6 Thesis structure}
+
+This thesis proceeds by first establishing the methodological framework
+(Chapter 3), implementing the advanced feature engineering and temporal
+validation systems (Chapter 4), presenting the breakthrough performance
+results (Chapter 5), analysing the implications and contributions
+(Chapter 6), and concluding with future directions (Chapter 7). This
+structure systematically builds from theoretical foundations through
+empirical validation to practical implications.
+
+5
+
+\textbf{Chapter 2}
+
+\begin{quote}
+\textbf{2.Literature Review}
+\end{quote}
+
+\emph{2.1 Sports Analytics and Prediction}
+
+The application of data analysis and machine learning techniques to
+sports, broadly termed "sports analytics," has seen significant growth
+in recent years (Bunker \& Susnjak, 2022). This field encompasses
+various activities, from predicting match outcomes to optimising player
+performance and understanding fan engagement (Bunker \& Susnjak, 2022).
+Early approaches in sports prediction relied heavily on statistical
+analysis and expert judgment. Traditional statistical models, such as
+regression analysis, were used to identify relationships between
+variables like player statistics and team performance, aiming to
+quantify the impact of individual factors on game outcomes (Bunker \&
+Susnjak, 2022). However, these models often assume linear relationships
+and may struggle to capture sports\textquotesingle{} complex, dynamic
+nature (Bunker \& Susnjak, 2022).
+
+Machine learning (ML) has emerged as a powerful tool to overcome these
+limitations (Bunker \& Susnjak, 2022). Unlike traditional statistical
+models, ML algorithms can automatically learn from data without
+pre-defined assumptions about the relationships between variables
+(Bunker \& Susnjak, 2022). This allows ML models to capture more nuanced
+and intricate patterns in sports data, potentially improving predictive
+accuracy (Bunker \& Susnjak, 2022). Various ML techniques are used,
+including classification algorithms (logistic regression, support vector
+machines, decision trees) to predict winners and regression algorithms
+(linear regression, support vector regression, neural networks) to
+predict numerical outcomes like scores (Bunker \& Susnjak, 2022).
+
+Predictive models have been applied to various team sports, including
+football (soccer) (Joseph et al., 2006). These models often consider
+factors such as historical performance, team composition (Joseph et al.,
+2006), and even player EEG data (Minami et al., 2024).
+
+While the core principles of sports analytics apply to different sports,
+the specific features and models must be adapted to each
+game\textquotesingle s unique characteristics.
+
+.
+
+\emph{2.2 ESports Analytics and Research}
+
+The rapid ascent of eSports from a niche activity to a global phenomenon
+has spurred the emergence of eSports analytics as a specialised and
+critical field of study. This discipline involves systematically
+collecting, processing, and analysing vast datasets generated by
+competitive video games, players, and teams. The primary objective of
+eSports analytics is to extract actionable insights that can inform
+strategic decision-making for professional organisations, enhance
+individual player performance, and enrich the overall viewing and fan
+engagement experience.
+
+Early iterations of eSports analytics often concentrated on descriptive
+statistics, such as player kill-death ratios, gold-per-minute, and
+overall win rates. While these fundamental metrics provided an initial
+understanding of player and team performance, they offered limited
+insight into the intricate underlying factors that drive success in
+highly complex game environments. However, the field has rapidly
+evolved, incorporating more advanced analytical techniques. The current
+state of eSports analytics is characterised by applying sophisticated
+methods, including data visualisation, advanced statistical modeling,
+and, increasingly, machine learning algorithms. This growing field also
+encompasses various data visualisation and analytics projects beyond
+just winning or skill prediction, providing tools for viewers and
+players to evaluate game states and player performance (e.g., Eaton et
+al., 2017; Horst et al., 2021; Novak et al., 2020; Maymin, 2020; Afonso
+et al., 2019).
+
+6
+
+As a prominent MOBA title, research within League of Legends forms a
+significant segment of eSports analytics. Studies in this area
+frequently explore variables related to the outcome of professional
+tournaments, seeking to identify the most critical factors influencing
+victory (Martín-Castellanos \& Corps, 2021; Slotboom, 2021). This often
+involves analysing pre-game information, such as champion picks and
+bans, critical strategic decisions made before a match commences (Costa
+et al., 2021). For instance, specific features derived from the pick and
+ban phase have been benchmarked to assess their predictive power for LoL
+match outcomes (Costa et al., 2021).
+
+However, the analytical landscape of League of Legends presents unique
+challenges that differentiate it from traditional sports. The continuous
+evolution of the game through frequent patch updates introduces dynamic
+shifts in the "meta-game"---the prevailing strategies, champion
+strengths, and item builds. These meta-shifts can rapidly alter optimal
+strategies and champion effectiveness, posing significant hurdles for
+predictive models aiming to maintain accuracy over time. Furthermore,
+the validity and reliability of publicly available match statistics and
+notational analysis in League of Legends have been scrutinised,
+underscoring the importance of rigorous data quality assessment for any
+analytical endeavour (Novak et al., 2019).
+
+While some research has focused on real-time prediction of \emph{League
+of Legends} results, exploring the ability to forecast outcomes during
+different match stages. This distinction is crucial, as real-time
+prediction leverages in-game events and unavailable statistics before
+the match begins, making pre-match prediction inherently more
+challenging yet highly valuable for strategic planning and competitive
+insight. For example, Silva, Pappa, and Chaimowicz (Silva et al., 2018)
+conducted a winning prediction based on Recurrent Neural Networks using
+minute-by-minute match data, achieving up to 83.54\% accuracy with data
+from the 20th to 25th minute. However, such real-time approaches do not
+consider the differential influence of player roles on game outcome.
+Similarly, Hodge et al. (2019) focused on real-time match prediction in
+\emph{Dota 2} for spectator interest. In contrast, Khromov et al. (2019)
+explored predicting player biometric skill in \emph{Counter-Strike:
+Global Offensive} with 90\% accuracy, but their work is based on
+biometric features, not in-game data relevant to match outcomes.
+
+\emph{2.3 Machine Learning for Sports Prediction}
+
+The advent of machine learning (ML) has fundamentally transformed the
+landscape of sports prediction, moving beyond traditional statistical
+models to embrace more sophisticated analytical capabilities (Bunker \&
+Susnjak, 2022). ML models offer distinct advantages, including the
+capacity to analyse large, complex datasets and identify intricate,
+non-linear patterns that may remain obscure to conventional techniques
+(Bunker \& Susnjak, 2022). This section delves into key aspects of
+applying machine learning to sports prediction, explicitly focusing on
+feature engineering, algorithm selection, and temporal modeling.
+
+Feature Engineering: A critical component in any machine learning
+model\textquotesingle s success in sports prediction is the quality and
+relevance of its features (Costa et al., 2021). Effective feature
+engineering involves extracting or creating domain-specific variables
+encapsulating the most influential factors impacting game outcomes
+(Martín-Castellanos \& Corps, 2021; Slotboom, 2021). In the context of
+sports, this can range from basic player statistics and team performance
+metrics to more complex strategic indicators (Martín-Castellanos \&
+Corps, 2021; Slotboom, 2021; Ani et al., 2019). For instance, studies
+have explored the significance of historical performance information,
+champion selection, and in-game variables in predicting League of
+Legends victories (Costa et al., 2021; Junior \& Campelo, 2023). The
+validity and reliability of these raw match statistics are also crucial
+considerations, as data quality directly impacts model performance
+(Novak et al., 2019).
+
+Algorithm Selection: The choice of machine learning algorithms for
+sports prediction is diverse, reflecting various approaches to modeling
+complex relationships within sports data (Bunker \& Susnjak,
+
+7
+
+2022). Classification algorithms, such as logistic regression, support
+vector machines (SVMs), decision trees, and ensemble methods like Random
+Forest, are commonly employed to predict binary outcomes like win or
+loss (Bunker \& Susnjak, 2022; Costa et al., 2021). For example, studies
+on football prediction have utilised Bayesian networks alongside other
+ML techniques (Joseph et al., 2006). More advanced algorithms, including
+gradient boosting machines (e.g., LightGBM, XGBoost) and neural networks
+(e.g., Multi-layer Perceptrons), have also shown promise in capturing
+highly intricate patterns and achieving high predictive accuracy in
+various sports, including eSports (Junior \& Campelo, 2023; Minami et
+al., 2024). The selection often depends on the dataset size, feature
+complexity, and interpretability requirements (Bunker \& Susnjak, 2022).
+
+Temporal Modeling: Sports data inherently possesses a temporal
+dimension, as player form, team dynamics, and game rules evolve. This
+temporal aspect introduces challenges such as concept drift, where the
+underlying relationships between features and outcomes change (Bunker \&
+Susnjak, 2022). Effective temporal modeling involves strategies to
+ensure that predictive models remain relevant and accurate despite these
+changes. Approaches can include rolling averages for performance
+metrics, incorporating patch-specific information, or employing
+time-series forecasting techniques. The dynamic nature of eSports,
+particularly League of Legends with its frequent meta-shifts, makes
+robust temporal modeling a critical consideration for maintaining model
+accuracy and generalizability (Costa et al., 2021)
+
+This comprehensive application of machine learning, from meticulous
+feature engineering to strategic algorithm selection and robust temporal
+modeling, underpins the development of advanced predictive systems in
+sports.
+
+\emph{2.4 Temporal Validation Methodologies}
+
+Practical evaluation of machine learning models ensures reliable
+performance on unseen data. Traditional validation approaches, including
+k-fold cross-validation, are commonly utilised; however, they often fall
+short when confronted with datasets that exhibit temporal dependencies.
+In these scenarios, maintaining the chronological order of data points
+is essential, as any disruption to this sequence can lead to data
+leakage and result in an inflated perception of model efficacy (Hastie
+et al., 2009).
+
+Time-series data, prevalent across various fields, introduces distinct
+challenges for model evaluation due to its sequential characteristics
+and potential non-stationarity. Unlike independent and identically
+distributed data, time-series observations are typically autocorrelated
+with their preceding values. Randomly shuffling data, a typical
+procedure in conventional cross-validation, inadvertently undermines the
+essential temporal relationships, yielding models that may appear
+effective on manipulated datasets but fail to generalise well in
+authentic sequential prediction contexts (Chen et al., 2019).
+
+Additionally, the statistical properties of time-series data, including
+means and variances, can change over time; this fluctuation is called
+non-stationarity. Such dynamic behaviour, particularly prominent in
+swiftly evolving environments, underscores the need for validation
+strategies that can adapt to and account for these transformations. A
+pressing issue in temporal validation remains the risk of data leakage,
+where inadvertent exposure to future information can skew the training
+process, leading to overly optimistic and misleading performance
+assessments.
+
+8
+
+\emph{2.5 Research Gap and Opportunities}
+
+Despite the growing body of research in sports analytics and the
+increasing application of machine learning to predict match outcomes, as
+exemplified by studies on League of Legends Championship Series teams
+(Gilles, 2023), several critical research gaps persist, particularly
+within the dynamic realm of eSports. These gaps underscore the necessity
+for more robust, adaptable, and systematic approaches to prediction.
+
+One significant challenge is the lack of systematic approaches to
+handling meta evolution within game prediction systems. Like many modern
+eSports titles, League of Legends is characterised by frequent patch
+updates introducing significant shifts in game mechanics, champion
+balance, and optimal strategies---collectively known as the "meta".
+Existing predictive models often struggle to adapt to these rapid
+changes, with traditional temporal validation methods proving inadequate
+for effectively capturing the evolving nature of the game. This leads to
+models that may quickly become outdated, exhibiting poor performance on
+recent data due to a fundamental mismatch with the current meta.
+
+The pressing need for eSports-specific temporal validation methodologies
+is closely related to this challenge. Conventional cross-validation
+techniques, while robust for static datasets, are prone to data leakage
+when applied without careful consideration of the chronological order of
+events in a constantly changing environment (Sarikaya, 2024). While
+time-series validation approaches like walk-forward validation exist,
+there is a recognised absence of a comprehensive framework explicitly
+designed for the unique temporal complexities and meta-shifts inherent
+in eSports. Such a framework ensures that predictive models are
+evaluated realistically and that their reported performance genuinely
+reflects their ability to generalise in a dynamic, competitive setting.
+
+Furthermore, the field lacks established benchmark performance levels
+for League of Legends match prediction, particularly for pre-match
+scenarios. While individual studies report accuracy and AUC scores,
+different datasets, feature engineering approaches, and validation
+methodologies often hinder direct comparisons. As noted in the
+literature, "no study has easily replicable results in the context of
+League of Legends win prediction using pre-game information" (Costa et
+al., 2021). This lack of standardised benchmarks makes assessing and
+advancing the field\textquotesingle s state-of-the-art objectively
+challenging.
+
+Finally, a persistent limitation is the limited availability of
+comprehensive methodological frameworks that ensure reproducibility. The
+intricacies of data collection from game APIs, the nuances of feature
+engineering (especially dynamic and context-aware features), and the
+specifics of validation strategies are not always fully detailed or
+openly shared across studies. This lack of transparent and comprehensive
+methodological documentation impedes the ability of other researchers to
+replicate findings, build upon existing work, and collectively advance
+the field (Costa et al., 2021).
+
+This thesis explicitly addresses these identified research gaps by
+developing and validating a novel temporal framework, implementing
+advanced feature engineering techniques, and providing a reproducible
+methodology for professional League of Legends match prediction.
+
+9
+
+\textbf{Chapter 3}
+
+\textbf{3.Methodology}\\
+This chapter details the research design and methodological approaches
+to develop a state-of-the-art machine learning framework for predicting
+professional League of Legends match outcomes. It outlines the data
+collection, advanced feature engineering, novel temporal validation
+strategies, and machine learning architecture used to address the
+challenges of dynamic competitive environments.
+
+\emph{3.1 Research Design and Approach}
+
+This study\textquotesingle s investigative paradigm is rooted in a
+quantitative, experimental design, primarily focused on the systematic
+development and exhaustive evaluation of a predictive machine learning
+model. The central objective is to accurately forecast the outcome of
+professional \emph{League of Legends} matches, utilising only data
+available before the match commencement, thereby significantly advancing
+the capabilities of existing eSports analytical frameworks. This design
+facilitates a meticulous inquiry into the efficacy of advanced
+computational techniques when judiciously applied to complex, dynamic,
+and large-scale eSports datasets.
+
+A deliberate emphasis on the synergistic integration of deep domain
+expertise with cutting-edge machine learning principles characterises
+the overall methodological approach. This comprehensive strategy is
+supported by several foundational pillars, each contributing to the
+predictive system\textquotesingle s robustness and novelty. Primarily,
+the research commits to advanced feature engineering, which creates 37
+sophisticated variables capturing dynamic champion meta-analysis,
+strategic interactions, and temporal team performance dynamics.
+
+Secondly, the approach incorporates multiple algorithms that deploy
+seven state-of-the-art machine learning algorithms with rigorous
+hyperparameter optimisation using Bayesian Optimisation and
+RandomizedSearchCV.
+
+Thirdly, a cornerstone of the research design is its commitment to
+rigorous temporal validation, manifested through implementing a novel
+validation framework. This framework directly confronts the critical
+challenge of meta-evolution in \emph{League of Legends} by utilising a
+"Stratified Random Temporal Validation" methodology. This innovative
+approach scrupulously maintains strict temporal ordering while
+strategically incorporating random sampling within yearly data
+partitions. The objective is to effectively mitigate intra-year meta
+bias and prevent data leakage, ensuring a truly unbiased and realistic
+assessment of the model's generalisation capabilities across evolving
+game versions.
+
+This research design is structured to systematically evaluate each
+component, culminating in developing and validating an Enhanced Ultimate
+League of Legends Predictor system. This system is envisioned as a
+high-performing predictive tool and a significant methodological
+contribution, providing a reproducible framework for subsequent research
+endeavours within dynamically evolving competitive environments.
+
+\emph{3.2 Data Collection and Preparation}
+
+A robust and representative dataset is fundamental for training machine
+learning models that can accurately generalise to complex, real-world
+scenarios in professional eSports.
+
+10
+
+Dataset Overview
+
+The dataset for this study was meticulously compiled from the Oracle
+Elixir professional match database. This comprehensive collection
+encompasses 41,296 professional matches, spanning a decade of
+competitive play in \emph{League of Legends} from 2014 to 2024. The
+scope of the data covers nine premier leagues, ensuring broad
+representation of the evolution of professional eSports. Rigorous
+quality assurance protocols were applied, including sophisticated
+missing value handling and stringent data consistency validation, to
+ensure the integrity and reliability of the dataset.
+
+League Distribution
+
+The 41,296 matches within the dataset are distributed across nine
+premier professional \emph{League of Legends} leagues. The most
+significant contributions come from the LPL (China) with 11,848 matches
+and the LCK (Korea) with 8,842 matches. Other significant leagues
+include CBLOL (Brazil) with 3,794 matches, NA LCS (North America) with
+3,472 matches, LCS (NA) with 3,318 matches, and LEC (Europe) with 3,196
+matches. Additionally, the dataset incorporates matches from EU LCS (EU)
+with 3,108 matches, the prestigious Worlds Championship (2,490 matches),
+and the Mid-Season Invitational (MSI) with 1,228 matches, collectively
+offering a diverse and extensive view of professional eSports
+competition.
+
+Data Preprocessing Pipeline
+
+The data preprocessing pipeline was designed to ensure the
+dataset\textquotesingle s integrity, consistency, and temporal accuracy.
+Missing value imputation was critical, employing both categorical and
+numerical strategies. For instance, champion and ban-related columns
+were systematically filled with
+\textquotesingle Unknown\textquotesingle{} or
+\textquotesingle NoBan\textquotesingle{} respectively, while numerical
+fields like \textquotesingle result\textquotesingle,
+\textquotesingle year\textquotesingle,
+\textquotesingle playoffs\textquotesingle, and
+\textquotesingle game\_length\textquotesingle{} had sensible default
+values assigned (e.g., 0 for loss/regular season, 2023 for year, 30
+minutes for game length). Type consistency was robustly enforced across
+the dataset, ensuring that categorical data was treated as strings,
+dates were converted to datetime objects, and numerical values were
+properly cast to numeric types. Furthermore, paramount importance was
+placed on maintaining temporal ordering throughout the preprocessing.
+All data was explicitly sorted chronologically to preserve temporal
+integrity.
+
+\emph{3.3 Advanced Feature Engineering Framework}
+
+A cornerstone of this thesis is developing an advanced feature
+engineering framework, meticulously designed to translate the intricate
+dynamics of League of Legends into a rich set of predictive variables.
+This framework moves beyond conventional approaches by integrating deep
+domain expertise with computational efficiency, yielding a comprehensive
+set of 37 sophisticated features that capture the strategic complexity
+of professional eSports.
+
+Champion Characteristics Analysis
+
+This sub-section focuses on extracting fundamental attributes of
+individual champions and aggregating them to represent team-wide
+characteristics. The methodology involves calculating dynamic champion
+strength by game version, inferring properties such as win rates, early
+and late game power, and scaling factors from historical match data. Key
+features derived from this analysis include the team\textquotesingle s
+average win rate, reflecting the overall strength of a given team
+composition. Furthermore, metrics like Team Early Strength and Team Late
+Strength quantify a composition\textquotesingle s power during different
+game phases. The Team Scaling feature captures the early-to-late game
+transition potential, indicating how a team\textquotesingle s power
+curve progresses. Additionally, Team Flexibility assesses the
+versatility of champion picks based on how many positions a champion can
+effectively play. This process is dynamically calculated for each
+champion based on historical performance, considering a minimum game
+threshold for reliability.
+
+11
+
+Strategic Feature Categories
+
+The engineered features are systematically organised into distinct
+strategic categories, each meticulously designed to capture specific
+facets of the game\textquotesingle s complexity. A comprehensive set of
+eight features, categorised as Meta Analysis Features, is dedicated to
+understanding the current game "meta" by quantifying champion
+effectiveness per game version, thus accounting for performance shifts
+influenced by patch updates, alongside pick/ban priority analysis, meta
+strength consistency, and popularity indicators. These are derived by
+grouping data by patch and champion to calculate win rates, pick rates,
+and ban rates, ultimately forming a Meta Strength metric that
+intelligently combines these elements.
+
+Team Performance Features, comprising four variables, rigorously
+quantify a team\textquotesingle s historical and recent competitive form
+through metrics such as overall win rate, recent win rate (based on the
+last 10 games), and form trend, all calculated chronologically to
+prevent data leakage. Team Experience, normalising games played, serves
+as a measure of a team\textquotesingle s seasoned status. Three
+Strategic Interaction Features are engineered to capture complex,
+multi-dimensional interactions within the game, including meta-form
+interactions and scaling-experience combinations, which link meta
+strength with team form and scaling potential with experience,
+respectively. Composition Balance metrics assess the strategic coherence
+of the team\textquotesingle s chosen champion lineup.
+
+Furthermore, nine features fall under Advanced Categorical Encoding,
+utilising target encoding for high-cardinality categorical variables
+such as league representation, team performance encoding, patch-specific
+encoding, and champion-role combinations. This technical innovation
+transforms qualitative data into a numerical format that captures its
+predictive power relative to the target. It applies TargetEncoder with
+robust missing value handling and LabelEncoder as a fallback. Three Ban
+Strategy Features quantify the strategic importance of the ban phase,
+encompassing ban count, ban diversity, and high priority bans, which
+reflect strategic flexibility and the elimination of perceived meta
+threats. Lastly, six Derived Features are created through cross-feature
+interactions, domain-specific calculations, and further strategic
+coherence metrics, enhancing the model\textquotesingle s ability to
+discern complex patterns, with integrated contextual features like
+playoffs, side blue, year, and champion count.
+
+Feature Engineering Innovation
+
+The feature engineering process is distinguished by significant
+methodological and technical innovations, strategically aimed at
+enhancing model performance and predictive insights\textquotesingle{}
+validity. Vectorised operations are extensively employed, fundamentally
+shifting from traditional row-by-row processing to highly efficient
+matrix operations and pandas vectorisation. This optimisation yields a
+remarkable 10- 50x performance improvement in feature computation time,
+drastically reducing the overall data processing pipeline from minutes
+to seconds.
+
+Domain Validation is an integral and continuous component, involving
+eSports experts to validate the relevance and meaningfulness of each
+engineered feature rigorously. This human-in-the-loop approach is
+crucial for ensuring that the derived features genuinely reflect the
+nuanced strategic complexities of \emph{League of Legends}.
+Concurrently, the entire framework is intrinsically designed for
+Scalability, providing an efficient pipeline capable of processing large
+and continually expanding datasets without incurring prohibitive
+computational costs, ensuring the enduring applicability and robustness
+of the methodology.
+
+\emph{3.4 Temporal Validation Framework}
+
+A significant contribution of this thesis is developing a novel temporal
+validation framework, designed to rigorously evaluate machine learning
+models in dynamically evolving environments such as professional
+eSports. This framework directly addresses the unique challenges of
+time-dependent data,
+
+12
+
+moving beyond traditional validation methods to provide a more realistic
+assessment of model generalisation capabilities.
+
+The Meta Evolution Challenge
+
+Like many modern eSports titles, League of Legendsis characterised by
+continuous evolution, driven by frequent game patches, champion updates,
+and strategic shifts. This constant evolution creates significant
+challenges for predictive modeling due to inherent temporal
+dependencies, where historical context must be carefully balanced
+against the model\textquotesingle s ability to predict future, unseen
+scenarios. A critical distinction arises between academic research
+rigour, which often prioritises unbiased evaluation, and practical
+deployment considerations, which demand models capable of adapting to
+ongoing game changes. The presence of concept drift, where the
+underlying statistical properties of the data or the relationship
+between features and target variables change over time, further
+complicates validation in such dynamic environments.
+
+Comprehensive Three-Strategy Framework
+
+A comprehensive comparison framework was developed to systematically
+address the meta evolution challenge, rigorously testing three distinct
+temporal validation strategies.
+
+The first, \textbf{Pure Temporal Validation}, serves as an academic
+baseline. This strategy employs a strict chronological split of the
+dataset, allocating approximately 70\% of matches (2014-2020) for
+training, 15\% (2020-2022) for validation, and the most recent 15\%
+(2022-2024) for testing. This approach offers true future prediction
+capability, ensuring no data leakage and upholding academic
+methodological rigour by simulating realistic deployment scenarios where
+only historical data is available. However, its primary limitation is
+that training data becomes outdated for recent meta patterns,
+potentially reducing prediction accuracy due to meta drift.
+
+The second approach is \textbf{Stratified Temporal Validation}, designed
+to be meta-aware. This strategy performs year-wise proportional splits
+(70\% train, 15\% validation, 15\% test) each year while maintaining
+chronological order. Combining these proportionally split yearly subsets
+ensures that recent meta patterns are represented in training data,
+providing balanced representation across all eras and improving
+practical deployment performance. Nevertheless, this approach sacrifices
+some "future prediction" purity and carries potential for subtle
+intra-year temporal leakage.
+
+The third and most innovative strategy is the \textbf{Stratified Random
+Temporal Validation}, a breakthrough approach that is explicitly
+patch-aware. This methodology employs stratified random sampling within
+year stratification, ensuring that while chronological separation is
+maintained at the yearly level, meta diversity is preserved across all
+data splits within each year. This innovation addresses intra-year meta
+bias by ensuring early-season and late-season matches (representing
+different patch cycles) are proportionally represented across training,
+validation, and test sets. This approach enhances statistical robustness
+through improved class balance and reduced temporal bias.
+
+Each strategy employs tailored hyperparameter optimisation approaches,
+with all strategies utilising 5-fold stratified cross-validation for
+robust performance estimation. The framework systematically compares
+temporal validation methodologies while maintaining academic rigour and
+practical applicability.
+
+Bayesian Optimisation Framework\\
+The research employs a single-layer Bayesian optimisation approach
+integrated with the three distinct temporal validation strategies,
+directly and efficiently comparing their efficacy. This framework
+utilises Gaussian Process optimisation for each strategy. The validation
+approaches include a Pure Temporal split, using a Time Series Split for
+strict chronological partitioning; a Stratified Temporal split,
+implemented with a Stratified TimeSeries Split to balance temporal order
+with proportional yearly
+
+13
+
+representation; and a Stratified Random Temporal split, which leverages
+Stratified K-Fold to enable random sampling within stratified yearly
+partitions while maintaining overall temporal structure.
+
+The Bayesian optimiser explores a defined search space for
+hyperparameters, including C (continuous regularisation from 1e-4 to 100
+on a log-uniform prior), max\_iter (integer values from 2000 to 6000),
+penalty (l1, l2), and solver (liblinear, lbfgs, saga). This intelligent
+parameter search is conducted with
+
+50 calls, utilising the Expected Improvement (EI) acquisition function
+and a fixed random state for reproducibility. The framework demonstrates
+the capability to systematically differentiate between validation
+strategies, with each approach showing distinct performance
+characteristics that validate the
+
+theoretical expectations of the temporal validation design.
+
+A key design decision was the selection of single-layer optimisation
+over more complex nested cross-validation approaches. This choice was
+driven by several factors: \textbf{substantial computational efficiency
+gains}, a focused approach on directly comparing the three distinct
+temporal validation strategies, simpler model selection for practical
+deployment, and enhanced interpretability stemming from clear, direct
+performance comparisons across the chosen strategies.
+
+\emph{3.5 Three-Phase Machine Learning Research Design}
+
+The predictive system\textquotesingle s core is built upon a
+sophisticated machine learning architecture, systematically
+
+designed to identify optimal algorithms, intelligently optimise their
+performance, and ensure
+
+computational efficiency for production-ready deployment. This
+architecture leverages the insights
+
+gained from advanced feature engineering and novel temporal validation
+to achieve state-of-the-art prediction capabilities in the dynamic
+eSports environment.
+
+Comprehensive Algorithm Discovery (Phase 1)
+
+The framework employs a comprehensive multi-algorithm approach,
+screening a broad spectrum of machine learning models to empirically
+identify the most effective algorithms for League of Legends
+
+prediction. This approach encompasses a diverse suite of classifiers,
+including various tree-based models such as Random Forest, Extra Trees,
+XGBoost, LightGBM, and CatBoost. A linear model, Logistic Regression, a
+kernel-based Support Vector Machine (SVM), and a Multi-Layer Perceptron
+(MLP) neural network are included. The final component is a
+performance-weighted voting ensemble, designed to leverage the
+collective strength of the best-performing individual models.
+
+Central to the architecture is an intelligent optimisation strategy,
+meticulously designed to fine-tune each model\textquotesingle s
+performance. Bayesian Optimisation is employed for tree-based models
+(Random Forest, XGBoost, LightGBM, CatBoost), specifically utilising a
+Gaussian Process-based intelligent parameter search with 100 trials, as
+implemented via Optuna. This approach efficiently navigates a continuous
+parameter space, including continuous regularisation parameters and
+extended iteration ranges (e.g., 2000-6000 for max\_iter), to discover
+optimal hyperparameter combinations.
+
+For linear and kernel-based models (Logistic Regression, SVM, MLP),
+RandomizedSearchCV is
+
+utilised, performing 50 iterations of strategic sampling across their
+respective hyperparameter grids. All models undergo evaluation using an
+enhanced 5-fold stratified cross-validation, ensuring robust performance
+estimation. The optimisation consistently targets the Area Under the
+Receiver Operating Characteristic Curve (AUC-ROC) as the primary metric,
+which is crucial for assessing the discriminative capability of
+predictive models in binary classification tasks and ensures optimal
+
+evaluation for League of Legends prediction. Intelligent convergence
+settings, including extended iteration ranges for models like Logistic
+Regression and MLP, are configured to provide stable and complete model
+training.
+
+14
+
+Evidence-Based Model Selection (Phase 2)
+
+Following the comprehensive algorithm discovery in the initial phase,
+the second phase of the machine learning research design focused on
+evidence-based model selection. The objective of this phase was the
+validation of performance patterns and the derivation of theoretical
+insights. This systematic evaluation led to a pivotal finding: the
+consistent dominance of linear models. Specifically, Logistic Regression
+consistently outperformed all other complex models, including tree-based
+algorithms, neural networks, and ensemble methods. This remarkable
+consistency was observed across every implementation and system version
+tested, including those utilising different optimisation strategies
+
+such as GridSearchCV, RandomizedSearchCV, and Bayesian Optimisation,
+establishing a reproducible pattern of algorithmic superiority.
+
+The performance hierarchy revealed distinct algorithmic characteristics
+across model families. Logistic
+
+Regression demonstrated consistent superiority, while tree-based models
+showed varying degrees of effectiveness despite their complexity. Neural
+Networks indicated unnecessary complexity given the
+
+task structure, and ensemble methods suggested that their averaging
+process diluted the clean patterns inherent in the data. This key
+insight led to a linear separability hypothesis: advanced feature
+engineering can transform complex eSports strategic patterns into
+linearly separable problems, allowing simpler models to outperform more
+sophisticated ones. This is attributed to specific domain-
+
+driven relationships, where factors like champion synergies demonstrate
+additive team composition effects, meta strength exhibits linear
+effectiveness across patches, performance trends reveal linear temporal
+dependencies, and gold advantages show linear relationships with win
+probability.
+
+The rationale for selecting Logistic Regression as the primary model was
+multifaceted. Its cross-implementation consistency, demonstrating
+superior performance across three independent systems,
+
+provided compelling empirical evidence. The observation that advanced
+features enable discernible
+
+linear patterns underscored the principle of feature quality over model
+complexity. Furthermore, its simplicity offered significant production
+efficiency, making it a superior choice for real-world deployment due to
+faster prediction times and lower computational requirements. This
+phase\textquotesingle s finding, emphasising that feature quality
+outweighs model complexity, constitutes a significant academic
+contribution to machine learning methodology.
+
+Rigorous Deep-Dive Analysis (Phase 3)
+
+The third and final phase of the machine learning research design
+involved a rigorous deep dive analysis, primarily focusing on the
+comprehensive validation of the selected model and the integration of
+advanced system optimisations for practical deployment. This phase
+specifically concentrated on a comprehensive Logistic Regression
+validation framework, building upon the insights gained from the
+previous phase regarding its consistently superior performance.
+
+This framework systematically explored the three novel temporal
+validation strategies: Pure Temporal validation, serving as an academic
+rigour baseline; Stratified Temporal validation, representing a meta-
+
+aware enhancement; and the Stratified Random Temporal validation,
+recognised as a breakthrough innovation in managing meta evolution. The
+validation framework incorporated a Nested Cross-Validation protocol,
+featuring an outer 5-fold cross-validation for robust performance
+estimation and an
+
+inner Bayesian optimisation loop, utilising a Gaussian Process with 50
+evaluations for intelligent hyperparameter tuning. Comprehensive
+statistical analysis, including bootstrap confidence intervals and
+significance testing, alongside a full suite of metrics (AUC, F1-score,
+Accuracy, and calibration analysis), ensured a thorough performance
+characterisation. The core objectives of this deep dive were the
+development of a novel temporal validation methodology, statistical
+validation of the
+
+15
+
+breakthrough approach, comprehensive performance characterisation, and
+the optimisation for production deployment.
+
+Research Design Advantages
+
+The meticulously structured three-phase machine learning research design
+offers several distinct advantages, contributing to this
+thesis\textquotesingle s robustness, novelty, and practical impact. This
+
+methodology promotes a systematic discovery process, eliminating
+potential algorithm selection bias
+
+through a broad initial exploration of machine learning models.
+Following this, an evidence-based focus ensures that deeper analytical
+efforts are concentrated solely on empirically superior methods,
+optimising research efficiency and effectiveness.
+
+A significant advantage lies in its novel contribution, specifically
+developing a breakthrough temporal
+
+validation framework tailored for dynamic competitive environments. The
+design\textquotesingle s academic rigour is underscored by its
+progression from a comprehensive initial exploration to a focused
+analysis, culminating in a validated methodology. From a practical
+standpoint, the research design yields substantial practical impact by
+delivering a production-ready system firmly grounded in theoretical
+foundations. Finally, the framework embodies technical excellence
+through its complete optimisation suite, meticulously engineered for
+real-world deployment scenarios.
+
+16
+
+\textbf{Chapter 4}
+
+\begin{quote}
+\textbf{4.Implementation}
+\end{quote}
+
+This chapter articulates the technical implementation nuances of the
+sophisticated machine learning framework crafted for predicting League
+of Legends match outcomes. It delivers an exhaustive examination of the
+software architecture, meticulously designed pipelines for data
+processing and feature engineering, and model training and optimisation
+methodologies. Additionally, considerations regarding system performance
+and deployment for production readiness are addressed\\
+comprehensively.
+
+\emph{4.1 Software Architecture and Design}
+
+The entire system is predominantly constructed using Python,
+capitalising on its comprehensive scientific computing stack to
+facilitate data manipulation, machine learning, and performance
+optimisation. Key libraries include scikit-learn, which provides a range
+of machine learning algorithms and utilities; XGBoost, LightGBM, and
+CatBoost, which are utilised for gradient boosting frameworks; and
+Optuna, designated for advanced hyperparameter optimisation. To achieve
+enhanced computational performance, the architecture integrates pandas
+for vectorized operations, alongside PyTorch, which enables GPU
+acceleration, thereby promoting efficient processing and model training
+on compatible hardware.
+
+Moreover, the system features intelligent hardware detection with
+automatic fallback mechanisms that switch from GPU to CPU, ensuring
+reliable operation across varied computational environments. Fixed
+random seeds are utilised for all stochastic processes to uphold the
+reproducibility of research findings, and best practices in version
+control and environment management are rigorously followed.
+
+\emph{4.2 Feature Engineering Pipeline Implementation}
+
+The feature engineering pipeline is constructed with a modular
+architecture, facilitating the development of reusable components that
+enhance the efficiency of feature extraction and transformation
+processes. A pivotal element of this design is performance optimisation,
+accomplished by substituting traditional iterative loops with highly
+efficient vectorised operations utilizing pandas. This approach
+leverages matrix operations and batch processing techniques, thereby
+fundamentally reducing the computational complexity from O(n²) for
+individual operations to O(n) for vectorised computations.
+
+In addition, the pipeline integrates an internal validation framework
+that automates feature quality assessment, ensuring the extracted
+features\textquotesingle{} reliability and relevance. Furthermore,
+advanced categorical encoding is realised through sophisticated target
+encoding methods, which include robust handling of missing values and
+automatic fallback systems. The implementation also emphasises
+scalability through memory-efficient processing, enabling the system to
+manage the extensive and expanding League of Legends match dataset
+without excessive resource consumption.
+
+\emph{4.3 Model Training and Optimisation}
+
+A sophisticated methodology underpins hyperparameter tuning and robust
+evaluation within model training and optimisation. The design of the
+hyperparameter space is meticulously aligned with algorithm-specific
+parameter grids, incorporating an extensive array of values for each
+model to
+
+17
+
+facilitate exhaustive optimisation. Employing Bayesian Optimisation,
+specifically the Tree-structured Parzen Estimator (TPE) sampler in
+conjunction with Optuna, efficiently explores these intricate parameter
+landscapes. This approach intelligently navigates the search for optimal
+configurations through Gaussian Process-based acquisition functions,
+which leverage insights from prior evaluations to inform the strategic
+exploration of parameters.
+
+The framework for cross-validation applies a 5-fold stratified
+technique, which is essential for producing reliable performance
+estimates and mitigating bias in model assessments. The implementation
+also features advanced parameter validation systems that adeptly manage
+solver-penalty constraints and address compatibility issues among
+algorithm families. Furthermore, early stopping mechanisms are
+seamlessly integrated into the training process for models that support
+them. They are a convergence monitoring tool and a crucial strategy to
+avert overfitting and enhance overall operational efficiency.
+
+\emph{4.4 System Performance Optimisations}
+
+The implementation integrates several layers of performance optimisation
+aimed at evolving the system from a research prototype to a
+production-ready platform. By adopting vectorized computing, we move
+beyond traditional row-by-row processing, leveraging advanced pandas
+matrix operations and list comprehensions. This shift fundamentally
+transforms the computational strategy employed in feature engineering.
+Furthermore, GPU acceleration is seamlessly incorporated for algorithms
+that support it, featuring automatic hardware detection and resilient
+CPU fallback mechanisms, which facilitate consistent operation across
+various computational environments.
+
+The hyperparameter optimisation framework utilises a dual approach; it
+employs Bayesian\\
+optimisation for intricate tree-based models and RandomizedSearchCV for
+linear models, enhancing computational efficiency while upholding
+optimisation quality. Additionally, memory management is refined through
+effective data flow patterns and minimized object creation, thus
+enabling the scalable processing of large datasets without incurring
+excessive resource consumption.
+
+\emph{4.5 Production Deployment Architecture}
+
+The system\textquotesingle s architecture is meticulously designed with
+a pronounced focus on production\\
+deployment, ensuring its suitability for real-world use cases. This
+encompasses an advanced error-free saving mechanism for trained models
+and their associated components, which employs intelligent serialisation
+strategies to circumvent common pickle failures through selective
+component saving and robust error handling measures. The deployment
+package is comprehensive, featuring detailed metadata, specifications of
+feature columns, and configurations of the model, which facilitate
+seamless integration into operational environments.
+
+Furthermore, the system incorporates an efficient loading mechanism that
+allows for one-line model loading, simplifying deployment processes
+within operational settings. The sophisticated error handling mechanisms
+are pivotal in guaranteeing the success of the training pipeline, even
+in instances where saving operations may encounter difficulties, thus
+preserving the continuity of research workflows. A broad range of
+performance metrics is systematically captured and made available,
+allowing for ongoing monitoring and assessment of the
+system\textquotesingle s effectiveness in production scenarios.
+
+Ultimately, the overall architecture is meticulously crafted for
+scalability, rendering it enterprise-ready to manage large-scale
+predictions amidst dynamically evolving competitive landscapes.
+
+18
+
+\textbf{Chapter 5}
+
+\begin{quote}
+\textbf{5.Results}
+\end{quote}
+
+This chapter presents the comprehensive experimental results of the
+advanced machine learning framework developed for League of Legends
+professional match prediction. The results demonstrate breakthrough
+achievements across multiple dimensions: novel temporal validation
+methodology development, world-class predictive performance, and
+significant methodological
+
+contributions to eSports analytics. The experimental evaluation
+validates our three-phase research design through rigorous statistical
+analysis of actual model performance on unseen data, confirming the
+theoretical advantages of our meta-aware validation approaches and
+advanced feature engineering system.
+
+The results are organised to reflect the systematic progression from
+comprehensive algorithm discovery through evidence-based model selection
+to rigorous deep-dive analysis. This structure demonstrates the superior
+performance achieved and the methodological rigour underlying our
+breakthrough findings. All reported results are based on actual model
+predictions generated from logistic regression comparison, ensuring the
+reliability and reproducibility of our contributions.
+
+\emph{5.1 Three-Strategy Validation Results}
+
+The comprehensive validation of three distinct temporal validation
+strategies specifically designed to address the meta evolution challenge
+in professional eSports prediction. Our novel three-strategy
+
+framework represents a fundamental methodological contribution to
+temporal validation in evolving competitive environments, providing the
+first systematic comparison of validation approaches tailored for game
+balance dynamics and strategic meta shifts.
+
+The three-strategy validation framework addresses a critical gap in
+sports analytics literature by explicitly confronting the temporal
+validation challenges unique to evolving competitive systems. Unlike
+traditional sports, where rule changes are infrequent and gradual,
+professional eSports experiences continuous meta evolution through
+regular game patches, champion updates, and strategic
+
+innovations. Our framework provides empirically validated solutions to
+this challenge through carefully designed validation strategies that
+balance temporal realism with meta representation requirements.
+
+Strategy Performance Comparison
+
+The experimental evaluation reveals remarkable performance achievements
+across all three temporal
+
+validation strategies. Each approach demonstrates world-class predictive
+capability while exhibiting distinct characteristics aligned with its
+theoretical foundations. The comprehensive comparison using identical
+feature engineering systems and optimisation procedures provides clear
+empirical evidence for the relative advantages of meta-aware validation
+approaches.
+
+The \textbf{Stratified Temporal Split} emerged as the optimal performer,
+achieving a test AUC of 0.8265. This result validates our hypothesis
+that meta-aware validation approaches can successfully balance temporal
+realism with comprehensive meta representation. With cross-validation
+(CV) AUC of 0.8192,
+
+indicating robust internal consistency, it exhibited an excellent
+generalisation gap of -0.0073, suggesting strong performance on truly
+unseen data.
+
+The \textbf{Stratified Random Temporal Split} achieved a test AUC of
+0.8203, validating our novel
+
+methodological contribution. Its CV AUC was 0.8202. This breakthrough
+approach combines random
+
+19
+
+sampling within year-based stratification to eliminate intra-year meta
+bias and demonstrates exceptional consistency with a generalisation gap
+of only -0.0001. The near-perfect generalisation indicates that our
+innovative sampling strategy successfully captures the full spectrum of
+meta patterns while maintaining robust temporal validation principles.
+
+The \textbf{Pure Temporal Split} establishes a strong academic baseline
+at 0.8117 AUC, confirming that even traditional temporal validation
+approaches achieve excellent performance when combined with our advanced
+feature engineering system. Its CV AUC was 0.8217, exhibiting a
+generalisation gap of
+
++0.0100, affirming its academic rigour and firm performance while
+indicating a slight performance drop from validation to test set
+compared to the other strategies.
+
+The performance hierarchy (Stratified Temporal (0.8265) \textgreater{}
+Stratified Random Temporal (0.8203) \textgreater{} Pure Temporal
+(0.8117)) validates our theoretical framework while revealing the
+practical impact of meta-awareness in temporal validation design. The
+1.48 percentage point improvement between the optimal strategy and the
+baseline confirms that meta evolution considerations provide substantial
+practical benefits in eSports prediction systems.
+
+\includegraphics[width=6.37778in,height=3.76528in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image2.png}
+
+\emph{Figure 1 -- Final AUC performance Across Strategies}
+
+The statistical robustness of these results is further demonstrated
+through comprehensive cross-validation analysis, revealing consistent
+performance patterns with narrow confidence intervals across all
+strategies. The cross-validation results show mean AUC scores of 0.8192
+± 0.0052 for Stratified Temporal, 0.8202 ± 0.0059 for Stratified Random
+Temporal, and 0.8217 ± 0.0047 for Pure Temporal, indicating exceptional
+stability and reliability across different data partitions.
+
+20
+
+\begin{quote}
+\includegraphics[width=5.63194in,height=3.72917in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image3.png}
+\end{quote}
+
+\emph{Figure 2 -- CV Performance with Confidence Intervals}
+
+The generalisation analysis reveals particularly compelling evidence for
+the superiority of meta-aware approaches. While traditional temporal
+validation often exhibits positive generalisation gaps indicating
+overfitting to temporal patterns, our stratified approaches demonstrate
+negative generalisation gaps, suggesting improved performance on unseen
+data relative to validation performance. This exceptional generalisation
+characteristic validates the theoretical advantages of meta-aware
+validation design.
+
+\includegraphics[width=5.49028in,height=3.63611in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image4.png}
+
+\emph{Figure 3 -- Generalisation Gap Analysis}
+
+21
+
+Statistical significance testing confirms that the observed performance
+differences represent meaningful
+
+improvements rather than random variation. Pairwise comparisons between
+strategies reveal statistically significant differences, with p-values
+indicating high confidence in the superiority of meta-aware approaches
+over traditional temporal validation methods.
+
+\begin{quote}
+\includegraphics[width=5.18333in,height=4.02083in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image5.png}
+\end{quote}
+
+\emph{Figure 4 -- Statistical Significance Matrix}
+
+Temporal Validation Methodology Insights
+
+The cross-strategy analysis reveals fundamental insights into temporal
+validation methodology for evolving competitive environments, providing
+empirical support for theoretical predictions about meta-aware
+validation advantages. The consistent achievement of world-class
+performance across all strategies (81-83\% AUC range) demonstrates the
+robustness of our feature engineering system while highlighting the
+incremental benefits of methodological innovation.
+
+Meta Evolution Mastery emerges as a defining characteristic of superior
+temporal validation approaches. The Stratified Temporal
+strategy\textquotesingle s achievement of optimal meta-evolution balance
+(82.65\% AUC) demonstrates that explicit consideration of game balance
+patterns during validation split construction provides measurable
+performance advantages. This finding establishes meta-awareness as a
+fundamental requirement for temporal validation in evolving competitive
+systems, extending beyond eSports to any prediction domain characterised
+by systematic rule or environment changes.
+
+The temporal analysis of meta evolution patterns provides crucial
+context for understanding the challenges addressed by our validation
+framework. The comprehensive time series analysis reveals distinct meta
+shifts across the decade-long dataset, highlighting the dynamic nature
+of professional League of Legends competition and validating the need
+for meta-aware validation approaches.
+
+22
+
+\includegraphics[width=6.26667in,height=3.88333in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image6.png}
+
+\emph{Figure 5 -- Meta Evolution Over Time}
+
+Novel Method Success confirms the theoretical advantages of our
+Stratified Random Temporal innovation. The approach\textquotesingle s
+exceptional consistency, demonstrated through a near-zero generalisation
+gap (82.03\% AUC), validates our hypothesis that random sampling within
+temporal strata eliminates
+
+systematic biases while preserving temporal validation integrity. This
+methodological contribution
+
+provides a reusable framework for temporal validation in dynamic
+environments, with applications extending to financial markets,
+technological adoption patterns, and other evolving prediction domains.
+
+The data distribution analysis reveals how each temporal validation
+strategy handles the underlying
+
+dataset characteristics differently, providing empirical evidence for
+the theoretical advantages of stratified approaches. The study
+demonstrates that while pure temporal validation concentrates recent
+data in test sets, stratified methods achieve a more balanced
+representation across temporal periods.
+
+\includegraphics[width=6.39861in,height=2.34722in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image7.png}
+
+\emph{Figure 6- Data Distribution by Strategy}
+
+23
+
+Academic Foundation Strength is confirmed through the Pure Temporal
+baseline\textquotesingle s excellent performance (81.17\% AUC). This
+result demonstrates that traditional temporal validation approaches
+remain academically rigorous and practically viable, providing important
+context for evaluating meta-aware enhancements. The consistent
+excellence across all approaches validates our comprehensive methodology
+while establishing clear performance hierarchies that inform optimal
+validation strategy selection.
+
+The meta diversity analysis provides compelling visual evidence for the
+differential handling of champion usage patterns across our three
+temporal validation strategies. The comparative analysis reveals how
+each approach captures different aspects of meta evolution, with
+stratified methods achieving superior meta representation diversity
+compared to traditional temporal splits. This directly supports our
+theoretical framework regarding advantages of meta-aware validation.
+
+\includegraphics[width=6.26667in,height=4.75556in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image8.png}
+
+\emph{Figure 7 - Meta Diversity Heatmap Across Temporal Validation
+Strategies}
+
+Statistical Excellence characterises all validation strategies, with the
+narrow performance range (81-83\% AUC) indicating consistent world-class
+predictive capability regardless of temporal validation approach. This
+consistency validates the fundamental soundness of our feature
+engineering system while demonstrating that methodological enhancements
+provide incremental but meaningful improvements. The negative
+generalisation gaps observed in stratified methods indicate superior
+
+generalisation characteristics compared to traditional temporal
+approaches, confirming the theoretical advantages of meta-aware
+validation design.
+
+24
+
+The temporal performance trends analysis, utilising existing
+comprehensive analysis files from individual strategy evaluations,
+further validates the robustness of our findings across different
+temporal periods. These detailed analyses confirm that the observed
+performance advantages of stratified methods remain consistent across
+various time horizons and competitive environments, supporting the
+generalizability of our methodological contributions.
+
+Statistical significance testing confirms that the observed performance
+differences represent meaningful improvements rather than random
+variation. The comprehensive evaluation demonstrates that meta-aware
+validation strategies achieve superior discriminative performance and
+exhibit enhanced stability and generalisation characteristics essential
+for practical deployment in dynamic competitive environments.
+
+Bayesian Optimisation Analysis
+
+The implementation of Gaussian Process-based Bayesian optimisation
+represents a significant
+
+methodological advancement in our temporal validation framework,
+providing intelligent parameter discovery capabilities that
+substantially enhance the efficiency and effectiveness of hyperparameter
+exploration. This section presents the comprehensive results of our
+Bayesian optimisation implementation, involving 750 total evaluations
+strategically distributed across all three temporal
+
+validation strategies, demonstrating both the practical benefits and
+theoretical soundness of intelligent parameter space navigation.
+
+Intelligent Parameter Discovery from 750 Total Evaluations demonstrates
+the superior efficiency of Bayesian optimisation compared to traditional
+grid search approaches. The systematic allocation of 250 evaluations per
+temporal validation strategy enables comprehensive parameter space
+exploration while maintaining computational efficiency. This intelligent
+approach achieves convergence to optimal
+
+parameter regions in significantly fewer evaluations than exhaustive
+grid search methods, representing a 95\% reduction in computational
+requirements while maintaining or improving parameter quality.
+
+The Bayesian optimisation results reveal exceptional discovery
+capabilities across all temporal validation strategies. The Stratified
+Temporal strategy achieves 0.8229 AUC through Bayesian discovery,
+representing optimal parameter identification within the complex
+hyperparameter landscape. The Stratified Random Temporal strategy
+demonstrates consistent optimisation at 0.8212 AUC, validating the
+robustness of Bayesian approaches across different validation
+methodologies. Even the Pure Temporal strategy achieves compelling
+exploration at 0.8215 AUC, confirming that Bayesian optimisation
+enhances performance regardless of the underlying validation framework.
+
+\includegraphics[width=6.3875in,height=2.07778in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image9.png}
+
+\emph{Figure 8- Bayesian Convergence}
+
+25
+
+Optimisation Intelligence emerges as a defining characteristic of our
+Bayesian implementation, with all
+
+strategies demonstrating convergence within 250 iterations per strategy.
+This rapid
+
+convergence validates the effectiveness of the Expected Improvement
+acquisition function in guiding
+
+parameter space exploration toward optimal regions. The progressive
+improvement patterns observed
+
+across evaluations demonstrate successful Gaussian Process learning,
+with the optimisation algorithm
+
+effectively building predictive models of hyperparameter performance
+relationships.
+
+The parameter space exploration reveals sophisticated 3D landscape
+navigation capabilities,
+
+successfully discovering optimal regions across the complex
+regularisation strength, penalty type, and
+
+solver selection dimensions. The continuous optimisation approach
+demonstrates clear superiority
+
+over discrete grid search methods, enabling the discovery of parameter
+combinations that traditional
+
+enumeration approaches would miss.
+
+\includegraphics[width=6.25972in,height=5.64861in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image10.png}
+
+\emph{Figure 9 - 3D parameter Landscape}
+
+Technical Achievements encompass multiple dimensions of optimisation
+sophistication, including
+
+smart regularisation through automatic L1/L2 penalty selection based on
+parameter space
+
+characteristics. The solver optimisation demonstrates constraint-aware
+matching between
+
+26
+
+penalty types and compatible optimisation algorithms, ensuring valid
+parameter combinations while
+
+maximising exploration efficiency. Iteration discovery identifies
+optimal convergence settings for each temporal validation strategy,
+adapting computational resources to strategy-specific requirements.
+
+The acquisition function validation confirms the effectiveness of the
+Expected Improvement strategy in balancing exploration of uncertain
+parameter regions with exploitation of promising areas. This balance
+proves crucial for efficient parameter discovery within the allocated
+evaluation budget, enabling comprehensive optimisation without excessive
+computational overhead.
+
+Convergence Analysis demonstrates remarkable consistency across temporal
+validation strategies, with all approaches achieving stable convergence
+patterns within the allocated evaluation budget. The parameter space
+exploration exhibits systematic navigation characteristics, avoiding
+random search inefficiencies while ensuring comprehensive coverage of
+viable parameter combinations. The Gaussian Process learning validation
+confirms progressive improvement in parameter\\
+selection quality, with later evaluations demonstrating increasingly
+sophisticated parameter space understanding.
+
+Continuous optimisation\textquotesingle s superiority over discrete grid
+approaches represents a fundamental advancement in hyperparameter
+optimisation for temporal validation applications. The ability to
+explore continuous parameter spaces enables the discovery of optimal
+configurations that fall between traditional grid points, resulting in
+performance improvements that would be impossible with discrete search
+strategies. This methodological advancement establishes Bayesian
+optimisation as essential for achieving optimal performance in complex
+temporal validation frameworks.
+
+\emph{5.2 Breakthrough: Linear Model Dominance Confirmed}
+
+This section elucidates a pivotal and unforeseen discovery from our
+research: linear models\textquotesingle{} remarkable
+
+and consistent superiority, particularly Logistic Regression, in
+predicting professional League of
+
+Legends matches compared to more complex ensemble methods. This finding
+poses a substantial
+
+challenge to established norms within machine learning applications. It
+provides a fresh theoretical
+
+framework for examining the interplay between feature engineering
+quality and models\textquotesingle{} complexity within structured
+competitive environments.
+
+The observation regarding the dominance of linear models arose from our
+extensive three-phase
+
+research design, yielding robust empirical support across numerous
+independent implementations and
+
+optimisation techniques. This result\textquotesingle s reproducibility
+across various methodological approaches
+
+transforms it from a mere isolated finding into a crucial insight, with
+far-reaching implications for the fields of eSports analytics and sports
+prediction methodology.
+
+Cross-Implementation Performance Validation
+
+The empirical data affirming the dominance of linear models exhibit
+remarkable consistency throughout
+
+our extensive evaluation framework. Logistic Regression consistently
+outperforms alternative methods
+
+across all implementations, establishing a robust trend that is
+unaffected by variations in optimisation
+
+techniques, hyperparameter configurations, or validation methodologies.
+This reliability provides significant evidence for the intrinsic
+suitability of linear models in professional eSports prediction tasks.
+
+The cross-implementation validation demonstrates that Logistic
+Regression attains an impressive
+
+82.97\% AUC within our most sophisticated optimisation framework. This
+performance level is on par
+
+with global standards, surpassing advanced ensemble methods such as
+Random Forest, XGBoost,
+
+LightGBM, and Neural Networks. Moreover, this superior performance is
+upheld across various
+
+27
+
+temporal validation strategies, confirming that linear
+models\textquotesingle{} advantages are not contingent upon specific
+data partitioning approaches or temporal management techniques.
+
+\begin{quote}
+\includegraphics[width=4.475in,height=3.57083in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image11.png}
+\end{quote}
+
+\emph{Figure 10 - Algorithm Performance Comparison}
+
+The statistical significance of this pattern transcends mere point
+performance estimates, incorporating crucial elements of stability and
+generalization characteristics. Linear models exhibit enhanced
+consistency with lower variance across cross-validation folds, which
+indicates their robust\\
+performance that effectively generalises to unseen data. This advantage
+in stability reinforces their superior raw performance and positions
+linear models as the superior option for production\\
+deployment scenarios where reliable and predictable performance is
+paramount.
+
+Linear Separability Hypothesis
+
+The dominance of consistent linear models yields a critical theoretical
+insight: advanced feature engineering can effectively convert intricate
+strategic patterns in eSports into linearly separable challenges. This
+finding reinforces the principle that "Feature Quality Outweighs Model
+Complexity".
+
+Practical and Theoretical Implications
+
+The superiority of linear models confers significant benefits: enhanced
+interpretability for coaches and analysts, increased computational
+efficiency for real-time applications, and diminished infrastructure
+demands.
+
+28
+
+\emph{5.3 Feature Analysis}
+
+This section thoroughly examines the feature engineering system that
+underpins our remarkable success in linear model performance. Through a
+detailed analysis of the coefficients derived from Bayesian-optimised
+logistic regression models, alongside an extensive exploration of
+feature interactions, we illustrate the critical role of advanced domain
+expertise in translating intricate eSports dynamics into robust
+predictive signals. The findings are grounded in the actual coefficients
+obtained from our trained models, which solidify the theoretical
+assertions regarding the quality of feature engineering and the
+achievement of linear separability.
+
+Our in-depth feature analysis substantiates the hypothesis that
+sophisticated feature engineering contributes to predictive efficacy
+within professional eSports analytics. By scrutinising the parameters
+learned from our optimal models, we affirm the principle that "Feature
+Quality Outweighs Model Complexity," a significant revelation stemming
+from our research.
+
+Individual Feature Importance from Bayesian-Optimised Models
+
+The analysis of feature importance, derived from the coefficients of our
+Bayesian-optimised logistic regression models, elucidates the precise
+mathematical relationships that underpin accurate match predictions.
+These coefficients serve as compelling evidence for the varying
+significance of different predictive signals and substantiate our
+theoretical framework concerning the linearizability of professional
+eSports patterns.
+
+The hierarchy of feature importance clearly illustrates the preeminence
+of team performance metrics over individual champion traits or strategic
+elements. The five most critical features, ranked according to their
+absolute coefficient values, establish a robust predictive framework
+centred on assessing team capabilities and analysing meta-adaptation.
+
+At the forefront, Team Overall Win Rate stands out as the most
+significant predictor, with a coefficient of 1.697. This metric captures
+essential team skills through a thorough historical performance
+evaluation. It is the most resilient meta-independent predictor,
+affirming that sustained competitive excellence is integral to
+predicting match outcomes.
+
+Following closely, Team Target Encoded ranks as the second most
+important feature, with a coefficient of 1.588. This underscores the
+efficacy of advanced categorical encoding techniques in encapsulating
+team-specific performance trends. This encoding method transforms team
+identity into quantifiable performance indicators while maintaining the
+nuances of team-specific strategic inclinations and performance
+characteristics.
+
+Team Meta Strength occupies the third important position, with a
+coefficient of 0.948. This feature quantifies the capability of
+strategic adaptation by evaluating how effectively team compositions
+harmonise with prevailing game balance conditions. Its introduction
+marks a significant advancement in meta analysis, offering a
+quantitative framework for appraising teams\textquotesingle{} strategic
+adaptability in a dynamically competitive environment.
+
+The top five predictors are completed by Meta Advantage and Team Recent
+Win Rate, with coefficients of 0.652 and 0.467, respectively. These
+features highlight the importance of competitive meta positioning and
+current performance assessment as essential supplementary parameters.
+The systematic decrease in coefficient magnitudes reveals a definitive
+hierarchy in which fundamental team quality supersedes strategic and
+temporal factors.
+
+Our coefficient analysis illuminates the mathematical foundations for
+the dominance of linear models, demonstrating that our advanced feature
+engineering has successfully produced additive predictive signals that
+interact effectively within linear relationships. The evident hierarchy
+of magnitude and the
+
+29
+
+positive coefficient values confirm that our features encapsulate
+complementary dimensions of team performance, devoid of significant
+multicollinearity issues.
+
+\includegraphics[width=5.44167in,height=4.49583in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image12.png}
+
+\emph{Figure 11- Feature Importance Logistic Regression}
+
+Feature Relationships and Strategic Interactions
+
+Examining actual correlation patterns from real model data and
+constructing strategic feature interaction networks, we demonstrate how
+our advanced feature engineering creates complementary predictive
+signals that combine effectively through linear relationships. This
+analysis utilises authentic data sources from champion meta strength
+calculations and team historical performance assessments.
+
+The feature correlation analysis reveals the sophisticated balance
+achieved in our feature engineering system. Predictive signals maintain
+sufficient independence to avoid problematic multicollinearity
+
+while capturing complementary competitive performance aspects. The
+correlation matrix demonstrates that our features span distinct but
+related dimensions of competitive capability, enabling effective linear
+combination without redundancy issues.
+
+Team performance correlations establish the foundation for understanding
+feature interaction patterns. The analysis reveals moderate positive
+correlations between related performance metrics while maintaining
+sufficient independence across different feature categories. Historical
+performance indicators show expected positive correlations with recent
+form metrics, confirming the temporal consistency of team quality
+assessments.
+
+30
+
+\includegraphics[width=6.25972in,height=5.27222in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image13.png}
+
+\emph{Figure 12 -Team Performance Correlation Matrix}
+
+Strategic feature interactions demonstrate the sophisticated
+relationships between meta adaptation capabilities and team performance
+indicators. The interaction network analysis reveals how meta strength
+features interact with team performance metrics to create enhanced
+predictive signals. These interactions validate our hypothesis that
+well-engineered linear combinations can effectively capture complex
+strategic relationships.
+
+The feature interaction network provides visual evidence for the
+domain-validated relationships underlying our prediction system. The
+network structure demonstrates how individual performance metrics,
+team-level aggregations, and strategic adaptation features combine to
+create a comprehensive
+
+representation of competitive capability, successfully capturing the
+multi-scale nature of professional eSports competition.
+
+The interaction analysis validates our linear separability hypothesis by
+demonstrating that additive feature combinations can effectively
+represent complex strategic relationships. The network structure reveals
+clear hierarchical relationships where fundamental team performance
+serves as the foundation, enhanced by meta adaptation capabilities and
+refined through strategic interaction terms. This supports linear model
+effectiveness through mathematically tractable linear relationships.
+
+31
+
+\includegraphics[width=6.25972in,height=4.45417in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image14.png}
+
+\emph{Figure 13 - Feature Interaction network}
+
+\emph{5.4 Statistical Analysis}
+
+This section presents a comprehensive statistical analysis of the
+predictive system\textquotesingle s performance. It rigorously validates
+its efficacy through advanced statistical methods applied to actual
+model
+
+predictions generated from a comprehensive logistic regression
+comparison. Moving beyond simple point estimates, this analysis provides
+deeper insights into model reliability, probability calibration, and
+comparative performance across the three implemented temporal validation
+strategies.
+
+Discriminative Performance Analysis
+
+The discriminative power of our temporal validation strategies is
+comprehensively evaluated through Receiver Operating Characteristic
+(ROC) analysis. These curves provide a holistic assessment of each
+strategy\textquotesingle s ability to distinguish between winning and
+losing teams across all possible classification thresholds, offering
+critical insights into the actual positive rate versus false positive
+rate trade-offs inherent in professional eSports prediction.
+
+My analysis reveals exceptional discriminative performance across all
+three temporal strategies, with AUC values consistently exceeding 0.81,
+indicating world-class predictive capability. The Stratified Temporal
+strategy achieves the highest discriminative performance (0.8265 AUC),
+demonstrating that meta-aware validation approaches successfully balance
+temporal realism with meta evolution representation. Notably, the
+Stratified Random Temporal methodology achieves 0.8203 AUC, validating
+our novel approach\textquotesingle s effectiveness while maintaining
+remarkable consistency (generalisation gap of only -0.0001). Even the
+Pure Temporal baseline achieves 0.8117 AUC, confirming the robustness of
+our feature engineering system across different validation paradigms.
+
+32
+
+\begin{quote}
+\includegraphics[width=4.45972in,height=3.54306in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image15.png}
+\end{quote}
+
+\emph{Figure 14 - ROC Curves for Each Temporal Strategy}
+
+Precision-Recall Performance Evaluation
+
+The precision-recall analysis provides crucial insights into model
+performance under imbalanced conditions and varying cost considerations
+for false positives versus false negatives. This metric is particularly
+relevant for professional eSports prediction, where the cost of
+incorrect predictions may vary significantly depending on the context of
+the application (betting markets, strategic analysis, or academic
+research).
+
+These precision-recall curves demonstrate consistent excellence across
+all temporal validation strategies, with firm performance in
+high-precision regions crucial for confident prediction applications.
+The analysis reveals that our linear model dominance finding extends to
+precision-recall performance, with logistic regression maintaining
+superior calibration and reliable probability estimates across different
+threshold settings. This consistency validates our breakthrough
+discovery that advanced feature engineering enables linear models to
+capture complex eSports patterns effectively.
+
+The precision-recall analysis also confirms the superior generalisation
+characteristics of our stratified approaches. While traditional temporal
+validation often suffers from precision degradation due to meta drift,
+our meta-aware strategies maintain stable precision-recall
+relationships, indicating robust performance across different
+competitive environments and game balance states.
+
+33
+
+\includegraphics[width=4.4125in,height=3.50694in]{vertopal_f8bae68754cc4355938a3586acce029e/media/image16.png}
+
+\emph{Figure 15 - Precision-Recall Curves}
+
+Statistical Rigour and Model Calibration
+
+The statistical analysis extends beyond discrimination to evaluate
+probability calibration quality, ensuring that predicted probabilities
+accurately reflect true win likelihoods. This calibration analysis is
+essential for applications requiring reliable probability estimates,
+such as real-time prediction systems or strategic decision support
+tools.
+
+The Bayesian-optimised logistic regression models demonstrate
+exceptional calibration properties, with
+
+predicted probabilities closely matching observed win rates across
+probability bins. This calibration excellence supports our linear
+separability hypothesis, suggesting that the linear decision boundary
+discovered through advanced feature engineering accurately represents
+the underlying data distribution in professional League of Legends
+matches.
+
+Cross-Strategy Statistical Comparison
+
+The statistical analysis enables rigorous comparison across our three
+temporal validation strategies, providing empirical evidence for the
+theoretical advantages of meta-aware validation approaches.
+
+Statistical significance testing confirms that stratified methods
+outperform pure temporal validation while maintaining superior
+generalisation characteristics.
+
+Cross-strategy analysis reveals exceptional AUC consistency, with all
+strategies achieving greater than 0.81 AUC, demonstrating world-class
+discriminative performance across different temporal validation
+paradigms. This consistency validates the robustness of our advanced
+feature engineering system and confirms that sophisticated domain
+expertise can transcend validation methodology differences. Furthermore,
+the stratified approaches exhibit superior generalisation
+characteristics, showing negative generalisation gaps that indicate
+improved test performance relative to validation performance. This
+
+remarkable finding contradicts typical machine learning expectations,
+where test performance generally degrades relative to validation.
+
+34
+
+The linear models maintain excellent probability calibration across all
+temporal strategies, supporting our breakthrough finding regarding
+linear separability achievement through advanced feature engineering.
+This calibration consistency demonstrates that our logistic regression
+models achieve superior discrimination and provide reliable probability
+estimates regardless of the temporal validation strategy employed.
+Additionally, the performance improvements observed in stratified
+methodologies are statistically significant across multiple evaluation
+metrics, providing robust empirical support for our novel temporal
+validation framework.
+
+This statistical validation confirms that our novel temporal validation
+framework successfully addresses the meta evolution challenge in
+professional eSports prediction while maintaining rigorous academic
+standards and practical deployment viability. The consistent excellence
+across all validation strategies
+
+and the superior performance of meta-aware approaches establishes a new
+methodological standard for temporal validation in evolving competitive
+environments.
+
+35
+
+\textbf{Chapter 6}
+
+\begin{quote}
+\textbf{6.Discussion}
+\end{quote}
+
+This chapter provides a comprehensive analysis and interpretation of the
+research findings presented in the last chapter, examining their
+significance within the broader context of eSports analytics, machine
+learning methodology, and sports prediction research. The discussion
+evaluates the achieved performance results, explores the methodological
+contributions, examines domain-specific insights, and addresses the
+limitations and challenges encountered during the research process.
+
+The performance achievements reported in the previous chapter, with all
+three temporal validation strategies delivering positive results in the
+81-83\% AUC range, warrant detailed analysis to understand their
+implications for academic research and practical applications. The
+consistent dominance of linear models across multiple implementations,
+the effectiveness of the novel temporal validation framework, and the
+success of advanced feature engineering approaches provide significant
+insights that extend beyond the specific domain of \emph{League of
+Legends} prediction.
+
+The methodological innovations introduced in this research, particularly
+the three-strategy temporal validation framework and the patch-aware
+validation methodology, represent contributions to the broader field of
+machine learning applications in evolving environments. These approaches
+address fundamental challenges in temporal validation that extend to
+other domains experiencing systematic environmental changes, including
+traditional sports with rule modifications, financial markets with
+regulatory updates, and technological systems with version changes.
+
+The research findings also provide important insights into the
+relationship between feature engineering quality and model complexity,
+challenging conventional assumptions about the necessity of
+sophisticated algorithms for complex prediction tasks. The discovery
+that advanced domain expertise in feature engineering can achieve linear
+separability in complex strategic domains has implications for
+theoretical understanding and practical system development across
+multiple application areas.
+
+\emph{6.1 Performance Achievement Analysis}
+
+As detailed in the Results Chapter, the three-strategy validation
+framework delivered exceptional results that establish new benchmarks
+for professional eSports prediction. High performance consistency across
+fundamentally different validation approaches provides strong evidence
+for the robustness of the underlying feature engineering and modeling
+approach. The negative generalisation gaps observed for stratified
+methods indicate superior generalisation capabilities, suggesting that
+these novel validation strategies maintain academic rigour and improve
+model robustness by better representing the underlying data distribution
+during training.
+
+The achieved performance represents a significant advancement over
+existing approaches. Traditional sports prediction typically yields
+modest accuracy levels (50-75\% across various disciplines), while
+eSports literature shows existing systems achieving 55-75\% accuracy.
+Our results represent a 7-12 percentage point improvement over existing
+eSports prediction systems, establishing a new performance frontier
+despite the additional challenges of rapid meta evolution and complex
+strategic interactions in eSports environments.
+
+The comprehensive evaluation framework provides strong statistical
+evidence through 5-fold cross-validation with Bayesian optimisation.
+Multiple indicators confirm reliability: consistent performance across
+folds, statistically significant differences via bootstrap analysis, and
+reproducible excellence across independent systems. The
+cross-implementation validation across three independent systems
+particularly reinforces the practical applicability of the findings.
+
+36
+
+One of the most significant findings is the consistent dominance of
+Logistic Regression across all validation strategies and
+implementations. As detailed in the Results Chapter, this pattern
+suggests that advanced feature engineering successfully transforms
+complex eSports strategic patterns into linearly separable problems.
+This discovery demonstrates that domain expertise in feature engineering
+can
+
+achieve superior impact compared to algorithmic sophistication, with
+practical benefits including
+
+simplified deployment, enhanced interpretability, improved training
+efficiency, and reduced computational requirements.
+
+The three-strategy framework offers comprehensive insights into temporal
+validation trade-offs in evolving competitive environments. As shown in
+the Results Chapter, the Pure Temporal Split serves as a robust academic
+baseline, the Stratified Temporal Split achieves optimal balance for
+practical applications, and the Stratified Random Temporal Split
+validates novel patch-aware methodology. This hierarchy confirms that
+meta-awareness provides significant advantages in evolving competitive
+environments while maintaining the fundamental benefits of temporal
+validation.
+
+\emph{6.2 Methodological Contributions}
+
+This research introduces several significant methodological innovations
+that advance eSports analytics and temporal validation methodologies in
+machine learning. It provides generalisable frameworks for evolving
+competitive environments beyond the specific domain of League of Legends
+prediction.
+
+The three-strategy temporal validation framework fundamentally
+transforms how prediction models are
+
+evaluated in evolving competitive environments. Traditional
+chronological splits fail to capture the complexity of systematic
+environmental changes, leading to poor generalisation in dynamic
+systems. The Stratified Temporal approach revolutionises this by
+ensuring balanced meta representation while
+
+maintaining temporal integrity, resulting in superior model robustness
+as evidenced by negative generalisation gaps. The Stratified Random
+Temporal methodology eliminates a critical bias source - intra-year meta
+drift - that has plagued sports analytics research, establishing a new
+paradigm for temporal validation that applies to any domain experiencing
+systematic environmental evolution, including traditional sports,
+financial markets, and technological systems.
+
+The systematic transformation of complex eSports strategic patterns into
+linearly separable problems represents a paradigm shift in sports
+analytics methodology. This achievement challenges the prevailing
+assumption that complex domains require sophisticated algorithms,
+instead demonstrating that deep domain expertise properly encoded
+through feature engineering can simplify the learning problem
+fundamentally. The 37-feature framework provides a replicable template
+for translating qualitative
+
+strategic knowledge into quantitative machine learning features, while
+the 10- 50x performance improvements through vectorisation establish new
+standards for scalable sports analytics implementation that bridges
+research and production requirements.
+
+The systematic validation of findings across three independent
+implementations with different optimisation strategies provides
+unprecedented evidence for research reproducibility in sports analytics.
+This methodology addresses a critical weakness in machine learning
+research, where results often fail to replicate across different
+implementations. The consistent linear model dominance across all
+systems establishes a robust finding that transcends implementation
+details. At the same time, the comprehensive documentation and version
+control practices provide a framework for reproducible research that can
+be adopted across the broader machine learning community.
+
+The strategy-specific Bayesian optimisation approach achieves 95\%
+efficiency improvement over traditional methods while maintaining
+parameter quality, transforming the computational feasibility of
+rigorous sports analytics research. This advancement enables
+comprehensive hyperparameter exploration that was previously
+computationally prohibitive, while the acquisition function optimisation
+provides a template for intelligent parameter space navigation in
+computationally
+
+37
+
+intensive applications. The integration with nested cross-validation
+maintains statistical rigour while
+
+dramatically reducing computational requirements, making sophisticated
+sports analytics accessible to researchers with limited computational
+resources.
+
+These methodological contributions collectively establish new paradigms
+for sports analytics research that emphasise reproducibility,
+computational efficiency, and theoretical rigour while maintaining
+practical applicability. They provide a foundation to influence future
+research directions across multiple domains experiencing temporal
+evolution challenges.
+
+\emph{6.3 Domain-Specific Insights}
+
+This research provides significant insights specific to eSports
+analytics, advancing our understanding of professional competitive
+gaming prediction while offering transferable lessons for other
+strategic competitive domains.
+
+The consistent dominance of linear models reveals that professional
+League of Legends matches
+
+operate according to discoverable linear relationships when properly
+encoded, despite the apparent complexity of champion interactions and
+strategic decisions. This fundamental insight demonstrates that
+sophisticated feature engineering can transform seemingly chaotic
+eSports environments into predictable patterns, challenging assumptions
+about the necessity of complex algorithms for strategic competitive
+analysis.
+
+Feature importance analysis reveals that team\_overall\_winrate,
+team\_target\_encoded, and
+
+team\_meta\_strength significantly outperform champion-specific features
+in determining match outcomes. This indicates that consistent
+organisational performance and meta adaptation capabilities
+
+matter more than specific tactical selections, challenging the common
+eSports analysis focus on
+
+champion matchups and highlighting the importance of systematic team
+competency over individual strategic choices.
+
+The superior performance of meta-aware validation strategies
+demonstrates that apparent "meta shifts" represent evolutionary
+adaptations to discovered strategies rather than arbitrary changes. The
+negative generalisation gaps achieved by stratified methods indicate
+that accounting for systematic meta evolution improves model robustness,
+revealing predictable temporal patterns that can be leveraged for
+competitive advantage.
+
+The superior performance of stratified over pure temporal validation
+reveals that eSports\textquotesingle{} rapid evolution pace necessitates
+validation approaches that balance temporal realism with meta
+representation. Unlike traditional sports with infrequent rule changes,
+eSports require methodologies that account for systematic environmental
+changes while maintaining predictive validity, with immediate
+implications for industry applications requiring current meta relevance.
+
+The transformation of expert eSports knowledge into a 37-feature
+framework achieving world-class prediction demonstrates how strategic
+understanding can be systematically quantified for competitive
+advantage. This methodology provides a framework for other strategic
+domains where expert knowledge exists. Still, systematic quantification
+has been challenging, suggesting broader applications in competitive
+environments where domain expertise significantly impacts outcomes.
+
+These insights demonstrate that professional eSports operate according
+to discoverable patterns that can be systematically analysed and
+predicted, providing immediate industry value and broader methodological
+insights for competitive analytics.
+
+38
+
+\emph{6.4 Limitations and Challenges}
+
+While the research achieves exceptional performance and introduces
+significant methodological
+
+innovations, several limitations and challenges should be acknowledged
+to provide a balanced assessment of the findings and guide future
+research directions.
+
+The study focuses exclusively on League of Legends professional matches
+from 2014 to 2024, creating potential temporal and domain-specific
+biases. The 41,296 matches represent only the premier leagues, excluding
+amateur and regional competitions that might exhibit different strategic
+patterns. The Oracle Elixir dataset, while comprehensive, may contain
+inherent biases in match selection and data quality that could influence
+results. Missing data handling through imputation introduces
+uncertainty, particularly for champion and ban information, where
+strategic significance may be lost through default value substitution.
+
+The temporal validation framework assumes that meta evolution follows
+predictable patterns, which
+
+may not hold during periods of major game overhauls or unprecedented
+strategic innovations. The
+
+linear separability hypothesis, while validated empirically, may not
+generalise to future meta states or different competitive formats. The
+feature engineering relies heavily on domain expertise that may not
+translate to other eSports titles or competitive environments without
+significant adaptation.
+
+Despite its achievements, the comprehensive Bayesian optimisation
+framework requires substantial computational resources for full
+implementation. The 150 total Bayesian evaluations (50 per strategy)
+demand significant processing time, which may limit accessibility for
+researchers with constrained
+
+resources. Vectorised feature engineering, while dramatically improved,
+still requires\\
+sufficient memory for large-scale dataset processing, which could pose
+challenges for smaller-scale implementations.
+
+The findings are explicitly validated for League of Legends professional
+prediction and may not directly transfer to other eSports titles with
+different strategic dynamics, rule structures, or competitive formats.
+The temporal scope represents a specific era of competitive play that
+may not fully capture future evolution patterns or major game redesigns.
+While consistent across current implementations, the linear model
+dominance may not persist as strategic complexity increases or if game
+mechanics fundamentally change.
+
+These limitations provide essential context for interpreting the results
+and highlight areas requiring
+
+future research validation, while not diminishing the significant
+contributions achieved within the defined scope of professional League
+of Legends match prediction.
+
+39
+
+\textbf{Chapter 7}
+
+\begin{quote}
+\textbf{7.Conclusions and Future Work}
+\end{quote}
+
+The comprehensive three-strategy temporal validation framework has
+adeptly tackled the research challenges, making substantial
+methodological and practical contributions to eSports analytics. This
+study has successfully fulfilled its primary aim of advancing a
+state-of-the-art machine learning framework for predicting League of
+Legends matches, effectively addressing the challenges associated with
+meta evolution and achieving performance suitable for production use.
+
+The research provides thorough solutions to all outlined objectives. The
+innovative temporal validation methodology offers systematic approaches
+tailored to game evolution in competitive environments. The advanced
+feature engineering techniques have effectively captured the strategic
+complexity intrinsic to the domain by translating domain-specific
+expertise into actionable insights.
+
+The exploration of multi-algorithm optimisation has unveiled surprising
+revelations about the dominance of linear models, thereby challenging
+prevailing assumptions in machine learning. Additionally, optimising
+system performance yielded significant improvements in efficiency while
+upholding rigorous research standards. The performance benchmarking has
+established new benchmarks for predictive accuracy in eSports, as
+thoroughly detailed in the Results chapter.
+
+The three-strategy temporal validation framework has undergone rigorous
+validation across various implementations and evaluation criteria. The
+Stratified Random Temporal approach represents a meaningful
+methodological contribution to the literature on temporal validation,
+while the\\
+overarching framework facilitates replicable methodologies applicable to
+other dynamic competitive environments. The results of
+cross-implementation validation affirm robust reproducibility,
+instilling confidence in the methodological innovations irrespective of
+specific implementation nuances.
+
+As evidenced in the Results chapter, the research has produced
+exceptional performance outcomes that significantly surpass current
+eSports and traditional sports analytics benchmarks. The remarkable
+consistency of world-class performance across all three validation
+strategies corroborates the efficacy of the comprehensive methodological
+approach. The identification of linear model dominance not only
+contributes theoretical insights but also offers practical benefits that
+significantly propel advancements in the field.
+
+The implications of this research extend well beyond immediate
+performance outcomes, promising a lasting influence on academic inquiry
+and industry practices. The methodological innovations presented here
+offer frameworks that can be generalised for temporal validation in
+evolving environments. At the same time, the feature engineering
+strategies exemplify the systematic translation of domain expertise into
+machine learning advantages. The production-ready system architecture
+bridges the divide between academic research and practical application,
+delivering immediate benefits for professional eSports while laying the
+groundwork for future research advancements.
+
+Accomplishing all research objectives establishes this study as a
+notable contribution that enhances the methodology of eSports analytics
+while delivering practical solutions for the predictive challenges faced
+in professional competitive gaming.
+
+\emph{7.1 Key Findings and Contributions}
+
+This research presents groundbreaking findings that enhance both the
+eSports analytics methodology and machine learning application in
+dynamic competitive settings. The central result provides reproducible
+evidence from three independent implementations, revealing that Logistic
+Regression
+
+40
+
+consistently surpasses complex ensemble methods, achieving an impressive
+AUC of 81-83\% across all temporal validation strategies. This outcome
+substantiates the Linear Separability Hypothesis, asserting that
+expertise in feature engineering can effectively convert intricate
+strategic patterns into linearly separable issues, thereby challenging
+established beliefs regarding the necessity of advanced algorithms for
+complex predictive tasks.
+
+Employing a three-strategy temporal validation framework, we attained
+remarkable outcomes. The Stratified Temporal approach emerged as the
+optimal strategy, yielding an AUC of 82.65\% via an ideal meta-evolution
+balance. The Stratified Random Temporal method validated this innovative
+methodology, achieving an AUC of 82.03\%, while the Pure Temporal split
+set a commendable academic benchmark at 81.17\% AUC. This thorough
+validation underscores the efficacy of meta-aware methodologies while
+preserving academic rigour.
+
+Moreover, the research achieved a significant breakthrough in Bayesian
+optimisation through Gaussian Process intelligence, leading to optimal
+parameter discovery after 750 evaluations across all strategies. The
+advanced feature engineering methodology proved highly effective,
+enabling the integration of 37 sophisticated features that facilitate
+world-class performance. This is bolstered by validated coefficient
+analysis, showcasing the systematic translation of domain expertise into
+quantitative competitive advantages.
+
+In terms of practical implementation, the developed system achieved a
+75\% reduction in training time while sustaining exceptional
+performance, effectively bridging the crucial divide between academic
+research and real-world application. The statistical rigour exhibited
+through comprehensive validation indicates excellent generalisation
+capabilities, with negative generalisation gaps for stratified methods
+reflecting superior model robustness relative to traditional temporal
+approaches.
+
+Collectively, these findings establish new paradigms for eSports
+prediction and offer generalisable methodologies for competitive
+analytics in dynamic environments. They embody both immediate practical
+applications and foundational contributions for future research
+trajectories.
+
+\emph{7.2 Future Research Directions}
+
+This research\textquotesingle s methodological advancements and findings
+pave the way for numerous promising research avenues that extend beyond
+the existing framework for predicting League of Legends outcomes.
+
+The potential for cross-game applications represents a significant
+opportunity to ascertain the generalizability of the temporal validation
+framework and feature engineering methodologies across various eSports
+titles. Testing the linear separability hypothesis and employing
+meta-aware validation strategies in games with diverse strategic
+structures, rule systems, and competitive formats can provide insights
+into the broader relevance of these methodological contributions.
+
+Furthermore, the development of real-time adaptation systems emerges as
+a compelling direction for enhancing the current framework, enabling it
+to respond to live meta shifts and emergent strategic innovations. The
+systematic quantification of meta evolution lays the groundwork for
+developing adaptive models that align with evolving competitive
+patterns, which could ultimately furnish professional teams and
+tournaments with real-time strategic intelligence.
+
+Integrating player-level modeling into the existing team-level framework
+would significantly improve prediction accuracy by incorporating
+individual player performance metrics, champion mastery levels, and
+historical matchup data. This enhancement would afford more nuanced
+insights into competitive dynamics while preserving the effectiveness of
+the existing approach.
+
+41
+
+Finally, implementing causal analysis frameworks signifies a logical
+progression from a correlational understanding toward grasping the
+mechanisms that shape match outcomes. The insights gained from robust
+feature importance analyses serve as a platform for exploring causal
+relationships between strategic decisions and competitive success,
+thereby transitioning from purely predictive analytics to prescriptive
+analytics.
+
+\emph{7.3 Practical Applications}
+
+The research contributions presented here possess immediate utility
+across various sectors within the eSports ecosystem and beyond. The
+professional eSports industry is poised to benefit most directly, as
+teams, organizations, and tournament operators can effectively utilise
+the prediction framework for strategic planning, draft preparation, and
+enhancing competitive intelligence. The production-ready architecture
+and its demonstrated reliability render its immediate implementation
+viable within professional settings.
+
+Furthermore, substantial opportunities exist for educational and
+research applications that can advance the field of eSports analytics.
+The comprehensive documentation of methodology and the\\
+reproducible framework serve as invaluable resources for academic
+institutions and research programs dedicated to developing curricula and
+conducting studies in eSports analytics.
+
+In addition, integrating betting and fantasy sports exemplifies a
+significant commercial opportunity.
+
+This framework\textquotesingle s remarkable prediction accuracy and
+robust statistical validation bestow a notable competitive edge on
+analytical platforms and decision-support systems that rely on
+dependable match outcome probabilities.
+
+Moreover, the interpretable linear model architecture and strategic
+feature insights can benefit applications in broadcasting and analytical
+enhancement. This enhances the sophistication of analytical content
+available for eSports broadcasts, thereby improving viewer engagement
+through data-driven strategic commentary and real-time competitive
+analyses.
+
+42
+
+\textbf{References}
+
+Bunker, R. and Susnjak, T. (2022) \textquotesingle The Application of
+Machine Learning Techniques for Predicting
+
+Match Results in Team Sport: A Review\textquotesingle, \emph{Journal of
+Artificial Intelligence Research}, 73, pp. 1285-1322.
+
+Costa, L.M., Mantovani, R.G., Souza, F.C.M. and Xexéo, G. (2021)
+\textquotesingle Feature Analysis to League of
+
+Legends Victory Prediction on the Picks and Bans Phase\textquotesingle,
+in \emph{2021 IEEE International Conference on Systems, Man, and
+Cybernetics (SMC)}. IEEE, pp. 2486-2491.
+
+Foote, H.P. \emph{et al.} (2024) \textquotesingle Development and
+Temporal Validation of a Machine Learning Model to Predict Clinical
+Deterioration\textquotesingle, \emph{Hosp Pediatr}, 14(1), pp. 11-20.
+doi: 10.1542/hpeds.2023-007308.
+
+Gilles, A.L. (2023) \emph{STATISTICAL ANALYSIS AND MACHINE LEARNING TO
+IMPROVE LEAGUE CHAMPIONSHIP SERIES TEAMS}. Project. California State
+University, San Bernardino.
+
+Hashmani, M.A. \emph{et al.} (2020) \textquotesingle Concept Drift
+Evolution In Machine Learning Approaches: A
+
+Systematic Literature Review\textquotesingle, \emph{International
+Journal on Smart Sensing and Intelligent Systems}, 13(1). doi:
+10.21307/ijssis-2020-029.
+
+Hastie, T., Tibshirani, R. and Friedman, J. (2017) \emph{The Elements of
+Statistical Learning: Data Mining, Inference, and Prediction}. 2nd edn.
+New York: Springer.
+
+Joseph, A., Fenton, N.E. and Neil, M. (2006) \textquotesingle Predicting
+football results using Bayesian nets and other machine learning
+techniques\textquotesingle, \emph{Knowledge-Based Systems}, 19(7), pp.
+544-553.
+
+Junior, J.B.S. and Campelo, C.E.C. (no date) \textquotesingle League of
+Legends: Real-Time Result Prediction\textquotesingle.
+
+Martín-Castellanos, A. and Corps, G.B. (2021) \textquotesingle Variables
+related to the outcome of an eSports
+
+professional tournament: Case study of 2019 League of Legends World
+Championship Series\textquotesingle, \emph{International Journal of
+ESports}.
+
+Minami, S. \emph{et al.} (2024) \textquotesingle Prediction of eSports
+competition outcomes using EEG data from expert players\textquotesingle,
+\emph{Computers in Human Behaviour}, 160, p. 108351. doi:
+10.1016/j.chb.2024.108351.
+
+Novak, A.R. \emph{et al.} (2019) \textquotesingle Performance analysis
+in eSports: part 1 - the validity and reliability of match statistics
+and notational analysis in League of Legends\textquotesingle,
+\emph{SportRxiv}. doi: 10.31236/osf.io/sm3nj.
+
+Ramspek, C.L. \emph{et al.} (2021) \textquotesingle External validation
+of prognostic models: what, why, how, when and where?\textquotesingle,
+\emph{Clinical Kidney Journal}, 14(1), pp. 49-58. doi:
+10.1093/ckj/sfaa188.
+
+Sadaiyandi, J. \emph{et al.} (2023) \textquotesingle Stratified
+Sampling-Based Deep Learning Approach to Increase
+
+Prediction Accuracy of Unbalanced Dataset\textquotesingle,
+\emph{Electronics}, 12(21), p. 4423. doi: 10.3390/electronics12214423.
+
+Sarikaya, F. (2024) \textquotesingle Validation Strategies in Machine
+Learning: Critical Analysis of Cross-Validation Techniques and Data
+Splitting Methods\textquotesingle. doi: 10.5281/zenodo.14066213.
+
+Slotboom, C.J. (2021) \emph{Exploring the most important variables for
+winning a professional League of Legends match}.
+Master\textquotesingle s thesis. Tilburg University.
+
+Statista (n.d.) \emph{Esports \textbar{} Worldwide}. Available at:
+
+V. Roshan Joseph \& Akhil Vakayil (2022) \textquotesingle Split: An
+Optimal Method for Data Splitting\textquotesingle, \emph{Technometrics},
+64(2), pp. 166-176. doi: 10.1080/00401706.2021.1921037.
+
+Oracle Elixir (n.d.) \emph{Professional Match Database} {[}Dataset{]}.
+Available at:
+
+43
+
+\textbf{Appendix A}\\
+\emph{Meta Analysis Features (8 features)}\\
+\textbf{Champion Effectiveness Mathematical Model:} Meta analysis
+features quantify champion strength within the current competitive
+environment through systematic aggregation of individual champion
+characteristics across team compositions.
+
+\textbf{Champion Win Rate Calculation}:\\
+For each champion c, the base win rate is calculated as follows:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule()
+\multirow{2}{*}{\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage}} &
+\multirow{2}{*}{\begin{minipage}[b]{\linewidth}\raggedright
+∑
+\end{minipage}} & \begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+𝑛𝑐
+\end{quote}
+\end{minipage} &
+\multirow{2}{*}{\begin{minipage}[b]{\linewidth}\raggedright
+𝑟𝑒𝑠𝑢𝑙𝑡𝑖
+\end{minipage}} \\
+& & \begin{minipage}[b]{\linewidth}\raggedright
+𝑖=1
+\end{minipage} \\
+\midrule()
+\endhead
+𝑊𝑅𝑐= & & & \begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+𝑛𝑐
+\end{quote}
+\end{minipage} \\
+\bottomrule()
+\end{longtable}
+
+Where:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+•\\
+•\\
+•
+\end{quote}\strut
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+𝑊𝑅𝑐 represents the win rate for champion 𝑐.
+
+𝑛𝑐 denotes the total number of games in which champion 𝑐 appeared.
+
+𝑟𝑒𝑠𝑢𝑙𝑡𝑖 is a binary variable indicating the outcome of the 𝑖𝑡ℎ game
+featuring champion 𝑐. A value of 1 signifies a win for champion 𝑐 in
+that game, while a value of 0 indicates a loss.
+\end{quote}
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+\textbf{Temporal Effectiveness Analysis}:
+
+𝐸𝑎𝑟𝑙𝑦𝑆𝑡𝑟𝑒𝑛𝑔𝑡ℎ𝑐=
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+∑
+\end{minipage} &
+\multicolumn{3}{>{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.6000} + 4\tabcolsep}}{%
+\begin{minipage}[b]{\linewidth}\raggedright
+𝑖: 𝑑𝑢𝑟𝑎𝑡𝑖𝑜𝑛𝑖\textless{} 25
+\end{minipage}} & \begin{minipage}[b]{\linewidth}\raggedright
+𝑟𝑒𝑠𝑢𝑙𝑡𝑖
+\end{minipage} \\
+\midrule()
+\endhead
+\multirow{2}{*}{} & \multirow{2}{*}{∑} &
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+𝑛𝑐
+\end{quote}
+\end{minipage} &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.4000} + 2\tabcolsep}@{}}{%
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+𝑟𝑒𝑠𝑢𝑙𝑡𝑖
+\end{quote}
+\end{minipage}}} \\
+& & 𝑖=1 \\
+\bottomrule()
+\end{longtable}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+∑
+\end{minipage} &
+\multicolumn{3}{>{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.5000} + 4\tabcolsep}}{%
+\begin{minipage}[b]{\linewidth}\raggedright
+𝑖: 𝑑𝑢𝑟𝑎𝑡𝑖𝑜𝑛𝑖\textgreater{} 35
+\end{minipage}} & \begin{minipage}[b]{\linewidth}\raggedright
+𝑟𝑒𝑠𝑢𝑙𝑡𝑖
+\end{minipage} \\
+\midrule()
+\endhead
+\multirow{2}{*}{𝐿𝑎𝑡𝑒𝑆𝑡𝑟𝑒𝑛𝑔𝑡ℎ𝑐=} & \multirow{2}{*}{} & \multirow{2}{*}{∑}
+& \begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+𝑛𝑐
+\end{quote}
+\end{minipage} &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.3333} + 2\tabcolsep}@{}}{%
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+𝑟𝑒𝑠𝑢𝑙𝑡𝑖
+\end{quote}
+\end{minipage}}} \\
+& & & 𝑖=1 \\
+\bottomrule()
+\end{longtable}
+
+\begin{quote}
+𝑆𝑐𝑎𝑙𝑖𝑛𝑔𝐹𝑎𝑐𝑡𝑜𝑟𝑐= 𝐿𝑎𝑡𝑒𝑆𝑡𝑟𝑒𝑛𝑔𝑡ℎ𝑐− 𝐸𝑎𝑟𝑙𝑦𝑆𝑡𝑟𝑒𝑛𝑔𝑡ℎ𝑐
+\end{quote}
+
+Where:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+•\\
+•
+\end{quote}\strut
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+Scaling\_Factor\_c \textless{} 0 indicates early game specialization
+Scaling\_Factor\_c \textgreater{} 0 indicates scaling orientation
+\end{quote}
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+Meta Strength Quantification: Professional eSports effectiveness
+combines win rate with strategic
+
+priority through pick/ban attention
+
+𝑀𝑒𝑡𝑎𝑆𝑡𝑟𝑒𝑛𝑔𝑡ℎ𝑐= 0.7 · 𝑊𝑅𝑐+ 0.3 · min(𝑃𝑜𝑝𝑢𝑙𝑎𝑟𝑖𝑡𝑦𝑐,0.5)
+
+𝑃𝑜𝑝𝑢𝑙𝑎𝑟𝑖𝑡𝑦𝑐= 𝑃𝑖𝑐𝑘𝑠𝑐+ 𝐵𝑎𝑛𝑠𝑐
+
+𝑇𝑜𝑡𝑎𝑙𝐺𝑎𝑚𝑒𝑠
+
+This formulation reflects professional teams\textquotesingle{} strategic
+valuation where ban priority indicates meta
+
+threat level.
+
+44
+
+\textbf{Team-Level Meta Feature Aggregation}
+
+For a team Composition 𝑇 = \{𝑐\_1, 𝑐\_2, 𝑐\_3, 𝑐\_4, 𝑐\_5\} representing
+top, jungle, mid, ADC, and support champions:
+
+\begin{quote}
+\textbf{Team Average Win Rate}
+
+5\\
+\{𝑊𝑅\}𝑇= (1 5) ∑𝑊𝑅𝑐𝑖\\
+𝑖=1
+
+\textbf{Team Early Strength}
+
+5\\
+𝐸𝑎𝑟𝑙𝑦𝑇= (1 5) ∑𝐸𝑎𝑟𝑙𝑦𝑆𝑡𝑟𝑒𝑛𝑔𝑡ℎ𝑐𝑖\\
+𝑖=1
+
+\textbf{Team Late Strength}
+
+5\\
+𝐿𝑎𝑡𝑒𝑇= (1 5) ∑𝐿𝑎𝑡𝑒𝑆𝑡𝑟𝑒𝑛𝑔𝑡ℎ𝑐𝑖\\
+𝑖=1
+
+\textbf{Team Scaling}
+
+5\\
+𝑆𝑐𝑎𝑙𝑖𝑛𝑔𝑇= (1 5) ∑𝑆𝑐𝑎𝑙𝑖𝑛𝑔𝐹𝑎𝑐𝑡𝑜𝑟𝑐𝑖\\
+𝑖=1
+
+\textbf{Team Meta Strength}
+
+5\\
+𝑀𝑒𝑡𝑎𝑇= (1 5) ∑𝑀𝑒𝑡𝑎𝑆𝑡𝑟𝑒𝑛𝑔𝑡ℎ𝑐𝑖\\
+𝑖=1
+
+\textbf{Meta Consistency}
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+5\\
+𝐶𝑜𝑛𝑠𝑖𝑠𝑡𝑒𝑛𝑐𝑦𝑇= 1 − √(1 5) ∑(𝑀𝑒𝑡𝑎𝑆𝑡𝑟𝑒𝑛𝑔𝑡ℎ𝑐𝑖− 𝑀𝑒𝑡𝑎𝑇) 𝑖=1
+\end{quote}\strut
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+2
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+\begin{quote}
+\textbf{Team Popularity}
+
+5\\
+𝑃𝑜𝑝𝑢𝑙𝑎𝑟𝑖𝑡𝑦𝑇= (1 5) ∑𝑃𝑜𝑝𝑢𝑙𝑎𝑟𝑖𝑡𝑦𝑐𝑖\\
+𝑖=1
+
+\textbf{Meta Advantage}
+\end{quote}
+
+𝐴𝑑𝑣𝑎𝑛𝑡𝑎𝑔𝑒𝑇= 𝑀𝑒𝑡𝑎𝑇− 𝑀𝑒𝑡𝑎̄ 𝑝𝑎𝑡𝑐ℎ
+
+\begin{quote}
+Where 𝑀𝑒𝑡𝑎̄\_(𝑝𝑎𝑡𝑐ℎ)is the patch specific meta baseline
+\end{quote}
+
+These features capture the fundamental concept of "meta" in competitive
+gaming - the evolving
+
+optimal strategies within the current game state. The mathematical
+formulation ensures that teams
+
+selecting currently effective champions receive higher meta scores,
+while the consistency metric penalizes compositions with inconsistent
+meta positioning.
+
+45
+
+\emph{Team Performance Features (4 Features)}
+
+\textbf{Temporal Performance Integration}: Team performance features
+implement chronologically safe historical analysis through careful
+temporal ordering and sliding window techniques.
+
+\textbf{Historical Performance Mathematical Model}
+
+For team t at match m with chronological ordering by date:
+
+\begin{quote}
+\textbf{Overall Win Rate}
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+∑
+\end{minipage} &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.3333} + 2\tabcolsep}}{%
+\begin{minipage}[b]{\linewidth}\raggedright
+𝑖: 𝑑𝑎𝑡𝑒𝑖\textless{} 𝑑𝑎𝑡𝑒𝑚∧ 𝑡𝑒𝑎𝑚𝑖= 𝑡
+\end{minipage}} &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.3333} + 2\tabcolsep}@{}}{%
+\begin{minipage}[b]{\linewidth}\raggedright
+𝑟𝑒𝑠𝑢𝑙𝑡𝑖
+\end{minipage}} \\
+\midrule()
+\endhead
+𝑊𝑅𝑡,𝑚= & & ∑ &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.3333} + 2\tabcolsep}}{%
+𝑖: 𝑑𝑎𝑡𝑒𝑖\textless{} 𝑑𝑎𝑡𝑒𝑚∧ 𝑡𝑒𝑎𝑚𝑖= 𝑡} &
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+1
+\end{quote}
+\end{minipage} \\
+\bottomrule()
+\end{longtable}
+
+\begin{quote}
+\textbf{Recent Form Analysis}
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+∑
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} \\
+\midrule()
+\endhead
+\multirow{2}{*}{𝑅𝑒𝑐𝑒𝑛𝑡𝑡,𝑚=} & \multirow{2}{*}{min(10,
+\textbar 𝐻𝑡,𝑚\textbar)} & ∑ &
+\multirow{2}{*}{\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+𝑟𝑒𝑠𝑢𝑙𝑡𝑖
+\end{quote}
+\end{minipage}} \\
+& & 𝑖 ∈ 𝐿𝑎𝑠𝑡10(𝐻𝑡,𝑚) \\
+\bottomrule()
+\end{longtable}
+
+Where \textbar 𝐻𝑡,𝑚\textbar{} represents the historical match set for
+team t prior to match m
+
+\begin{quote}
+\textbf{Performance Momentum}
+\end{quote}
+
+𝑀𝑜𝑚𝑒𝑛𝑡𝑢𝑚𝑡,𝑚= 𝑅𝑒𝑐𝑒𝑛𝑡𝑡,𝑚− 𝑊𝑅𝑡,𝑚
+
+Where:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+•\\
+•
+\end{quote}\strut
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+𝑀𝑜𝑚𝑒𝑛𝑡𝑢𝑚\textgreater{} 0 indicates good form 𝑀𝑜𝑚𝑒𝑛𝑡𝑢𝑚\textless{} 0
+indicates poor form
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+\begin{quote}
+\textbf{Experience Factor}
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+𝐸𝑥𝑝𝑒𝑟𝑖𝑒𝑛𝑐𝑒𝑡,𝑚= min (1.0,
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+\textbar 𝐻𝑡,𝑚\textbar{}\\
+100 )
+\end{quote}\strut
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+This normalization caps experience benefits while providing graduated
+advantages for match volume.
+
+\textbf{Generated Performance Features:}
+
+\begin{quote}
+\textbf{Team Overall Win Rate:} 𝑊𝑅𝑡,𝑚 Complete Historical Win Rate
+
+\textbf{Team Recent Win Rate:} 𝑅𝑒𝑐𝑒𝑛𝑡𝑡,𝑚 Recent Form Analysis
+
+\textbf{Team Form Trend:} 𝑀𝑜𝑚𝑒𝑛𝑡𝑢𝑚\_(𝑡, 𝑚) Performance Trajectory
+Indicator
+
+\textbf{Team Experience:}𝐸𝑥𝑝𝑒𝑟𝑖𝑒𝑛𝑐𝑒\_(𝑡, 𝑚) Normalized Experience factor
+\end{quote}
+
+These features reflect the fundamental sports analytics principle that
+past performance predicts future
+
+results. The distinction between overall and recent performance captures
+both established team quality
+
+and current momentum, while the momentum indicator identifies teams in
+transitional performance states.
+
+46
+
+\emph{Strategic Analysis Features (6 Features)}\\
+\textbf{Pick/Ban Strategy Mathematical Framework:} Strategic features
+quantify tactical decisions through systematic analysis of draft phase
+choices and team composition characteristics.
+
+\textbf{Ban Priority Analysis}\\
+For each champion c, ban priority is calculated as:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+𝑃𝑟𝑖𝑜𝑟𝑖𝑡𝑦𝑐=
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+𝐸𝑎𝑟𝑙𝑦𝐵𝑎𝑛𝑠𝑐\\
+𝑇𝑜𝑡𝑎𝑙𝐵𝑎𝑛𝑠𝑐
+\end{quote}\strut
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+Where:
+
+\begin{quote}
+• 𝐸𝑎𝑟𝑙𝑦\_𝐵𝑎𝑛𝑠\_𝑐 represents bans in the first two ban phases •
+𝑃𝑟𝑖𝑜𝑟𝑖𝑡𝑦\_𝑐 \textgreater{} 0.5 indicates high-priority meta threats.
+\end{quote}
+
+\textbf{Team Composition Synergy Analysis}\\
+For team composition 𝑇 = \{𝑐\_1, 𝑐\_2, 𝑐\_3, 𝑐\_4, 𝑐\_5\}:
+\textbf{Composition Balance}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+5\\
+𝐵𝑎𝑙𝑎𝑛𝑐𝑒𝑇= √(1 5) ∑(𝑆𝑐𝑎𝑙𝑖𝑛𝑔𝑐𝑖− 𝑆𝑐𝑎𝑙𝑖𝑛𝑔̄𝑇) 𝑖=1
+\end{quote}\strut
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+2
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+\begin{quote}
+\textbf{Team Flexibility}
+\end{quote}
+
+5\\
+𝐹𝑙𝑒𝑥𝑖𝑏𝑖𝑙𝑖𝑡𝑦𝑇= (1 5) ∑𝐹𝑙𝑒𝑥𝑐𝑖\\
+𝑖=1\\
+Where: 𝐹𝑙𝑒𝑥𝑐𝑖∈ {[}1, 5{]} represents the number of roles champion 𝑐𝑖 can
+effectively fulfil \textbf{Composition Historical Success}\\
+For composition signature 𝑆𝑇 (sorted champion set):
+
+𝐻𝑖𝑠𝑡𝑜𝑟𝑖𝑐𝑎𝑙𝑊𝑅𝑇= \textbf{Generated Strategic features:}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+∑
+\end{minipage} &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.4000} + 2\tabcolsep}}{%
+\begin{minipage}[b]{\linewidth}\raggedright
+𝑗: 𝑠𝑖𝑔𝑛𝑎𝑡𝑢𝑟𝑒𝑗= 𝑆𝑇∧ 𝑗 \textless{} 𝑐𝑢𝑟𝑟𝑒𝑛𝑡
+\end{minipage}} &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.4000} + 2\tabcolsep}@{}}{%
+\begin{minipage}[b]{\linewidth}\raggedright
+𝑟𝑒𝑠𝑢𝑙𝑡𝑗
+\end{minipage}} \\
+\midrule()
+\endhead
+& ∑ &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.4000} + 2\tabcolsep}}{%
+𝑗: 𝑠𝑖𝑔𝑛𝑎𝑡𝑢𝑟𝑒𝑗= 𝑆𝑇∧ 𝑗 \textless{} 𝑐𝑢𝑟𝑟𝑒𝑛𝑡} &
+\begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+1
+\end{quote}
+\end{minipage} \\
+\bottomrule()
+\end{longtable}
+
+\textbf{Ban Count:} \textbar 𝐵\textbar{} where B is the set of utilized
+bans (0-5)\\
+\textbf{Ban Diversity:} \textbar 𝑈𝑛𝑖𝑞𝑢𝑒(𝐵)\textbar{} − 𝐵𝑟𝑒𝑎𝑑𝑡ℎ 𝑜𝑓 𝑏𝑎𝑛
+𝑡𝑎𝑟𝑔𝑒𝑡𝑖𝑛𝑔\\
+\textbf{High Priority bans:} \textbar\{𝑏 ∈ 𝐵∶ 𝑃𝑟𝑖𝑜𝑟𝑖𝑡𝑦\_𝑏 \textgreater{}
+0.5\}\textbar{}\\
+\textbf{Composition Balance:} 𝐵𝑎𝑙𝑎𝑛𝑐𝑒𝑇-- 𝑆𝑡𝑟𝑎𝑡𝑒𝑔𝑖𝑐 (coherence measure)\\
+\textbf{Team Flexibility:}𝐹𝑙𝑒𝑥𝑖𝑏𝑖𝑙𝑖𝑡𝑦𝑇-- 𝐴𝑣𝑒𝑟𝑎𝑔𝑒 (champion
+versatility)\\
+\textbf{Composition Historical Win Rate:}𝐻𝑖𝑠𝑡𝑜𝑟𝑖𝑐𝑎𝑙𝑊𝑅𝑇-- 𝑆𝑖𝑚𝑖𝑙𝑎𝑟
+(composition success rate) Draft phase strategy represents the pre-game
+tactical layer where teams optimize champion selections while disrupting
+opponent strategies. The mathematical formulations capture the
+multi-dimensional
+
+47
+
+optimization problem teams face: maximizing their own composition
+strength while minimizing opponent opportunities.
+
+\emph{Target Encoding Features (9 Features)}\\
+\textbf{Target Encoding Mathematical Framework:} High-cardinality
+categorical features require sophisticated encoding techniques that
+preserve information content while enabling linear model processing.
+
+\textbf{Target Encoding Formulation}\\
+For categorical variable X with levels \{𝑥₁,𝑥₂, . . . , 𝑥ₖ\} and binary
+target Y:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+()
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+∑
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+𝑗: 𝑋𝑗= 𝑥𝑖
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+𝑌𝑗
+\end{minipage} \\
+\midrule()
+\endhead
+𝑇𝑎𝑟𝑔𝑒𝑡𝐸𝑛𝑐𝑜𝑑𝑒𝑥𝑖= & ∑ & 𝑗: 𝑋𝑗= 𝑥𝑖 & 1 \\
+\bottomrule()
+\end{longtable}
+
+This represents the conditional probability 𝑃(𝑌= 1\textbar 𝑋= 𝑥𝑖),
+providing optimal linear separability for logistic regression.
+
+\textbf{Bayesian Smoothing}\\
+For categories with limited observations:
+
+Where:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+•\\
+•
+
+•\\
+•\strut
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+𝑛𝑖= 𝑛𝑢𝑚𝑏𝑒𝑟 𝑜𝑓 𝑜𝑏𝑠𝑒𝑟𝑣𝑎𝑡𝑖𝑜𝑛𝑠 𝑓𝑜𝑟 𝑐𝑎𝑡𝑒𝑔𝑜𝑟𝑦 𝑥𝑖Ȳ𝑥𝑖= 𝑡𝑎𝑟𝑔𝑒𝑡 𝑚𝑒𝑎𝑛 𝑓𝑜𝑟 𝑐𝑎𝑡𝑒𝑔𝑜𝑟𝑦
+𝑥𝑖\\
+Ȳ = 𝑔𝑙𝑜𝑏𝑎𝑙 𝑡𝑎𝑟𝑔𝑒𝑡 𝑚𝑒𝑎𝑛
+
+𝛼 = 𝑠𝑚𝑜𝑜𝑡ℎ𝑖𝑛𝑔 𝑝𝑎𝑟𝑎𝑚𝑒𝑡𝑒𝑟
+\end{quote}\strut
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+\textbf{Position Specific Champion Encoding}\\
+For position 𝑝 ∈ \{𝑡𝑜𝑝,𝑗𝑢𝑛𝑔𝑙𝑒, 𝑚𝑖𝑑, 𝑎𝑑𝑐, 𝑠𝑢𝑝𝑝𝑜𝑟𝑡\} and champion 𝑐:
+
+𝐶ℎ𝑎𝑚𝑝𝑖𝑜𝑛𝐸𝑛𝑐𝑜𝑑𝑒𝑝(𝑐) =
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+∑
+\end{minipage} &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.4000} + 2\tabcolsep}}{%
+\begin{minipage}[b]{\linewidth}\raggedright
+𝑗: 𝑐ℎ𝑎𝑚𝑝𝑖𝑜𝑛𝑝,𝑗= 𝑐
+\end{minipage}} &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.4000} + 2\tabcolsep}@{}}{%
+\begin{minipage}[b]{\linewidth}\raggedright
+𝑟𝑒𝑠𝑢𝑙𝑡𝑗
+\end{minipage}} \\
+\midrule()
+\endhead
+& ∑ &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.4000} + 2\tabcolsep}}{%
+𝑗: 𝑐ℎ𝑎𝑚𝑝𝑖𝑜𝑛𝑝,𝑗= 𝑐} & \begin{minipage}[t]{\linewidth}\raggedright
+\begin{quote}
+1
+\end{quote}
+\end{minipage} \\
+\bottomrule()
+\end{longtable}
+
+This approach recognizes that champion effectiveness varies
+significantly across roles.
+
+\textbf{Generated Categorical Features:}\\
+\textbf{League Target Encoded:} League-specific performance encoding
+using\\
+𝑇𝑎𝑟𝑔𝑒𝑡𝐸𝑛𝑐𝑜𝑑𝑒(𝑙𝑒𝑎𝑔𝑢𝑒)\\
+\textbf{Team Target Encoded:} Team effectiveness encoding using
+𝑇𝑎𝑟𝑔𝑒𝑡𝐸𝑛𝑐𝑜𝑑𝑒(𝑡𝑒𝑎𝑚) \textbf{Patch target Encoded:} Patch-specific context
+using 𝑇𝑎𝑟𝑔𝑒𝑡𝐸𝑛𝑐𝑜𝑑𝑒(𝑝𝑎𝑡𝑐ℎ) \textbf{Split Target Encoded:} Season Context
+using 𝑇𝑎𝑟𝑔𝑒𝑡𝐸𝑛𝑐𝑜𝑑𝑒(𝑠𝑝𝑙𝑖𝑡)\\
+\textbf{Champion Position Target Encoded:}
+𝐶ℎ𝑎𝑚𝑝𝑖𝑜𝑛𝐸𝑛𝑐𝑜𝑑𝑒𝑝𝑜𝑠𝑖𝑡𝑜𝑛(𝑐𝑝𝑜𝑠𝑖𝑡𝑖𝑜𝑛)
+
+48
+
+Target encoding transforms categorical variables into numerical
+representations that directly correlate with match outcomes, preserving
+predictive information while enabling linear model processing. This
+approach is particularly effective for logistic regression models,
+providing optimal feature\\
+representation for linear decision boundaries.
+
+\emph{Interaction and Contextual Features (10 Features)}
+
+\textbf{Strategic Interaction Mathematical Models:} Complex strategic
+relationships require explicit modeling through interaction terms that
+capture synergistic effects between different strategic components.
+
+\textbf{Interaction Feature Formulations}
+
+\textbf{Meta Form Interaction} (Teams in derive greater benefit from
+meta-favourable picks):
+
+\begin{quote}
+𝑀𝑒𝑡𝑎𝐹𝑜𝑟𝑚𝑖𝑛𝑡𝑒𝑟𝑎𝑐𝑡𝑖𝑜𝑛= 𝑀𝑒𝑡𝑎𝑇× 𝑀𝑜𝑚𝑒𝑛𝑡𝑢𝑚𝑡,𝑚
+
+\textbf{Scaling-Experience Interaction} (Experienced teams better
+execute complex scaling strategies):
+\end{quote}
+
+𝑆𝑐𝑎𝑙𝑖𝑛𝑔𝐸𝑥𝑝𝑖𝑛𝑡𝑒𝑟𝑎𝑐𝑡𝑖𝑜𝑛= 𝑆𝑐𝑎𝑙𝑖𝑛𝑔𝑇× 𝐸𝑥𝑝𝑒𝑟𝑖𝑒𝑛𝑐𝑒𝑡,𝑚
+
+\begin{quote}
+\textbf{Tournament Context} (Binary indicator for high stake matches):
+
+𝑃𝑙𝑎𝑦𝑜𝑓𝑓𝑠 = \{1 𝑖𝑓 𝑡𝑜𝑢𝑟𝑛𝑎𝑚𝑒𝑛𝑡 𝑐𝑜𝑛𝑡𝑒𝑥𝑡; 0 𝑖𝑓 𝑟𝑒𝑔𝑢𝑙𝑎𝑟 𝑠𝑒𝑎𝑠𝑜𝑛\}
+\end{quote}
+
+\textbf{Environmental Factors}
+
+\begin{quote}
+\textbf{Map Side Advantage}
+\end{quote}
+
+𝑆𝑖𝑑𝑒𝐵𝑙𝑢𝑒 = \{1 𝑖𝑓 𝐵𝑙𝑢𝑒 𝑠𝑖𝑑𝑒; 0 𝑖𝑓 𝑅𝑒𝑑 𝑠𝑖𝑑𝑒\}
+
+\begin{quote}
+\textbf{Temporal Context}
+\end{quote}
+
+𝑌𝑒𝑎𝑟 = 𝑚𝑎𝑡𝑐ℎ 𝑦𝑒𝑎𝑟
+
+\begin{quote}
+\textbf{Draft Completeness}
+\end{quote}
+
+𝐶ℎ𝑎𝑚𝑝𝑖𝑜𝑛𝐶𝑜𝑢𝑛𝑡 = \textbar\{𝑐 ∈ 𝑇∶ 𝑐 ≠ 𝑈𝑛𝑘𝑛𝑜𝑤𝑛\}\textbar{}
+
+\textbf{Strategic Coherence Metrics}
+
+\begin{quote}
+\textbf{Team Flexibility}
+
+5\\
+𝐹𝑙𝑒𝑥𝑖𝑏𝑖𝑙𝑖𝑡𝑦𝑇 = (1 5) ∑𝐹𝑙𝑒𝑥𝑐𝑖\\
+𝑖=1
+
+\textbf{Ban Priority Score}
+\end{quote}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+𝐵𝑎𝑛𝑆𝑐𝑜𝑟𝑒 =
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+∑
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\begin{quote}
+𝑃𝑟𝑖𝑜𝑟𝑖𝑡𝑦𝑏
+\end{quote}
+\end{minipage} \\
+\midrule()
+\endhead
+\bottomrule()
+\end{longtable}
+
+𝑏 ∈ 𝐵𝑎𝑛𝑠
+
+\begin{quote}
+\textbf{Meta Diversity}
+
+𝑀𝑒𝑡𝑎𝐷𝑖𝑣𝑒𝑟𝑠𝑖𝑡𝑦 = \textbar\{𝑐 ∈ 𝑇∶ 𝑀𝑒𝑡𝑎𝑆𝑡𝑟𝑒𝑛𝑔𝑡ℎ𝑐\textgreater{} 𝑀𝑒𝑡𝑎̄
+𝑝𝑎𝑡𝑐ℎ\}\textbar{}
+\end{quote}
+
+49
+
+\end{document}

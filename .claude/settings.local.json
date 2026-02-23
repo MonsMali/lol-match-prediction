@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(pip3:*)",
+      "Bash(pip --version:*)",
+      "Bash(grep:*)",
+      "Bash(file:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(python:*)",
+      "WebFetch(domain:oracleselixir.com)",
+      "Bash(xargs cat:*)",
+      "WebSearch",
+      "WebFetch(domain:lol.timsevenhuysen.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(sudo apt-get update:*)",
+      "Bash(sudo apt-get install:*)",
+      "Bash(pip install:*)",
+      "Bash(wc:*)",
+      "Bash(sort:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}
