@@ -4,10 +4,13 @@
 
 ## Author
 
-**Luís Conceição**
-Email: [luis.viegas.conceicao@gmail.com](mailto:luis.viegas.conceicao@gmail.com)
-**Master's Thesis** - Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework
-**Thesis Paper**: [Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework](Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)
+- **Name**: Luís Conceição
+- **Email**: [luis.viegas.conceicao@gmail.com](mailto:luis.viegas.conceicao@gmail.com)
+- **Master's Thesis**: Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework
+- **Thesis Paper**: [Full Document (PDF)](Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/luisfvconceicao/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/MonsMali/lol-match-prediction)
 
 ---
 
@@ -342,11 +345,12 @@ Special thanks to:
 
 ## Contact
 
-**Luís Conceição**
-**Email**: [luis.viegas.conceicao@gmail.com](mailto:luis.viegas.conceicao@gmail.com)
-**GitHub**: [MonsMali/lol-match-prediction](https://github.com/MonsMali/lol-match-prediction)
-**LinkedIn**: Connect for research collaboration
-**Thesis**: [Complete Document Available](Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)
+- **Name**: Luís Conceição
+- **Email**: [luis.viegas.conceicao@gmail.com](mailto:luis.viegas.conceicao@gmail.com)
+- **Thesis**: [Complete Document Available](Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/luisfvconceicao/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/MonsMali/lol-match-prediction)
 
 ---
 
