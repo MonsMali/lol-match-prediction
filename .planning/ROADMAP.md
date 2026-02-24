@@ -45,13 +45,12 @@ Plans:
   4. `GET /health` returns model status and version info immediately, even before the model finishes loading
   5. The ML model loads exactly once at startup via FastAPI lifespan and is accessible from `app.state` for all subsequent requests
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Scaffold FastAPI app with lifespan model loading, Pydantic schemas, and CORS middleware
-- [ ] 02-02: Implement `/api/predict` endpoint calling adapter via `asyncio.to_thread`
-- [ ] 02-03: Implement `/api/champions`, `/api/teams`, `/health`, and model upload endpoints
-- [ ] 02-04: Pin scikit-learn version, build production requirements.txt, and verify startup in isolation
+- [ ] 02-01-PLAN.md -- Scaffold FastAPI app with lifespan, Pydantic schemas, CORS, champion mapping, team data, and health endpoint
+- [ ] 02-02-PLAN.md -- Implement predict, champions, and teams routers with integration smoke test
+- [ ] 02-03-PLAN.md -- Admin model upload endpoint with hot-swap and production requirements file
 
 ---
 
@@ -109,6 +108,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. ML Adapter | 3/3 | Complete    | 2026-02-24 |
-| 2. FastAPI Backend | 0/4 | Not started | - |
+| 2. FastAPI Backend | 0/3 | Not started | - |
 | 3. React Draft Board | 0/6 | Not started | - |
 | 4. Integration and Deployment | 0/3 | Not started | - |
