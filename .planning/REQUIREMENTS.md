@@ -92,38 +92,38 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFER-01 | Phase 1 | Pending |
-| INFER-02 | Phase 1 | Pending |
-| INFER-03 | Phase 1 | Pending |
-| INFER-04 | Phase 1 | Pending |
-| API-01 | Phase 2 | Pending |
-| API-02 | Phase 2 | Pending |
-| API-03 | Phase 2 | Pending |
-| API-04 | Phase 2 | Pending |
-| API-05 | Phase 2 | Pending |
-| API-06 | Phase 2 | Pending |
-| API-07 | Phase 2 | Pending |
-| API-08 | Phase 2 | Pending |
-| DRAFT-01 | Phase 3 | Pending |
-| DRAFT-02 | Phase 3 | Pending |
-| DRAFT-03 | Phase 3 | Pending |
-| DRAFT-04 | Phase 3 | Pending |
-| DRAFT-05 | Phase 3 | Pending |
-| DRAFT-06 | Phase 3 | Pending |
-| DRAFT-07 | Phase 3 | Pending |
-| LIVE-01 | Phase 3 | Pending |
-| LIVE-02 | Phase 3 | Pending |
-| LIVE-03 | Phase 3 | Pending |
-| BULK-01 | Phase 3 | Pending |
-| BULK-02 | Phase 3 | Pending |
-| BOS-01 | Phase 3 | Pending |
-| BOS-02 | Phase 3 | Pending |
-| BOS-03 | Phase 3 | Pending |
-| DEPLOY-01 | Phase 4 | Pending |
-| DEPLOY-02 | Phase 4 | Pending |
-| DEPLOY-03 | Phase 4 | Pending |
-| DEPLOY-04 | Phase 4 | Pending |
-| DEPLOY-05 | Phase 4 | Pending |
+| INFER-01 | Phase 1 - ML Adapter | Pending |
+| INFER-02 | Phase 1 - ML Adapter | Pending |
+| INFER-03 | Phase 1 - ML Adapter | Pending |
+| INFER-04 | Phase 1 - ML Adapter | Pending |
+| API-01 | Phase 2 - FastAPI Backend | Pending |
+| API-02 | Phase 2 - FastAPI Backend | Pending |
+| API-03 | Phase 2 - FastAPI Backend | Pending |
+| API-04 | Phase 2 - FastAPI Backend | Pending |
+| API-05 | Phase 2 - FastAPI Backend | Pending |
+| API-06 | Phase 2 - FastAPI Backend | Pending |
+| API-07 | Phase 2 - FastAPI Backend | Pending |
+| API-08 | Phase 2 - FastAPI Backend | Pending |
+| DRAFT-01 | Phase 3 - React Draft Board | Pending |
+| DRAFT-02 | Phase 3 - React Draft Board | Pending |
+| DRAFT-03 | Phase 3 - React Draft Board | Pending |
+| DRAFT-04 | Phase 3 - React Draft Board | Pending |
+| DRAFT-05 | Phase 3 - React Draft Board | Pending |
+| DRAFT-06 | Phase 3 - React Draft Board | Pending |
+| DRAFT-07 | Phase 3 - React Draft Board | Pending |
+| LIVE-01 | Phase 3 - React Draft Board | Pending |
+| LIVE-02 | Phase 3 - React Draft Board | Pending |
+| LIVE-03 | Phase 3 - React Draft Board | Pending |
+| BULK-01 | Phase 3 - React Draft Board | Pending |
+| BULK-02 | Phase 3 - React Draft Board | Pending |
+| BOS-01 | Phase 3 - React Draft Board | Pending |
+| BOS-02 | Phase 3 - React Draft Board | Pending |
+| BOS-03 | Phase 3 - React Draft Board | Pending |
+| DEPLOY-01 | Phase 4 - Integration and Deployment | Pending |
+| DEPLOY-02 | Phase 4 - Integration and Deployment | Pending |
+| DEPLOY-03 | Phase 4 - Integration and Deployment | Pending |
+| DEPLOY-04 | Phase 4 - Integration and Deployment | Pending |
+| DEPLOY-05 | Phase 4 - Integration and Deployment | Pending |
 
 **Coverage:**
 - v1 requirements: 31 total
@@ -132,4 +132,4 @@ Deferred to future release. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after initial definition*
+*Last updated: 2026-02-24 after roadmap creation*
