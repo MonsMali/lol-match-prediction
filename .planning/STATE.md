@@ -11,27 +11,27 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 
 Phase: 2 of 4 (FastAPI Backend)
 Plan: 3 of 3 in current phase
-Status: In progress (Plan 02-02 pending)
-Last activity: 2026-02-24 -- Completed 02-03-PLAN.md (Admin upload endpoint and production requirements)
+Status: Phase complete
+Last activity: 2026-02-24 -- Completed 02-02-PLAN.md (Core data endpoints: predict, champions, teams)
 
-Progress: [████████░░░░░░░░] 42%
+Progress: [██████████░░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 6 min
-- Total execution time: 0.5 hours
+- Total execution time: 0.57 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-ml-adapter | 3/3 | 18 min | 6 min |
-| 02-fastapi-backend | 2/3 | 12 min | 6 min |
+| 02-fastapi-backend | 3/3 | 16 min | 5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (5 min), 01-03 (4 min), 02-01 (9 min), 02-03 (3 min)
+- Last 5 plans: 01-03 (4 min), 02-01 (9 min), 02-03 (3 min), 02-02 (4 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -58,6 +58,9 @@ Recent decisions affecting current work:
 - [02-01]: Team names use canonical full names from training data (Gen.G not GenG, Hanwha Life Esports not HLE)
 - [02-01]: DDragon version pinned to 14.24.1
 - [02-01]: Health endpoint does not use get_adapter dependency -- always responds even during loading
+- [02-02]: Champion validation at API layer before adapter call -- collects all invalid names in single 422 response
+- [02-02]: Unknown teams silently fall back to first sorted valid team (no user-facing error)
+- [02-02]: predict endpoint uses sync def for auto-threading of blocking ML inference
 - [02-03]: Test prediction uses object.__new__ to bypass singleton for artifact validation in isolation
 - [02-03]: Production requirements pin scikit-learn==1.5.0 and exclude training-only deps
 
@@ -77,6 +80,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-24T14:39:03Z
-Stopped at: Completed 02-03-PLAN.md -- Admin upload endpoint with hot-swap and production requirements
+Last session: 2026-02-24T14:40:10Z
+Stopped at: Completed 02-02-PLAN.md -- Core data endpoints (predict, champions, teams) all operational
 Resume file: None

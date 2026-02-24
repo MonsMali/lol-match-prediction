@@ -7,7 +7,7 @@ The project wraps an existing, trained ML model (82.97% AUC-ROC Logistic Regress
 ## Phases
 
 - [x] **Phase 1: ML Adapter** - Refactor the inference path to eliminate the full CSV load and expose a clean `predict_from_draft` interface
-- [ ] **Phase 2: FastAPI Backend** - Build the REST API layer with all prediction, champion, team, and model-management endpoints
+- [x] **Phase 2: FastAPI Backend** - Build the REST API layer with all prediction, champion, team, and model-management endpoints
 - [ ] **Phase 3: React Draft Board** - Build the complete frontend draft simulator with both draft modes, role assignment, and win probability display
 - [ ] **Phase 4: Integration and Deployment** - Connect frontend to live backend, deploy to Render, and implement cold-start UX
 
@@ -49,7 +49,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md -- Scaffold FastAPI app with lifespan, Pydantic schemas, CORS, champion mapping, team data, and health endpoint
-- [ ] 02-02-PLAN.md -- Implement predict, champions, and teams routers with integration smoke test
+- [x] 02-02-PLAN.md -- Implement predict, champions, and teams routers with integration smoke test
 - [x] 02-03-PLAN.md -- Admin model upload endpoint with hot-swap and production requirements file
 
 ---
@@ -108,6 +108,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. ML Adapter | 3/3 | Complete    | 2026-02-24 |
-| 2. FastAPI Backend | 2/3 | In progress | - |
+| 2. FastAPI Backend | 3/3 | Complete    | 2026-02-24 |
 | 3. React Draft Board | 0/6 | Not started | - |
 | 4. Integration and Deployment | 0/3 | Not started | - |
