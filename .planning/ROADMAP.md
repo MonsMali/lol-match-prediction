@@ -50,7 +50,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md -- Scaffold FastAPI app with lifespan, Pydantic schemas, CORS, champion mapping, team data, and health endpoint
 - [ ] 02-02-PLAN.md -- Implement predict, champions, and teams routers with integration smoke test
-- [ ] 02-03-PLAN.md -- Admin model upload endpoint with hot-swap and production requirements file
+- [x] 02-03-PLAN.md -- Admin model upload endpoint with hot-swap and production requirements file
 
 ---
 
@@ -108,6 +108,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. ML Adapter | 3/3 | Complete    | 2026-02-24 |
-| 2. FastAPI Backend | 1/3 | In progress | - |
+| 2. FastAPI Backend | 2/3 | In progress | - |
 | 3. React Draft Board | 0/6 | Not started | - |
 | 4. Integration and Deployment | 0/3 | Not started | - |

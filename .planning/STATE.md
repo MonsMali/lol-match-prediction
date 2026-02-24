@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 2 of 4 (FastAPI Backend)
-Plan: 1 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-24 -- Completed 02-01-PLAN.md (API scaffold with lifespan, schemas, CORS, health endpoint)
+Plan: 3 of 3 in current phase
+Status: In progress (Plan 02-02 pending)
+Last activity: 2026-02-24 -- Completed 02-03-PLAN.md (Admin upload endpoint and production requirements)
 
-Progress: [████░░░░░░░░░░░░] 25%
+Progress: [████████░░░░░░░░] 42%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 7 min
-- Total execution time: 0.45 hours
+- Total plans completed: 5
+- Average duration: 6 min
+- Total execution time: 0.5 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-ml-adapter | 3/3 | 18 min | 6 min |
-| 02-fastapi-backend | 1/3 | 9 min | 9 min |
+| 02-fastapi-backend | 2/3 | 12 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (9 min), 01-02 (5 min), 01-03 (4 min), 02-01 (9 min)
+- Last 5 plans: 01-02 (5 min), 01-03 (4 min), 02-01 (9 min), 02-03 (3 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -58,6 +58,8 @@ Recent decisions affecting current work:
 - [02-01]: Team names use canonical full names from training data (Gen.G not GenG, Hanwha Life Esports not HLE)
 - [02-01]: DDragon version pinned to 14.24.1
 - [02-01]: Health endpoint does not use get_adapter dependency -- always responds even during loading
+- [02-03]: Test prediction uses object.__new__ to bypass singleton for artifact validation in isolation
+- [02-03]: Production requirements pin scikit-learn==1.5.0 and exclude training-only deps
 
 ### Pending Todos
 
@@ -75,6 +77,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-24T14:34:18Z
-Stopped at: Completed 02-01-PLAN.md -- API scaffold with schemas, dependencies, champion mapping, team data, and health endpoint
+Last session: 2026-02-24T14:39:03Z
+Stopped at: Completed 02-03-PLAN.md -- Admin upload endpoint with hot-swap and production requirements
 Resume file: None
