@@ -1,0 +1,21 @@
+# Production dependencies for LoL Draft Predictor API
+#
+# This file contains ONLY the packages needed to run the FastAPI inference
+# server. Training-only dependencies (gradient boosting libs, hyperparameter
+# tuning, data frames, visualization, etc.) are intentionally excluded to
+# minimize the deployment footprint on Render free tier.
+#
+# IMPORTANT: scikit-learn is pinned to 1.5.0 because the serialized model
+# artifacts (joblib files) were trained with this version. Loading them on
+# a different scikit-learn version will fail or produce incorrect results.
+
+# Web framework
+fastapi[standard]>=0.133.0
+
+# ML inference
+scikit-learn==1.5.0
+joblib>=1.1.0
+numpy>=1.21.0
+
+# File upload support (also included in fastapi[standard], listed explicitly)
+python-multipart>=0.0.5
