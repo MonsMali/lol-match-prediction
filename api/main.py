@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.adapter import LoLDraftAdapter
 
-from api.routers import health
+from api.routers import admin, champions, health, predict, teams
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +65,7 @@ app.add_middleware(
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(health.router)
-
-# TODO: predict router (Plan 02)
-# TODO: champions router (Plan 03)
-# TODO: teams router (Plan 03)
-# TODO: admin router (Plan 03)
+app.include_router(predict.router)
+app.include_router(champions.router)
+app.include_router(teams.router)
+app.include_router(admin.router)
