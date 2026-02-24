@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Users can simulate a professional draft as it happens live and instantly see the predicted win probability for each team
-**Current focus:** Phase 1 - ML Adapter (COMPLETE)
+**Current focus:** Phase 2 - FastAPI Backend (In progress)
 
 ## Current Position
 
-Phase: 1 of 4 (ML Adapter) -- COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-24 -- Completed 01-03-PLAN.md (End-to-end adapter testing and memory validation)
+Phase: 2 of 4 (FastAPI Backend)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-24 -- Completed 02-01-PLAN.md (API scaffold with lifespan, schemas, CORS, health endpoint)
 
-Progress: [██░░░░░░░░░░░░░░] 19%
+Progress: [████░░░░░░░░░░░░] 25%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 6 min
-- Total execution time: 0.30 hours
+- Total plans completed: 4
+- Average duration: 7 min
+- Total execution time: 0.45 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-ml-adapter | 3/3 | 18 min | 6 min |
+| 02-fastapi-backend | 1/3 | 9 min | 9 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (9 min), 01-02 (5 min), 01-03 (4 min)
-- Trend: improving
+- Last 5 plans: 01-01 (9 min), 01-02 (5 min), 01-03 (4 min), 02-01 (9 min)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -54,6 +55,9 @@ Recent decisions affecting current work:
 - [01-02]: Unseen LabelEncoder values map to -1 (graceful degradation)
 - [01-02]: League defaults to LCK and split to Summer when not inferrable -- minimal impact on predictions
 - [01-03]: Memory footprint confirmed at ~168 MB RSS -- 33% of 512 MB Render budget, leaving 344 MB headroom for FastAPI
+- [02-01]: Team names use canonical full names from training data (Gen.G not GenG, Hanwha Life Esports not HLE)
+- [02-01]: DDragon version pinned to 14.24.1
+- [02-01]: Health endpoint does not use get_adapter dependency -- always responds even during loading
 
 ### Pending Todos
 
@@ -71,6 +75,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-24T13:06:30Z
-Stopped at: Completed 01-03-PLAN.md -- Phase 1 (ML Adapter) complete with all requirements validated
+Last session: 2026-02-24T14:34:18Z
+Stopped at: Completed 02-01-PLAN.md -- API scaffold with schemas, dependencies, champion mapping, team data, and health endpoint
 Resume file: None
