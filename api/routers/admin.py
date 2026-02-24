@@ -99,15 +99,16 @@ async def upload_model(
             )
 
         # Build a minimal dummy draft for the test prediction
+        roles = ["top", "jungle", "mid", "bot", "support"]
         champions = sorted(test_adapter.valid_champions)
         teams = sorted(test_adapter.valid_teams)
 
         dummy_draft = {
             "blue_team": teams[0] if teams else "Team A",
             "red_team": teams[1] if len(teams) > 1 else "Team B",
-            "blue_picks": champions[:5] if len(champions) >= 5 else ["Aatrox"] * 5,
+            "blue_picks": dict(zip(roles, champions[:5])) if len(champions) >= 5 else dict(zip(roles, ["Aatrox"] * 5)),
             "blue_bans": champions[5:10] if len(champions) >= 10 else ["Zed"] * 5,
-            "red_picks": champions[10:15] if len(champions) >= 15 else ["Ahri"] * 5,
+            "red_picks": dict(zip(roles, champions[10:15])) if len(champions) >= 15 else dict(zip(roles, ["Ahri"] * 5)),
             "red_bans": champions[15:20] if len(champions) >= 20 else ["Lux"] * 5,
         }
 
