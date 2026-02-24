@@ -29,7 +29,7 @@ import os
 
 # Add the parent directory to Python path to import feature engineering
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from feature_engineering.advanced_feature_engineering import AdvancedFeatureEngineering
+from features.engineering import AdvancedFeatureEngineering
 from models.robustness import RobustnessAnalyzer, get_default_param_configs
 from models.explainability import ModelExplainer
 
@@ -713,35 +713,51 @@ class UltimateLoLPredictor:
         for name, weight in zip(model_names, weights):
             print(f"      {name}: {weight:.3f}")
         
-        # Create sophisticated voting ensemble
-        voting_clf = VotingClassifier(
-            estimators=prob_models,
-            voting='soft',
-            weights=weights
+        # Compute weighted soft-voting predictions using already-trained models
+        # (avoids re-training all models which can take hours)
+        y_pred_proba_ensemble = np.zeros(len(self.y_val))
+        for (name, model), weight in zip(prob_models, weights):
+            use_scaled = self.results[name].get('use_scaled', False)
+            X_val_data = self.X_val_scaled if use_scaled else self.X_val
+            y_pred_proba_ensemble += weight * model.predict_proba(X_val_data)[:, 1]
+
+        y_pred_ensemble = (y_pred_proba_ensemble >= 0.5).astype(int)
+
+        # Calculate all metrics
+        metrics = self._calculate_all_metrics(self.y_val, y_pred_ensemble, y_pred_proba_ensemble)
+        composite = self._calculate_composite_score(
+            metrics['auc'], metrics['log_loss'], metrics['brier'],
+            metrics['ece'], metrics['f1'], metrics['mcc'], metrics['kappa']
         )
-        
-        # Train ensemble
-        voting_clf.fit(self.X_train, self.y_train)
-        
-        # Evaluate ensemble
-        y_pred_ensemble = voting_clf.predict(self.X_val)
-        y_pred_proba_ensemble = voting_clf.predict_proba(self.X_val)[:, 1]
-        
-        # Calculate metrics
-        accuracy = accuracy_score(self.y_val, y_pred_ensemble)
-        f1_performance = f1_score(self.y_val, y_pred_ensemble)
-        auc = roc_auc_score(self.y_val, y_pred_proba_ensemble)
-        
-        # Store ensemble results
-        self.models['Ultimate Ensemble'] = voting_clf
-        self.results['Ultimate Ensemble'] = {
-            'accuracy': accuracy,
-            'f1': f1_performance,
-            'auc': auc,
-            'use_scaled': False  # Ensemble handles scaling internally
+
+        # Store ensemble config for inference and test evaluation
+        self.ensemble_config = {
+            'model_names': model_names,
+            'weights': weights
         }
-        
-        print(f"    Ensemble F1: {f1_performance:.4f} | Accuracy: {accuracy:.4f} | AUC: {auc:.4f}")
+        self.results['Ultimate Ensemble'] = {
+            'accuracy': metrics['accuracy'],
+            'precision': metrics['precision'],
+            'recall': metrics['recall'],
+            'f1': metrics['f1'],
+            'auc': metrics['auc'],
+            'log_loss': metrics['log_loss'],
+            'brier': metrics['brier'],
+            'ece': metrics['ece'],
+            'mcc': metrics['mcc'],
+            'kappa': metrics['kappa'],
+            'balanced_accuracy': metrics['balanced_accuracy'],
+            'sensitivity': metrics['sensitivity'],
+            'specificity': metrics['specificity'],
+            'calibration_slope': metrics['calibration_slope'],
+            'composite': composite,
+            'cv_f1_mean': 0,
+            'cv_f1_std': 0,
+            'best_params': {'type': 'weighted_soft_vote', 'n_models': len(model_names)},
+            'use_scaled': False
+        }
+
+        print(f"   Validation F1: {metrics['f1']:.4f} | AUC: {metrics['auc']:.4f} | Composite: {composite:.4f}")
     
     def evaluate_models(self):
         """Comprehensive model evaluation on validation set with composite ranking."""
@@ -810,15 +826,24 @@ class UltimateLoLPredictor:
         print(f"EVALUATING ON COMPLETELY UNSEEN TEST DATA")
         print(f"Best Model: {best_model_name}")
 
-        best_model = self.models[best_model_name]
-        use_scaled = self.results[best_model_name]['use_scaled']
-
-        # Select appropriate test data
-        X_test_data = self.X_test_scaled if use_scaled else self.X_test
-
-        # Make predictions
-        y_pred_test = best_model.predict(X_test_data)
-        y_pred_proba_test = best_model.predict_proba(X_test_data)[:, 1]
+        # Handle ensemble separately since it uses pre-trained models directly
+        if best_model_name == 'Ultimate Ensemble' and hasattr(self, 'ensemble_config'):
+            cfg = self.ensemble_config
+            y_pred_proba_test = np.zeros(len(self.y_test))
+            for name, weight in zip(cfg['model_names'], cfg['weights']):
+                use_scaled = self.results[name].get('use_scaled', False)
+                X_data = self.X_test_scaled if use_scaled else self.X_test
+                y_pred_proba_test += weight * self.models[name].predict_proba(X_data)[:, 1]
+            y_pred_test = (y_pred_proba_test >= 0.5).astype(int)
+            best_model = None
+            use_scaled = False
+            X_test_data = self.X_test
+        else:
+            best_model = self.models[best_model_name]
+            use_scaled = self.results[best_model_name]['use_scaled']
+            X_test_data = self.X_test_scaled if use_scaled else self.X_test
+            y_pred_test = best_model.predict(X_test_data)
+            y_pred_proba_test = best_model.predict_proba(X_test_data)[:, 1]
 
         # Calculate all metrics
         test_metrics = self._calculate_all_metrics(self.y_test, y_pred_test, y_pred_proba_test)
@@ -973,41 +998,62 @@ class UltimateLoLPredictor:
     def save_ultimate_model(self, best_model_name):
         """Save the ultimate model and all preprocessing components."""
         print(f"\n SAVING ULTIMATE MODEL SYSTEM")
-        
+
         # Create models directory path
         script_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(os.path.dirname(script_dir))
         models_dir = os.path.join(project_root, "models")
-        
+
         # Ensure models directory exists
         os.makedirs(models_dir, exist_ok=True)
-        
-        best_model = self.models[best_model_name]
-        
-        # Save model components to models directory
-        joblib.dump(best_model, os.path.join(models_dir, 'ultimate_best_model.joblib'))
+
+        # Save best model
+        if best_model_name in self.models:
+            best_model = self.models[best_model_name]
+            joblib.dump(best_model, os.path.join(models_dir, 'ultimate_best_model.joblib'))
+            print(f"    Saved best model ({best_model_name}): ultimate_best_model.joblib")
+
+        # Save all individual trained models with clear naming
+        saved_models = {}
+        for name, model in self.models.items():
+            safe_name = name.lower().replace(' ', '_')
+            filename = f'model_{safe_name}.joblib'
+            joblib.dump(model, os.path.join(models_dir, filename))
+            saved_models[filename] = name
+
+        # Save shared components
         joblib.dump(self.scaler, os.path.join(models_dir, 'ultimate_scaler.joblib'))
         joblib.dump(self.feature_engineering, os.path.join(models_dir, 'ultimate_feature_engineering.joblib'))
-        
-        # Save feature names and metadata
+
+        # Save ensemble config if available
+        if hasattr(self, 'ensemble_config'):
+            joblib.dump(self.ensemble_config, os.path.join(models_dir, 'ensemble_config.joblib'))
+
+        # Save metadata with model name mapping
         metadata = {
             'best_model_name': best_model_name,
             'feature_names': list(self.X.columns),
             'num_features': len(self.X.columns),
             'model_performance': self.results[best_model_name],
+            'all_results': {name: res for name, res in self.results.items()},
+            'saved_models': saved_models,
             'feature_engineering_config': {
                 'champion_characteristics_count': len(self.feature_engineering.champion_characteristics),
                 'meta_strength_combinations': len(self.feature_engineering.champion_meta_strength),
                 'team_compositions': len(self.feature_engineering.team_compositions)
             }
         }
-        
+
         joblib.dump(metadata, os.path.join(models_dir, 'ultimate_model_metadata.joblib'))
-        
-        print(f"    Saved: {os.path.join(models_dir, 'ultimate_best_model.joblib')}")
-        print(f"    Saved: {os.path.join(models_dir, 'ultimate_scaler.joblib')}")
-        print(f"    Saved: {os.path.join(models_dir, 'ultimate_feature_engineering.joblib')}")
-        print(f"    Saved: {os.path.join(models_dir, 'ultimate_model_metadata.joblib')}")
+
+        # Print summary of all saved files
+        print(f"\n    Saved files:")
+        print(f"      ultimate_best_model.joblib  -> {best_model_name}")
+        for filename, model_name in saved_models.items():
+            print(f"      {filename:<35s} -> {model_name}")
+        print(f"      ultimate_scaler.joblib")
+        print(f"      ultimate_feature_engineering.joblib")
+        print(f"      ultimate_model_metadata.joblib")
 
     def analyze_robustness(self, best_model_name, run_validation_curves=True):
         """Analyze model robustness with learning and validation curves."""
@@ -1141,9 +1187,6 @@ def main(quick_mode=False, use_stratified_temporal=False, use_enhanced_v2=False,
 
     # Train advanced model suite
     predictor.train_advanced_models(quick_mode=quick_mode)
-
-    # Create ultimate ensemble
-    predictor.create_ultimate_ensemble()
 
     # Evaluate models
     best_model, results = predictor.evaluate_models()

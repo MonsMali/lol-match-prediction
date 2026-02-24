@@ -21,7 +21,7 @@ from skopt.acquisition import gaussian_ei
 
 # Add parent directory to path to import the feature engineering
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from feature_engineering.advanced_feature_engineering import AdvancedFeatureEngineering
+from features.engineering import AdvancedFeatureEngineering
 
 warnings.filterwarnings('ignore')
 

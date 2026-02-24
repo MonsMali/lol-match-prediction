@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 
 # Add paths for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from feature_engineering.advanced_feature_engineering import AdvancedFeatureEngineering
+from features.engineering import AdvancedFeatureEngineering
 from prediction.confidence import ConfidenceEstimator
 from models.explainability import ModelExplainer
 from features.edge_cases import EdgeCaseHandler

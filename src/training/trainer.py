@@ -102,7 +102,7 @@ class ContinuousTrainer:
                 return result
 
             # Import training components
-            from src.feature_engineering.advanced_feature_engineering import AdvancedFeatureEngineering
+            from src.features.engineering import AdvancedFeatureEngineering
             from src.models.trainer import UltimateLoLPredictor
 
             # Save filtered data temporarily

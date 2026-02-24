@@ -8,10 +8,6 @@ Modules:
 - comprehensive_logistic_regression_comparison: Strategy comparison
 - robustness: RobustnessAnalyzer for learning/validation curves
 - explainability: ModelExplainer for SHAP-based explanations
-
-Legacy aliases:
-- ultimate_predictor -> trainer
-- enhanced_ultimate_predictor -> optimizer
 """
 
 from .robustness import RobustnessAnalyzer, get_default_param_configs
