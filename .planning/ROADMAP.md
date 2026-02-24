@@ -27,7 +27,7 @@ The project wraps an existing, trained ML model (82.97% AUC-ROC Logistic Regress
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Audit artifacts, resolve open questions, create schemas and normalization
+- [x] 01-01-PLAN.md -- Audit artifacts, resolve open questions, create schemas and normalization
 - [ ] 01-02-PLAN.md -- Build validation, feature computation, and LoLDraftAdapter core
 - [ ] 01-03-PLAN.md -- Validate memory footprint and end-to-end prediction correctness
 
