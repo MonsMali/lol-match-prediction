@@ -24,12 +24,12 @@ The project wraps an existing, trained ML model (82.97% AUC-ROC Logistic Regress
   3. The adapter runs within 512 MB RAM on a cold Python process (measured with `memory_profiler`)
   4. The adapter accepts a structured draft dict and returns a typed result object with blue/red win probability
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Audit existing inference code path and identify all CSV-loading calls
-- [ ] 01-02: Build lean adapter that loads only joblib artifacts and wraps InteractiveLoLPredictor
-- [ ] 01-03: Validate adapter memory footprint and end-to-end prediction correctness
+- [ ] 01-01-PLAN.md -- Audit artifacts, resolve open questions, create schemas and normalization
+- [ ] 01-02-PLAN.md -- Build validation, feature computation, and LoLDraftAdapter core
+- [ ] 01-03-PLAN.md -- Validate memory footprint and end-to-end prediction correctness
 
 ---
 
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. ML Adapter | 0/3 | Not started | - |
+| 1. ML Adapter | 0/3 | Planned | - |
 | 2. FastAPI Backend | 0/4 | Not started | - |
 | 3. React Draft Board | 0/6 | Not started | - |
 | 4. Integration and Deployment | 0/3 | Not started | - |
