@@ -68,15 +68,14 @@ Plans:
   6. User can assign a role (Top, Jungle, Mid, Bot, Support) to each picked champion before submitting
   7. User can toggle BO3 or BO5 series mode, track series score, and enter a fresh draft for each game
 
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 03-01: Scaffold React + Vite + TypeScript + Tailwind project; set up Zustand draft store and TanStack Query
-- [ ] 03-02: Build ChampionGrid component with DDragon portrait loading, search/filter, and duplicate prevention
-- [ ] 03-03: Build two-sided draft board layout (blue/red split, pick/ban slots, team selector, role assignment UI)
-- [ ] 03-04: Implement step-by-step live draft mode with enforced professional draft order
-- [ ] 03-05: Implement bulk entry mode and win probability display component
-- [ ] 03-06: Add best-of-series toggle, series score tracking, and per-game draft entry
+- [ ] 03-01-PLAN.md -- Scaffold Vite + React + TypeScript + Tailwind v4 project with LoL theme, Zustand draft store, and TanStack Query hooks
+- [ ] 03-02-PLAN.md -- Build ChampionGrid with DDragon portraits and search, draft board layout with team panels, slots, selectors, and mode toggle
+- [ ] 03-03-PLAN.md -- Wire step-by-step live draft mode with 20-step professional draft order and visual turn indicators
+- [ ] 03-04-PLAN.md -- Implement bulk entry mode, role assignment UI, prediction submission, and win probability display
+- [ ] 03-05-PLAN.md -- Add best-of-series tracker (BO3/BO5) with score tracking and visual verification checkpoint
 
 ---
 
@@ -109,5 +108,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. ML Adapter | 3/3 | Complete    | 2026-02-24 |
 | 2. FastAPI Backend | 3/3 | Complete    | 2026-02-24 |
-| 3. React Draft Board | 0/6 | Not started | - |
+| 3. React Draft Board | 0/5 | Not started | - |
 | 4. Integration and Deployment | 0/3 | Not started | - |
