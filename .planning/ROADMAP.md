@@ -28,7 +28,7 @@ The project wraps an existing, trained ML model (82.97% AUC-ROC Logistic Regress
 
 Plans:
 - [x] 01-01-PLAN.md -- Audit artifacts, resolve open questions, create schemas and normalization
-- [ ] 01-02-PLAN.md -- Build validation, feature computation, and LoLDraftAdapter core
+- [x] 01-02-PLAN.md -- Build validation, feature computation, and LoLDraftAdapter core
 - [ ] 01-03-PLAN.md -- Validate memory footprint and end-to-end prediction correctness
 
 ---
@@ -108,7 +108,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. ML Adapter | 0/3 | Planned | - |
+| 1. ML Adapter | 2/3 | In progress | - |
 | 2. FastAPI Backend | 0/4 | Not started | - |
 | 3. React Draft Board | 0/6 | Not started | - |
 | 4. Integration and Deployment | 0/3 | Not started | - |
