@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useDraftStore, countFilledSlots } from '../store/draftStore'
 import { ModeToggle } from './ModeToggle'
+import { SeriesTracker } from './SeriesTracker'
 import { TeamPanel } from './TeamPanel'
 import { RoleAssignment } from './RoleAssignment'
 import { WinProbability } from './WinProbability'
@@ -33,7 +34,10 @@ export function DraftBoard() {
 
   return (
     <div className="flex flex-col gap-4">
-      <ModeToggle />
+      <div className="flex items-center justify-center gap-4 flex-wrap">
+        <ModeToggle />
+        <SeriesTracker />
+      </div>
 
       {mode === 'live' && (
         <div className="flex items-center justify-center gap-3">

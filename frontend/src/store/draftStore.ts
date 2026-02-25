@@ -72,6 +72,7 @@ interface DraftState {
   usedChampions: () => Set<string>
   isComplete: () => boolean
   isDraftReady: () => boolean
+  isSeriesComplete: () => boolean
   currentDraftStep: () => DraftStep | null
   currentPhaseLabel: () => string
 
@@ -236,6 +237,13 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
     return allSlotsFilled && teamsSelected && allRolesAssigned
   },
 
+  isSeriesComplete: () => {
+    const state = get()
+    if (state.seriesFormat === 'single') return false
+    const threshold = state.seriesFormat === 'bo3' ? 2 : 3
+    return state.seriesScore.blue >= threshold || state.seriesScore.red >= threshold
+  },
+
   currentDraftStep: () => {
     const state = get()
     if (state.currentStep >= DRAFT_SEQUENCE.length) return null
@@ -376,12 +384,25 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
   },
 
   recordGameResult: (winner: Side) => {
+    const state = get()
+    // Do not record if series is already complete
+    if (state.isSeriesComplete()) return
+
     set((prev) => {
       const newScore = { ...prev.seriesScore }
       newScore[winner] += 1
       return {
         seriesScore: newScore,
         currentGame: prev.currentGame + 1,
+        // Reset draft state for next game (preserves teams and series)
+        blueBans: createEmptySlots(),
+        redBans: createEmptySlots(),
+        bluePicks: createEmptySlots(),
+        redPicks: createEmptySlots(),
+        blueRoles: { ...EMPTY_ROLES },
+        redRoles: { ...EMPTY_ROLES },
+        currentStep: 0,
+        activeSlot: null,
       }
     })
   },
