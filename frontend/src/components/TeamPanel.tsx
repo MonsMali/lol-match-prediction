@@ -66,7 +66,12 @@ export function TeamPanel({ side }: TeamPanelProps) {
 
       <div className="flex flex-col items-center gap-1">
         <span className="text-text-secondary text-xs uppercase tracking-wide">Bans</span>
-        <BanRow bans={bans} side={side} activeBanIndex={activeBanIndex} />
+        <BanRow
+          bans={bans}
+          side={side}
+          activeBanIndex={activeBanIndex}
+          onSlotClick={mode === 'bulk' ? (index) => setActiveSlot(side, 'ban', index) : undefined}
+        />
       </div>
 
       <div className="flex flex-col items-center gap-1.5">

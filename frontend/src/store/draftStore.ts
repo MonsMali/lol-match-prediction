@@ -72,6 +72,8 @@ interface DraftState {
   usedChampions: () => Set<string>
   isComplete: () => boolean
   isDraftReady: () => boolean
+  currentDraftStep: () => DraftStep | null
+  currentPhaseLabel: () => string
 
   // Actions
   selectChampion: (name: string) => void
@@ -81,6 +83,7 @@ interface DraftState {
   setMode: (mode: DraftMode) => void
   setSeriesFormat: (format: SeriesFormat) => void
   recordGameResult: (winner: Side) => void
+  undoLastStep: () => void
   resetDraft: () => void
   resetAll: () => void
 }
@@ -94,6 +97,44 @@ function getSlotArray(
     return action === 'ban' ? state.blueBans : state.bluePicks
   }
   return action === 'ban' ? state.redBans : state.redPicks
+}
+
+/** Scan for the next empty slot in bulk mode: blue bans, red bans, blue picks, red picks */
+function findNextEmptySlot(state: {
+  blueBans: (string | null)[]
+  redBans: (string | null)[]
+  bluePicks: (string | null)[]
+  redPicks: (string | null)[]
+}): ActiveSlot | null {
+  const groups: { team: Side; action: DraftAction; slots: (string | null)[] }[] = [
+    { team: 'blue', action: 'ban', slots: state.blueBans },
+    { team: 'red', action: 'ban', slots: state.redBans },
+    { team: 'blue', action: 'pick', slots: state.bluePicks },
+    { team: 'red', action: 'pick', slots: state.redPicks },
+  ]
+  for (const g of groups) {
+    for (let i = 0; i < g.slots.length; i++) {
+      if (g.slots[i] === null) {
+        return { team: g.team, action: g.action, index: i }
+      }
+    }
+  }
+  return null
+}
+
+/** Count how many of the 20 draft slots are filled */
+export function countFilledSlots(state: {
+  blueBans: (string | null)[]
+  redBans: (string | null)[]
+  bluePicks: (string | null)[]
+  redPicks: (string | null)[]
+}): number {
+  return [
+    ...state.blueBans,
+    ...state.redBans,
+    ...state.bluePicks,
+    ...state.redPicks,
+  ].filter((s) => s !== null).length
 }
 
 export const useDraftStore = create<DraftState>()((set, get) => ({
@@ -160,12 +201,29 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
     return allSlotsFilled && teamsSelected && allRolesAssigned
   },
 
+  currentDraftStep: () => {
+    const state = get()
+    if (state.currentStep >= DRAFT_SEQUENCE.length) return null
+    return DRAFT_SEQUENCE[state.currentStep]
+  },
+
+  currentPhaseLabel: () => {
+    const step = get().currentStep
+    if (step < 6) return 'Ban Phase 1'
+    if (step < 12) return 'Pick Phase 1'
+    if (step < 16) return 'Ban Phase 2'
+    if (step < 20) return 'Pick Phase 2'
+    return 'Draft Complete'
+  },
+
   // Actions
   selectChampion: (name: string) => {
     const state = get()
 
     if (state.mode === 'live') {
       if (state.currentStep >= DRAFT_SEQUENCE.length) return
+      // Reject duplicate champion selection
+      if (state.usedChampions().has(name)) return
       const step = DRAFT_SEQUENCE[state.currentStep]
       const { team, action, slotIndex } = step
 
@@ -193,13 +251,15 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
         return update
       })
     } else {
-      // Bulk mode: place into activeSlot
+      // Bulk mode: place into activeSlot, then auto-advance to next empty slot
       const slot = state.activeSlot
       if (!slot) return
+      // Reject duplicate champion selection
+      if (state.usedChampions().has(name)) return
 
       set((prev) => {
         const { team, action, index } = slot
-        const update: Partial<DraftState> = { activeSlot: null }
+        const update: Partial<DraftState> = {}
 
         if (team === 'blue' && action === 'ban') {
           const arr = [...prev.blueBans]
@@ -218,6 +278,15 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
           arr[index] = name
           update.redPicks = arr
         }
+
+        // Build a temporary view of the state after placement for auto-advance
+        const nextState = {
+          blueBans: update.blueBans ?? prev.blueBans,
+          redBans: update.redBans ?? prev.redBans,
+          bluePicks: update.bluePicks ?? prev.bluePicks,
+          redPicks: update.redPicks ?? prev.redPicks,
+        }
+        update.activeSlot = findNextEmptySlot(nextState)
 
         return update
       })
@@ -279,6 +348,29 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
         seriesScore: newScore,
         currentGame: prev.currentGame + 1,
       }
+    })
+  },
+
+  undoLastStep: () => {
+    const state = get()
+    if (state.mode !== 'live' || state.currentStep <= 0) return
+    const prevStep = state.currentStep - 1
+    const { team, action, slotIndex } = DRAFT_SEQUENCE[prevStep]
+
+    set((prev) => {
+      const update: Partial<DraftState> = { currentStep: prevStep }
+
+      if (team === 'blue' && action === 'ban') {
+        const arr = [...prev.blueBans]; arr[slotIndex] = null; update.blueBans = arr
+      } else if (team === 'red' && action === 'ban') {
+        const arr = [...prev.redBans]; arr[slotIndex] = null; update.redBans = arr
+      } else if (team === 'blue' && action === 'pick') {
+        const arr = [...prev.bluePicks]; arr[slotIndex] = null; update.bluePicks = arr
+      } else {
+        const arr = [...prev.redPicks]; arr[slotIndex] = null; update.redPicks = arr
+      }
+
+      return update
     })
   },
 

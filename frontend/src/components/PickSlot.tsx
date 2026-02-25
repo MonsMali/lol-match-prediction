@@ -20,6 +20,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 export function PickSlot({ champion, role, side, slotIndex, isActive, onClick }: PickSlotProps) {
   const borderColor = side === 'blue' ? 'border-blue-team' : 'border-red-team'
+  const glowColor = side === 'blue' ? 'shadow-blue-team/40' : 'shadow-red-team/40'
 
   return (
     <button
@@ -27,9 +28,10 @@ export function PickSlot({ champion, role, side, slotIndex, isActive, onClick }:
       onClick={onClick}
       className={`
         relative w-16 h-16 rounded bg-panel-light flex flex-col items-center justify-center
-        border-2 transition-all duration-150
-        ${isActive ? `${borderColor} shadow-lg` : 'border-transparent'}
-        ${!champion ? 'cursor-pointer hover:border-gold/40' : 'cursor-default'}
+        border-2 transition-all duration-200
+        ${isActive ? `${borderColor} ${glowColor} shadow-lg` : ''}
+        ${!isActive && champion ? 'border-transparent cursor-default' : ''}
+        ${!isActive && !champion ? 'border-white/5 cursor-pointer hover:border-gold/40' : ''}
       `}
     >
       {champion ? (
@@ -46,7 +48,7 @@ export function PickSlot({ champion, role, side, slotIndex, isActive, onClick }:
           )}
         </>
       ) : (
-        <span className="text-disabled text-xs font-mono">{slotIndex + 1}</span>
+        <span className={`text-xs font-mono ${isActive ? 'text-gold' : 'text-disabled'}`}>{slotIndex + 1}</span>
       )}
     </button>
   )
