@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 3 of 4 (React Draft Board)
-Plan: 3 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-25 -- Completed 03-03-PLAN.md (Live Draft Mode: 20-step draft sequence with visual indicators)
+Last activity: 2026-02-25 -- Completed 03-04-PLAN.md (Bulk entry mode, role assignment, prediction submission)
 
-Progress: [█████████████░░░] 69%
+Progress: [██████████████░░] 77%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 5 min
-- Total execution time: 0.70 hours
+- Total execution time: 0.78 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [█████████████░░░] 69%
 |-------|-------|-------|----------|
 | 01-ml-adapter | 3/3 | 18 min | 6 min |
 | 02-fastapi-backend | 3/3 | 16 min | 5 min |
-| 03-react-draft-board | 3/5 | 8 min | 3 min |
+| 03-react-draft-board | 4/5 | 13 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (4 min), 03-01 (4 min), 03-02 (2 min), 03-03 (2 min)
+- Last 5 plans: 03-01 (4 min), 03-02 (2 min), 03-03 (2 min), 03-04 (5 min)
 - Trend: stable-improving
 
 *Updated after each plan completion*
@@ -73,6 +73,9 @@ Recent decisions affecting current work:
 - [03-03]: Phase labels derived from step ranges (0-5, 6-11, 12-15, 16-19) rather than separate phase state variable
 - [03-03]: Undo action decrements currentStep and clears slot rather than maintaining history stack
 - [03-03]: ChampionGrid disables all icons when draft complete or no active slot to prevent accidental selections
+- [03-04]: buildPredictRequest exported from store module as single source of truth for API request construction
+- [03-04]: setRole accepts string|null to properly clear role assignments for isDraftReady compatibility
+- [03-04]: RoleAssignment renders per-team when 5 picks filled, regardless of mode
 
 ### Pending Todos
 
@@ -90,6 +93,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-25T12:06:04Z
-Stopped at: Completed 03-03-PLAN.md -- Live draft mode (20-step sequence, phase labels, turn indicators, undo)
+Last session: 2026-02-25T12:09:20Z
+Stopped at: Completed 03-04-PLAN.md -- Bulk entry mode, role assignment, prediction submission
 Resume file: None

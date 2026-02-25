@@ -31,8 +31,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DRAFT-02**: Champion search/filter allows finding champions by name with fuzzy matching
 - [x] **DRAFT-03**: Two-sided draft board shows blue team and red team with 5 pick slots and 5 ban slots each
 - [x] **DRAFT-04**: Team selection interface for major professional leagues (LCK, LEC, LCS, LPL)
-- [ ] **DRAFT-05**: Role assignment UI maps picked champions to positions (Top, Jungle, Mid, Bot, Support)
-- [ ] **DRAFT-06**: Win probability display shows percentage for each team after draft completes
+- [x] **DRAFT-05**: Role assignment UI maps picked champions to positions (Top, Jungle, Mid, Bot, Support)
+- [x] **DRAFT-06**: Win probability display shows percentage for each team after draft completes
 - [x] **DRAFT-07**: LoL-themed visual design with champion portraits, team colors, and draft board resembling pro broadcast
 
 ### Live Draft Mode
@@ -43,8 +43,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Bulk Entry Mode
 
-- [ ] **BULK-01**: Bulk entry mode allows entering all 10 bans and 10 picks at once
-- [ ] **BULK-02**: Quick prediction without following step-by-step draft sequence
+- [x] **BULK-01**: Bulk entry mode allows entering all 10 bans and 10 picks at once
+- [x] **BULK-02**: Quick prediction without following step-by-step draft sequence
 
 ### Best-of-Series
 
@@ -108,14 +108,14 @@ Deferred to future release. Tracked but not in current roadmap.
 | DRAFT-02 | Phase 3 - React Draft Board | Complete |
 | DRAFT-03 | Phase 3 - React Draft Board | Complete |
 | DRAFT-04 | Phase 3 - React Draft Board | Complete |
-| DRAFT-05 | Phase 3 - React Draft Board | Pending |
-| DRAFT-06 | Phase 3 - React Draft Board | Pending |
+| DRAFT-05 | Phase 3 - React Draft Board | Complete |
+| DRAFT-06 | Phase 3 - React Draft Board | Complete |
 | DRAFT-07 | Phase 3 - React Draft Board | Complete |
 | LIVE-01 | Phase 3 - React Draft Board | Complete |
 | LIVE-02 | Phase 3 - React Draft Board | Complete |
 | LIVE-03 | Phase 3 - React Draft Board | Complete |
-| BULK-01 | Phase 3 - React Draft Board | Pending |
-| BULK-02 | Phase 3 - React Draft Board | Pending |
+| BULK-01 | Phase 3 - React Draft Board | Complete |
+| BULK-02 | Phase 3 - React Draft Board | Complete |
 | BOS-01 | Phase 3 - React Draft Board | Pending |
 | BOS-02 | Phase 3 - React Draft Board | Pending |
 | BOS-03 | Phase 3 - React Draft Board | Pending |
