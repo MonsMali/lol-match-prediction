@@ -37,9 +37,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Live Draft Mode
 
-- [ ] **LIVE-01**: Step-by-step draft mode follows the real professional draft order (ban-ban-ban-pick-pick-pick sequence)
-- [ ] **LIVE-02**: User enters one champion at a time as it happens on broadcast
-- [ ] **LIVE-03**: Draft board updates visually with each pick/ban selection
+- [x] **LIVE-01**: Step-by-step draft mode follows the real professional draft order (ban-ban-ban-pick-pick-pick sequence)
+- [x] **LIVE-02**: User enters one champion at a time as it happens on broadcast
+- [x] **LIVE-03**: Draft board updates visually with each pick/ban selection
 
 ### Bulk Entry Mode
 
@@ -111,9 +111,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | DRAFT-05 | Phase 3 - React Draft Board | Pending |
 | DRAFT-06 | Phase 3 - React Draft Board | Pending |
 | DRAFT-07 | Phase 3 - React Draft Board | Complete |
-| LIVE-01 | Phase 3 - React Draft Board | Pending |
-| LIVE-02 | Phase 3 - React Draft Board | Pending |
-| LIVE-03 | Phase 3 - React Draft Board | Pending |
+| LIVE-01 | Phase 3 - React Draft Board | Complete |
+| LIVE-02 | Phase 3 - React Draft Board | Complete |
+| LIVE-03 | Phase 3 - React Draft Board | Complete |
 | BULK-01 | Phase 3 - React Draft Board | Pending |
 | BULK-02 | Phase 3 - React Draft Board | Pending |
 | BOS-01 | Phase 3 - React Draft Board | Pending |
