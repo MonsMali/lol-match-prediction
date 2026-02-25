@@ -9,21 +9,21 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Inference Refactor
 
-- [ ] **INFER-01**: Prediction pipeline runs without loading the full 37K-row CSV dataset
-- [ ] **INFER-02**: Pre-serialized artifacts (champion meta, team stats, synergies) load directly from joblib files
-- [ ] **INFER-03**: Clean adapter interface wraps InteractiveLoLPredictor for API consumption (accepts draft dict, returns probabilities)
-- [ ] **INFER-04**: Inference runs within 512MB RAM budget (Render free tier constraint)
+- [x] **INFER-01**: Prediction pipeline runs without loading the full 37K-row CSV dataset
+- [x] **INFER-02**: Pre-serialized artifacts (champion meta, team stats, synergies) load directly from joblib files
+- [x] **INFER-03**: Clean adapter interface wraps InteractiveLoLPredictor for API consumption (accepts draft dict, returns probabilities)
+- [x] **INFER-04**: Inference runs within 512MB RAM budget (Render free tier constraint)
 
 ### Backend API
 
-- [ ] **API-01**: FastAPI REST endpoint accepts a complete draft (teams, picks, bans, roles) and returns win probability for each team
-- [ ] **API-02**: ML model loads once at startup via FastAPI lifespan context manager, stored in app.state
-- [ ] **API-03**: Champion list endpoint returns all valid champions with metadata (name, image URL from Data Dragon)
-- [ ] **API-04**: Team list endpoint returns professional teams grouped by league (LCK, LEC, LCS, LPL)
-- [ ] **API-05**: CORS configured to allow frontend requests
-- [ ] **API-06**: Health/readiness endpoint returns model status and version info
-- [ ] **API-07**: Model file upload endpoint allows swapping in newly trained model files (security-gated with secret token)
-- [ ] **API-08**: Data Dragon champion name mapping handles mismatches (Wukong=MonkeyKing, Nunu, etc.)
+- [x] **API-01**: FastAPI REST endpoint accepts a complete draft (teams, picks, bans, roles) and returns win probability for each team
+- [x] **API-02**: ML model loads once at startup via FastAPI lifespan context manager, stored in app.state
+- [x] **API-03**: Champion list endpoint returns all valid champions with metadata (name, image URL from Data Dragon)
+- [x] **API-04**: Team list endpoint returns professional teams grouped by league (LCK, LEC, LCS, LPL)
+- [x] **API-05**: CORS configured to allow frontend requests
+- [x] **API-06**: Health/readiness endpoint returns model status and version info
+- [x] **API-07**: Model file upload endpoint allows swapping in newly trained model files (security-gated with secret token)
+- [x] **API-08**: Data Dragon champion name mapping handles mismatches (Wukong=MonkeyKing, Nunu, etc.)
 
 ### Frontend Draft Board
 
@@ -92,18 +92,18 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFER-01 | Phase 1 - ML Adapter | Pending |
-| INFER-02 | Phase 1 - ML Adapter | Pending |
-| INFER-03 | Phase 1 - ML Adapter | Pending |
-| INFER-04 | Phase 1 - ML Adapter | Pending |
-| API-01 | Phase 2 - FastAPI Backend | Pending |
-| API-02 | Phase 2 - FastAPI Backend | Pending |
-| API-03 | Phase 2 - FastAPI Backend | Pending |
-| API-04 | Phase 2 - FastAPI Backend | Pending |
-| API-05 | Phase 2 - FastAPI Backend | Pending |
-| API-06 | Phase 2 - FastAPI Backend | Pending |
-| API-07 | Phase 2 - FastAPI Backend | Pending |
-| API-08 | Phase 2 - FastAPI Backend | Pending |
+| INFER-01 | Phase 1 - ML Adapter | Complete |
+| INFER-02 | Phase 1 - ML Adapter | Complete |
+| INFER-03 | Phase 1 - ML Adapter | Complete |
+| INFER-04 | Phase 1 - ML Adapter | Complete |
+| API-01 | Phase 2 - FastAPI Backend | Complete |
+| API-02 | Phase 2 - FastAPI Backend | Complete |
+| API-03 | Phase 2 - FastAPI Backend | Complete |
+| API-04 | Phase 2 - FastAPI Backend | Complete |
+| API-05 | Phase 2 - FastAPI Backend | Complete |
+| API-06 | Phase 2 - FastAPI Backend | Complete |
+| API-07 | Phase 2 - FastAPI Backend | Complete |
+| API-08 | Phase 2 - FastAPI Backend | Complete |
 | DRAFT-01 | Phase 3 - React Draft Board | Complete |
 | DRAFT-02 | Phase 3 - React Draft Board | Complete |
 | DRAFT-03 | Phase 3 - React Draft Board | Complete |
@@ -132,4 +132,4 @@ Deferred to future release. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after roadmap creation*
+*Last updated: 2026-02-25 after milestone audit gap closure*

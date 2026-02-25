@@ -10,6 +10,7 @@ The project wraps an existing, trained ML model (82.97% AUC-ROC Logistic Regress
 - [x] **Phase 2: FastAPI Backend** - Build the REST API layer with all prediction, champion, team, and model-management endpoints
 - [x] **Phase 3: React Draft Board** - Build the complete frontend draft simulator with both draft modes, role assignment, and win probability display
 - [ ] **Phase 4: Integration and Deployment** - Connect frontend to live backend, deploy to Render, and implement cold-start UX
+- [ ] **Phase 5: DDragon Image URL Fix** - Fix broken champion portrait URLs in slot components for 12 special-name champions
 
 ## Phase Details
 
@@ -99,6 +100,23 @@ Plans:
 
 ---
 
+### Phase 5: DDragon Image URL Fix
+**Goal**: All champion portraits render correctly in slot components, including the 12 champions whose DDragon ID differs from display name
+**Depends on**: Phase 3
+**Requirements**: DRAFT-07, API-08 (visual correctness fix)
+**Gap Closure:** Closes integration gap from v1.0 audit
+
+**Success Criteria** (what must be TRUE):
+  1. `PickSlot.tsx`, `BanRow.tsx`, and `RoleAssignment.tsx` use the API-provided `image_url` instead of constructing URLs from display names
+  2. All 12 affected champions (Wukong, Kai'Sa, Nunu & Willump, Kha'Zix, Cho'Gath, Vel'Koz, Rek'Sai, Kog'Maw, Bel'Veth, K'Sante, LeBlanc, Renata Glasc) render correct portraits
+
+**Plans**: 1 plan
+
+Plans:
+- [ ] 05-01: Store image_url in Zustand state and update slot components to use it
+
+---
+
 ## Progress
 
 **Execution Order:**
@@ -110,3 +128,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 2. FastAPI Backend | 3/3 | Complete    | 2026-02-24 |
 | 3. React Draft Board | 5/5 | Complete | 2026-02-25 |
 | 4. Integration and Deployment | 0/3 | Not started | - |
+| 5. DDragon Image URL Fix | 0/1 | Not started | - |
