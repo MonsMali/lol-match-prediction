@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Users can simulate a professional draft as it happens live and instantly see the predicted win probability for each team
-**Current focus:** Phase 2 - FastAPI Backend (In progress)
+**Current focus:** Phase 3 - React Draft Board (In progress)
 
 ## Current Position
 
-Phase: 2 of 4 (FastAPI Backend)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-24 -- Completed 02-02-PLAN.md (Core data endpoints: predict, champions, teams)
+Phase: 3 of 4 (React Draft Board)
+Plan: 1 of 5 in current phase
+Status: In progress
+Last activity: 2026-02-25 -- Completed 03-01-PLAN.md (Frontend foundation: Vite + React + Zustand + TanStack Query)
 
-Progress: [██████████░░░░░░] 50%
+Progress: [███████████░░░░░] 54%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 6 min
-- Total execution time: 0.57 hours
+- Total plans completed: 7
+- Average duration: 5 min
+- Total execution time: 0.63 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [██████████░░░░░░] 50%
 |-------|-------|-------|----------|
 | 01-ml-adapter | 3/3 | 18 min | 6 min |
 | 02-fastapi-backend | 3/3 | 16 min | 5 min |
+| 03-react-draft-board | 1/5 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (4 min), 02-01 (9 min), 02-03 (3 min), 02-02 (4 min)
+- Last 5 plans: 02-01 (9 min), 02-03 (3 min), 02-02 (4 min), 03-01 (4 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -63,6 +64,9 @@ Recent decisions affecting current work:
 - [02-02]: predict endpoint uses sync def for auto-threading of blocking ML inference
 - [02-03]: Test prediction uses object.__new__ to bypass singleton for artifact validation in isolation
 - [02-03]: Production requirements pin scikit-learn==1.5.0 and exclude training-only deps
+- [03-01]: Vite dev proxy for /api and /health avoids CORS in development -- API_BASE defaults to empty string
+- [03-01]: apiFetch generic wrapper centralizes error handling and Content-Type headers for all API calls
+- [03-01]: Draft store uses getSlotArray helper for mode-switching recalculation
 
 ### Pending Todos
 
@@ -80,6 +84,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-24T14:40:10Z
-Stopped at: Completed 02-02-PLAN.md -- Core data endpoints (predict, champions, teams) all operational
+Last session: 2026-02-25T11:56:19Z
+Stopped at: Completed 03-01-PLAN.md -- Frontend foundation (Vite + React + Zustand + TanStack Query)
 Resume file: None

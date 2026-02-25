@@ -33,7 +33,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **DRAFT-04**: Team selection interface for major professional leagues (LCK, LEC, LCS, LPL)
 - [ ] **DRAFT-05**: Role assignment UI maps picked champions to positions (Top, Jungle, Mid, Bot, Support)
 - [ ] **DRAFT-06**: Win probability display shows percentage for each team after draft completes
-- [ ] **DRAFT-07**: LoL-themed visual design with champion portraits, team colors, and draft board resembling pro broadcast
+- [x] **DRAFT-07**: LoL-themed visual design with champion portraits, team colors, and draft board resembling pro broadcast
 
 ### Live Draft Mode
 
@@ -110,7 +110,7 @@ Deferred to future release. Tracked but not in current roadmap.
 | DRAFT-04 | Phase 3 - React Draft Board | Pending |
 | DRAFT-05 | Phase 3 - React Draft Board | Pending |
 | DRAFT-06 | Phase 3 - React Draft Board | Pending |
-| DRAFT-07 | Phase 3 - React Draft Board | Pending |
+| DRAFT-07 | Phase 3 - React Draft Board | Complete |
 | LIVE-01 | Phase 3 - React Draft Board | Pending |
 | LIVE-02 | Phase 3 - React Draft Board | Pending |
 | LIVE-03 | Phase 3 - React Draft Board | Pending |
