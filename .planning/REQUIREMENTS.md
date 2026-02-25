@@ -27,10 +27,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Frontend Draft Board
 
-- [ ] **DRAFT-01**: Champion portrait grid displays all champions using Riot Data Dragon CDN images
-- [ ] **DRAFT-02**: Champion search/filter allows finding champions by name with fuzzy matching
-- [ ] **DRAFT-03**: Two-sided draft board shows blue team and red team with 5 pick slots and 5 ban slots each
-- [ ] **DRAFT-04**: Team selection interface for major professional leagues (LCK, LEC, LCS, LPL)
+- [x] **DRAFT-01**: Champion portrait grid displays all champions using Riot Data Dragon CDN images
+- [x] **DRAFT-02**: Champion search/filter allows finding champions by name with fuzzy matching
+- [x] **DRAFT-03**: Two-sided draft board shows blue team and red team with 5 pick slots and 5 ban slots each
+- [x] **DRAFT-04**: Team selection interface for major professional leagues (LCK, LEC, LCS, LPL)
 - [ ] **DRAFT-05**: Role assignment UI maps picked champions to positions (Top, Jungle, Mid, Bot, Support)
 - [ ] **DRAFT-06**: Win probability display shows percentage for each team after draft completes
 - [x] **DRAFT-07**: LoL-themed visual design with champion portraits, team colors, and draft board resembling pro broadcast
@@ -104,10 +104,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | API-06 | Phase 2 - FastAPI Backend | Pending |
 | API-07 | Phase 2 - FastAPI Backend | Pending |
 | API-08 | Phase 2 - FastAPI Backend | Pending |
-| DRAFT-01 | Phase 3 - React Draft Board | Pending |
-| DRAFT-02 | Phase 3 - React Draft Board | Pending |
-| DRAFT-03 | Phase 3 - React Draft Board | Pending |
-| DRAFT-04 | Phase 3 - React Draft Board | Pending |
+| DRAFT-01 | Phase 3 - React Draft Board | Complete |
+| DRAFT-02 | Phase 3 - React Draft Board | Complete |
+| DRAFT-03 | Phase 3 - React Draft Board | Complete |
+| DRAFT-04 | Phase 3 - React Draft Board | Complete |
 | DRAFT-05 | Phase 3 - React Draft Board | Pending |
 | DRAFT-06 | Phase 3 - React Draft Board | Pending |
 | DRAFT-07 | Phase 3 - React Draft Board | Complete |

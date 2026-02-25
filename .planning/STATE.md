@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 3 of 4 (React Draft Board)
-Plan: 1 of 5 in current phase
+Plan: 2 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-25 -- Completed 03-01-PLAN.md (Frontend foundation: Vite + React + Zustand + TanStack Query)
+Last activity: 2026-02-25 -- Completed 03-02-PLAN.md (UI Components: champion grid, draft board, team panels)
 
-Progress: [███████████░░░░░] 54%
+Progress: [████████████░░░░] 62%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 5 min
-- Total execution time: 0.63 hours
+- Total execution time: 0.66 hours
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: [███████████░░░░░] 54%
 |-------|-------|-------|----------|
 | 01-ml-adapter | 3/3 | 18 min | 6 min |
 | 02-fastapi-backend | 3/3 | 16 min | 5 min |
-| 03-react-draft-board | 1/5 | 4 min | 4 min |
+| 03-react-draft-board | 2/5 | 6 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (9 min), 02-03 (3 min), 02-02 (4 min), 03-01 (4 min)
-- Trend: stable
+- Last 5 plans: 02-03 (3 min), 02-02 (4 min), 03-01 (4 min), 03-02 (2 min)
+- Trend: stable-improving
 
 *Updated after each plan completion*
 
@@ -67,6 +67,9 @@ Recent decisions affecting current work:
 - [03-01]: Vite dev proxy for /api and /health avoids CORS in development -- API_BASE defaults to empty string
 - [03-01]: apiFetch generic wrapper centralizes error handling and Content-Type headers for all API calls
 - [03-01]: Draft store uses getSlotArray helper for mode-switching recalculation
+- [03-02]: ChampionIcon uses React.memo to avoid re-rendering 167 icons on every state change
+- [03-02]: BanRow and PickSlot construct DDragon URLs directly rather than looking up from useChampions data
+- [03-02]: DraftControls builds PredictRequest with role-to-champion mapping fallback
 
 ### Pending Todos
 
@@ -84,6 +87,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-25T11:56:19Z
-Stopped at: Completed 03-01-PLAN.md -- Frontend foundation (Vite + React + Zustand + TanStack Query)
+Last session: 2026-02-25T12:01:04Z
+Stopped at: Completed 03-02-PLAN.md -- UI components (champion grid, draft board, team panels, controls)
 Resume file: None
