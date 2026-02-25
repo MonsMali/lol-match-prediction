@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Side, DraftAction, DraftMode, SeriesFormat, Role, DraftStep } from '../types'
+import type { Side, DraftAction, DraftMode, SeriesFormat, Role, DraftStep, PredictRequest } from '../types'
 
 // The 20-step professional draft sequence
 export const DRAFT_SEQUENCE: DraftStep[] = [
@@ -79,7 +79,7 @@ interface DraftState {
   selectChampion: (name: string) => void
   setActiveSlot: (team: Side, action: DraftAction, index: number) => void
   setTeam: (side: Side, name: string) => void
-  setRole: (side: Side, role: Role, champion: string) => void
+  setRole: (side: Side, role: Role, champion: string | null) => void
   setMode: (mode: DraftMode) => void
   setSeriesFormat: (format: SeriesFormat) => void
   recordGameResult: (winner: Side) => void
@@ -135,6 +135,41 @@ export function countFilledSlots(state: {
     ...state.bluePicks,
     ...state.redPicks,
   ].filter((s) => s !== null).length
+}
+
+const ROLES: Role[] = ['top', 'jungle', 'mid', 'bot', 'support']
+
+/** Build a PredictRequest from current store state */
+export function buildPredictRequest(): PredictRequest {
+  const state = useDraftStore.getState()
+  const bluePicksMap: Record<string, string> = {} as Record<string, string>
+  const redPicksMap: Record<string, string> = {} as Record<string, string>
+
+  for (const role of ROLES) {
+    bluePicksMap[role] = state.blueRoles[role] ?? state.bluePicks[ROLES.indexOf(role)] ?? 'UNKNOWN'
+    redPicksMap[role] = state.redRoles[role] ?? state.redPicks[ROLES.indexOf(role)] ?? 'UNKNOWN'
+  }
+
+  return {
+    blue_team: state.blueTeam ?? '',
+    red_team: state.redTeam ?? '',
+    blue_picks: {
+      top: bluePicksMap.top,
+      jungle: bluePicksMap.jungle,
+      mid: bluePicksMap.mid,
+      bot: bluePicksMap.bot,
+      support: bluePicksMap.support,
+    },
+    red_picks: {
+      top: redPicksMap.top,
+      jungle: redPicksMap.jungle,
+      mid: redPicksMap.mid,
+      bot: redPicksMap.bot,
+      support: redPicksMap.support,
+    },
+    blue_bans: state.blueBans.filter((b): b is string => b !== null),
+    red_bans: state.redBans.filter((b): b is string => b !== null),
+  }
 }
 
 export const useDraftStore = create<DraftState>()((set, get) => ({
@@ -305,7 +340,7 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
     }
   },
 
-  setRole: (side: Side, role: Role, champion: string) => {
+  setRole: (side: Side, role: Role, champion: string | null) => {
     set((prev) => {
       if (side === 'blue') {
         return { blueRoles: { ...prev.blueRoles, [role]: champion } }

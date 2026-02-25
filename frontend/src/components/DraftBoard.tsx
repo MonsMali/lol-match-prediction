@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useDraftStore, countFilledSlots } from '../store/draftStore'
 import { ModeToggle } from './ModeToggle'
 import { TeamPanel } from './TeamPanel'
+import { RoleAssignment } from './RoleAssignment'
 import { WinProbability } from './WinProbability'
 import { DraftControls } from './DraftControls'
 
@@ -75,7 +76,10 @@ export function DraftBoard() {
       )}
 
       <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-start">
-        <TeamPanel side="blue" />
+        <div className="flex flex-col gap-3">
+          <TeamPanel side="blue" />
+          <RoleAssignment side="blue" />
+        </div>
 
         <div className="flex flex-col gap-4 items-center min-w-[200px] pt-12">
           <WinProbability
@@ -86,7 +90,10 @@ export function DraftBoard() {
           <DraftControls onPrediction={handlePrediction} />
         </div>
 
-        <TeamPanel side="red" />
+        <div className="flex flex-col gap-3">
+          <TeamPanel side="red" />
+          <RoleAssignment side="red" />
+        </div>
       </div>
     </div>
   )
