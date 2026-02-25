@@ -1,0 +1,53 @@
+import type { Side, Role } from '../types'
+
+interface PickSlotProps {
+  champion: string | null
+  role: Role | null
+  side: Side
+  slotIndex: number
+  isActive: boolean
+  onClick: () => void
+}
+
+const DDRAGON_BASE = 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion'
+const ROLE_LABELS: Record<string, string> = {
+  top: 'TOP',
+  jungle: 'JGL',
+  mid: 'MID',
+  bot: 'BOT',
+  support: 'SUP',
+}
+
+export function PickSlot({ champion, role, side, slotIndex, isActive, onClick }: PickSlotProps) {
+  const borderColor = side === 'blue' ? 'border-blue-team' : 'border-red-team'
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        relative w-16 h-16 rounded bg-panel-light flex flex-col items-center justify-center
+        border-2 transition-all duration-150
+        ${isActive ? `${borderColor} shadow-lg` : 'border-transparent'}
+        ${!champion ? 'cursor-pointer hover:border-gold/40' : 'cursor-default'}
+      `}
+    >
+      {champion ? (
+        <>
+          <img
+            src={`${DDRAGON_BASE}/${champion}.png`}
+            alt={champion}
+            className="w-full h-full rounded object-cover"
+          />
+          {role && (
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-bold bg-panel px-1 rounded text-text-secondary">
+              {ROLE_LABELS[role] ?? role}
+            </span>
+          )}
+        </>
+      ) : (
+        <span className="text-disabled text-xs font-mono">{slotIndex + 1}</span>
+      )}
+    </button>
+  )
+}
