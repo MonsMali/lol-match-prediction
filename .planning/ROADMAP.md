@@ -91,12 +91,11 @@ Plans:
   3. A keep-alive cron job runs at 10-minute intervals and reduces cold starts during active usage periods
   4. The production deployment uses a trimmed requirements file that excludes XGBoost, LightGBM, CatBoost, and Optuna
 
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: Build React SPA with `npm run build` and configure FastAPI StaticFiles to serve Vite dist output
-- [ ] 04-02: Write Render deployment config (`render.yaml`), trim production requirements, and validate first deploy
-- [ ] 04-03: Implement cold-start UX (frontend warm-up ping, loading screen) and configure keep-alive cron
+- [ ] 04-01-PLAN.md -- Build React SPA, configure FastAPI SPA catch-all, validate production requirements
+- [ ] 04-02-PLAN.md -- Create WarmUpScreen cold-start UX component and render.yaml deployment config
 
 ---
 
@@ -127,5 +126,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. ML Adapter | 3/3 | Complete    | 2026-02-24 |
 | 2. FastAPI Backend | 3/3 | Complete    | 2026-02-24 |
 | 3. React Draft Board | 5/5 | Complete | 2026-02-25 |
-| 4. Integration and Deployment | 0/3 | Not started | - |
+| 4. Integration and Deployment | 0/2 | Not started | - |
 | 5. DDragon Image URL Fix | 0/1 | Not started | - |
