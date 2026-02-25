@@ -48,9 +48,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Best-of-Series
 
-- [ ] **BOS-01**: Best-of-series toggle supports BO3 and BO5 series formats
-- [ ] **BOS-02**: Series score tracking across multiple games
-- [ ] **BOS-03**: User can input a new draft for each game in the series
+- [x] **BOS-01**: Best-of-series toggle supports BO3 and BO5 series formats
+- [x] **BOS-02**: Series score tracking across multiple games
+- [x] **BOS-03**: User can input a new draft for each game in the series
 
 ### Deployment
 
@@ -116,9 +116,9 @@ Deferred to future release. Tracked but not in current roadmap.
 | LIVE-03 | Phase 3 - React Draft Board | Complete |
 | BULK-01 | Phase 3 - React Draft Board | Complete |
 | BULK-02 | Phase 3 - React Draft Board | Complete |
-| BOS-01 | Phase 3 - React Draft Board | Pending |
-| BOS-02 | Phase 3 - React Draft Board | Pending |
-| BOS-03 | Phase 3 - React Draft Board | Pending |
+| BOS-01 | Phase 3 - React Draft Board | Complete |
+| BOS-02 | Phase 3 - React Draft Board | Complete |
+| BOS-03 | Phase 3 - React Draft Board | Complete |
 | DEPLOY-01 | Phase 4 - Integration and Deployment | Pending |
 | DEPLOY-02 | Phase 4 - Integration and Deployment | Pending |
 | DEPLOY-03 | Phase 4 - Integration and Deployment | Pending |

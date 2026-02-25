@@ -8,7 +8,7 @@ The project wraps an existing, trained ML model (82.97% AUC-ROC Logistic Regress
 
 - [x] **Phase 1: ML Adapter** - Refactor the inference path to eliminate the full CSV load and expose a clean `predict_from_draft` interface
 - [x] **Phase 2: FastAPI Backend** - Build the REST API layer with all prediction, champion, team, and model-management endpoints
-- [ ] **Phase 3: React Draft Board** - Build the complete frontend draft simulator with both draft modes, role assignment, and win probability display
+- [x] **Phase 3: React Draft Board** - Build the complete frontend draft simulator with both draft modes, role assignment, and win probability display
 - [ ] **Phase 4: Integration and Deployment** - Connect frontend to live backend, deploy to Render, and implement cold-start UX
 
 ## Phase Details
@@ -71,11 +71,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Scaffold Vite + React + TypeScript + Tailwind v4 project with LoL theme, Zustand draft store, and TanStack Query hooks
-- [ ] 03-02-PLAN.md -- Build ChampionGrid with DDragon portraits and search, draft board layout with team panels, slots, selectors, and mode toggle
-- [ ] 03-03-PLAN.md -- Wire step-by-step live draft mode with 20-step professional draft order and visual turn indicators
-- [ ] 03-04-PLAN.md -- Implement bulk entry mode, role assignment UI, prediction submission, and win probability display
-- [ ] 03-05-PLAN.md -- Add best-of-series tracker (BO3/BO5) with score tracking and visual verification checkpoint
+- [x] 03-01-PLAN.md -- Scaffold Vite + React + TypeScript + Tailwind v4 project with LoL theme, Zustand draft store, and TanStack Query hooks
+- [x] 03-02-PLAN.md -- Build ChampionGrid with DDragon portraits and search, draft board layout with team panels, slots, selectors, and mode toggle
+- [x] 03-03-PLAN.md -- Wire step-by-step live draft mode with 20-step professional draft order and visual turn indicators
+- [x] 03-04-PLAN.md -- Implement bulk entry mode, role assignment UI, prediction submission, and win probability display
+- [x] 03-05-PLAN.md -- Add best-of-series tracker (BO3/BO5) with score tracking and visual verification checkpoint
 
 ---
 
@@ -108,5 +108,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. ML Adapter | 3/3 | Complete    | 2026-02-24 |
 | 2. FastAPI Backend | 3/3 | Complete    | 2026-02-24 |
-| 3. React Draft Board | 0/5 | Not started | - |
+| 3. React Draft Board | 5/5 | Complete | 2026-02-25 |
 | 4. Integration and Deployment | 0/3 | Not started | - |
