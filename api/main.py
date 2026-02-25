@@ -3,13 +3,19 @@
 Creates the app with lifespan-managed model loading, CORS middleware,
 and router inclusion. The LoLDraftAdapter singleton is loaded once at
 startup and stored in app.state for dependency injection.
+
+In production the compiled React SPA is served from ``frontend/dist/``
+via a catch-all route registered *after* all API routers so that
+``/health``, ``/api/*``, and ``/admin/*`` still respond with JSON.
 """
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from src.adapter import LoLDraftAdapter
 
@@ -69,3 +75,18 @@ app.include_router(predict.router)
 app.include_router(champions.router)
 app.include_router(teams.router)
 app.include_router(admin.router)
+
+# ---------------------------------------------------------------------------
+# SPA static file serving (MUST be AFTER all API routers)
+# ---------------------------------------------------------------------------
+DIST_DIR = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+
+if DIST_DIR.is_dir():
+
+    @app.get("/{path:path}")
+    async def serve_spa(path: str):
+        """Serve static files or fall back to index.html for SPA routing."""
+        file_path = DIST_DIR / path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(DIST_DIR / "index.html")
