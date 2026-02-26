@@ -54,11 +54,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Deployment
 
-- [ ] **DEPLOY-01**: Application deploys on Render free tier as single-process (uvicorn)
+- [x] **DEPLOY-01**: Application deploys on Render free tier as single-process (uvicorn)
 - [x] **DEPLOY-02**: Frontend SPA built and served by FastAPI as static files (single deployment)
 - [x] **DEPLOY-03**: Production requirements.txt excludes training-only dependencies (XGBoost, LightGBM, CatBoost, Optuna)
-- [ ] **DEPLOY-04**: Cold-start UX shows loading screen while model initializes (~30s on free tier)
-- [ ] **DEPLOY-05**: Keep-alive strategy reduces cold start frequency for active periods
+- [x] **DEPLOY-04**: Cold-start UX shows loading screen while model initializes (~30s on free tier)
+- [x] **DEPLOY-05**: Keep-alive strategy reduces cold start frequency for active periods
 
 ## v2 Requirements
 
@@ -119,11 +119,11 @@ Deferred to future release. Tracked but not in current roadmap.
 | BOS-01 | Phase 3 - React Draft Board | Complete |
 | BOS-02 | Phase 3 - React Draft Board | Complete |
 | BOS-03 | Phase 3 - React Draft Board | Complete |
-| DEPLOY-01 | Phase 4 - Integration and Deployment | Pending |
+| DEPLOY-01 | Phase 4 - Integration and Deployment | Complete |
 | DEPLOY-02 | Phase 4 - Integration and Deployment | Complete |
 | DEPLOY-03 | Phase 4 - Integration and Deployment | Complete |
-| DEPLOY-04 | Phase 4 - Integration and Deployment | Pending |
-| DEPLOY-05 | Phase 4 - Integration and Deployment | Pending |
+| DEPLOY-04 | Phase 4 - Integration and Deployment | Complete |
+| DEPLOY-05 | Phase 4 - Integration and Deployment | Complete |
 
 **Coverage:**
 - v1 requirements: 31 total
