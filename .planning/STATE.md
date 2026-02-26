@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Users can simulate a professional draft as it happens live and instantly see the predicted win probability for each team
-**Current focus:** Phase 4 - Integration and Deployment (Next)
+**Current focus:** Phase 4 - Integration and Deployment
 
 ## Current Position
 
-Phase: 3 of 4 (React Draft Board) -- COMPLETE
-Plan: 5 of 5 in current phase (all done)
-Status: Phase 3 complete, ready for Phase 4
-Last activity: 2026-02-25 -- Completed 03-05-PLAN.md (Best-of-series tracker and final verification)
+Phase: 4 of 4 (Integration and Deployment)
+Plan: 1 of 2 in current phase (04-01 complete)
+Status: Phase 4 in progress
+Last activity: 2026-02-26 -- Completed 04-01-PLAN.md (SPA integration and production requirements)
 
-Progress: [██████████████████░░] 85%
+Progress: [███████████████████░] 92%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: 4 min
-- Total execution time: 0.83 hours
+- Total execution time: 0.85 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [██████████████████░░] 85%
 | 01-ml-adapter | 3/3 | 18 min | 6 min |
 | 02-fastapi-backend | 3/3 | 16 min | 5 min |
 | 03-react-draft-board | 5/5 | 16 min | 3 min |
+| 04-integration-deployment | 1/2 | 1 min | 1 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (4 min), 03-02 (2 min), 03-03 (2 min), 03-04 (5 min), 03-05 (3 min)
+- Last 5 plans: 03-02 (2 min), 03-03 (2 min), 03-04 (5 min), 03-05 (3 min), 04-01 (1 min)
 - Trend: stable-improving
 
 *Updated after each plan completion*
@@ -79,6 +80,8 @@ Recent decisions affecting current work:
 - [03-05]: SeriesTracker is visually subtle in Single mode (just a dropdown), expands only when BO3/BO5 is selected
 - [03-05]: recordGameResult resets draft internally while preserving teams and series state
 - [03-05]: isSeriesComplete is a computed getter on the store, not a separate state variable
+- [04-01]: SPA catch-all route must be registered AFTER all API routers to preserve JSON responses
+- [04-01]: DIST_DIR guard (if is_dir) allows dev mode without a frontend build present
 
 ### Pending Todos
 
@@ -96,6 +99,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-25T12:25:00Z
-Stopped at: Completed 03-05-PLAN.md -- Phase 3 complete, ready for Phase 4
+Last session: 2026-02-26T09:22:47Z
+Stopped at: Completed 04-01-PLAN.md -- SPA integration and production requirements
 Resume file: None
