@@ -928,7 +928,7 @@ class UltimateLoLPredictor:
         # Save to visualizations directory
         script_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(os.path.dirname(script_dir))
-        viz_dir = os.path.join(project_root, "visualizations")
+        viz_dir = os.path.join(project_root, "outputs", "visualizations")
         os.makedirs(viz_dir, exist_ok=True)
 
         plt.savefig(os.path.join(viz_dir, 'ultimate_test_confusion_matrix.png'), dpi=300, bbox_inches='tight')
@@ -981,14 +981,14 @@ class UltimateLoLPredictor:
             # Save to visualizations directory
             script_dir = os.path.dirname(os.path.abspath(__file__))
             project_root = os.path.dirname(os.path.dirname(script_dir))
-            viz_dir = os.path.join(project_root, "visualizations")
+            viz_dir = os.path.join(project_root, "outputs", "visualizations")
             os.makedirs(viz_dir, exist_ok=True)
-            
+
             plt.savefig(os.path.join(viz_dir, 'ultimate_feature_importance.png'), dpi=300, bbox_inches='tight')
             plt.close()
-            
+
             # Save feature importance data to results directory
-            results_dir = os.path.join(project_root, "results")
+            results_dir = os.path.join(project_root, "outputs", "results")
             os.makedirs(results_dir, exist_ok=True)
             importance_df.to_csv(os.path.join(results_dir, 'ultimate_feature_importance.csv'), index=False)
             

@@ -421,9 +421,27 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
       } else if (team === 'red' && action === 'ban') {
         const arr = [...prev.redBans]; arr[slotIndex] = null; update.redBans = arr
       } else if (team === 'blue' && action === 'pick') {
+        const champion = prev.bluePicks[slotIndex]
         const arr = [...prev.bluePicks]; arr[slotIndex] = null; update.bluePicks = arr
+        // Clear any role assignment for this champion
+        if (champion) {
+          const roles = { ...prev.blueRoles }
+          for (const role of ROLES) {
+            if (roles[role] === champion) roles[role] = null
+          }
+          update.blueRoles = roles
+        }
       } else {
+        const champion = prev.redPicks[slotIndex]
         const arr = [...prev.redPicks]; arr[slotIndex] = null; update.redPicks = arr
+        // Clear any role assignment for this champion
+        if (champion) {
+          const roles = { ...prev.redRoles }
+          for (const role of ROLES) {
+            if (roles[role] === champion) roles[role] = null
+          }
+          update.redRoles = roles
+        }
       }
 
       return update

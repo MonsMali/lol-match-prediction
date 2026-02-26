@@ -4,8 +4,14 @@ data/processed/*.csv
   
 # Trained models
 models/*.joblib
-models/production/*.joblib
 models/experiments/
+
+# Allow production models (needed for deployment)
+!models/production/*.joblib
+# Allow shared artifacts required by the adapter
+!models/champion_meta_strength.joblib
+!models/champion_synergies.joblib
+!models/team_historical_performance.joblib
 
 # Python
 __pycache__/

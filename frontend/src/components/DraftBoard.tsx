@@ -58,7 +58,7 @@ export function DraftBoard() {
               <span className="text-sm text-text-secondary ml-2">-- Assign Roles</span>
             )}
           </div>
-          {currentStep > 0 && !isDraftComplete && (
+          {currentStep > 0 && (
             <button
               type="button"
               onClick={undoLastStep}
