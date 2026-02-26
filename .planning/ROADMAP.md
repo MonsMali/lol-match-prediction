@@ -112,7 +112,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 05-01: Store image_url in Zustand state and update slot components to use it
+- [ ] 05-01-PLAN.md -- Create ChampionImage component with shimmer/fallback and update slot components to use API image_url via lookup hook
 
 ---
 
