@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Users can simulate a professional draft as it happens live and instantly see the predicted win probability for each team
-**Current focus:** Phase 4 - Integration and Deployment
+**Current focus:** Phase 5 - DDragon Image Fix
 
 ## Current Position
 
-Phase: 4 of 4 (Integration and Deployment)
-Plan: 2 of 2 in current phase (04-02 complete)
-Status: All phases complete
-Last activity: 2026-02-26 -- Completed 04-02-PLAN.md (Cold-start UX and Render deployment)
+Phase: 5 (DDragon Image Fix)
+Plan: 1 of 1 in current phase (05-01 complete)
+Status: Phase 05 complete
+Last activity: 2026-02-26 -- Completed 05-01-PLAN.md (DDragon image URL fix)
 
 Progress: [████████████████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: 4 min
-- Total execution time: 0.87 hours
+- Total execution time: 0.90 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [████████████████████] 100%
 | 02-fastapi-backend | 3/3 | 16 min | 5 min |
 | 03-react-draft-board | 5/5 | 16 min | 3 min |
 | 04-integration-deployment | 2/2 | 2 min | 1 min |
+| 05-ddragon-image-fix | 1/1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (2 min), 03-04 (5 min), 03-05 (3 min), 04-01 (1 min), 04-02 (1 min)
+- Last 5 plans: 03-04 (5 min), 03-05 (3 min), 04-01 (1 min), 04-02 (1 min), 05-01 (2 min)
 - Trend: stable-improving
 
 *Updated after each plan completion*
@@ -69,7 +70,9 @@ Recent decisions affecting current work:
 - [03-01]: apiFetch generic wrapper centralizes error handling and Content-Type headers for all API calls
 - [03-01]: Draft store uses getSlotArray helper for mode-switching recalculation
 - [03-02]: ChampionIcon uses React.memo to avoid re-rendering 167 icons on every state change
-- [03-02]: BanRow and PickSlot construct DDragon URLs directly rather than looking up from useChampions data
+- [03-02]: BanRow and PickSlot construct DDragon URLs directly rather than looking up from useChampions data (SUPERSEDED by 05-01)
+- [05-01]: No image retry on error -- show team-colored SVG silhouette immediately
+- [05-01]: Grayscale filter applied via wrapper div around ChampionImage in BanRow to preserve component encapsulation
 - [03-02]: DraftControls builds PredictRequest with role-to-champion mapping fallback
 - [03-03]: Phase labels derived from step ranges (0-5, 6-11, 12-15, 16-19) rather than separate phase state variable
 - [03-03]: Undo action decrements currentStep and clears slot rather than maintaining history stack
@@ -102,6 +105,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-26T09:26:05Z
-Stopped at: Completed 04-02-PLAN.md -- Cold-start UX and Render deployment (all phases complete)
+Last session: 2026-02-26T10:19:27Z
+Stopped at: Completed 05-01-PLAN.md -- DDragon image URL fix (phase 05 complete)
 Resume file: None
