@@ -1,5 +1,6 @@
 import type { Side } from '../types'
 import { useTeams } from '../api/teams'
+import { SearchableSelect } from './SearchableSelect'
 
 interface TeamSelectorProps {
   side: Side
@@ -15,42 +16,31 @@ export function TeamSelector({ side, selectedTeam, onSelect }: TeamSelectorProps
 
   if (isPending || !teams) {
     return (
-      <select disabled className="w-full px-2 py-1.5 rounded bg-panel text-text-secondary text-sm border border-disabled">
-        <option>Loading teams...</option>
-      </select>
+      <div className="w-full px-2 py-1.5 rounded bg-panel text-text-secondary text-sm border border-disabled">
+        Loading teams...
+      </div>
     )
   }
 
   const leagueGroups = LEAGUE_ORDER.filter((league) => league in teams)
   const otherLeagues = Object.keys(teams).filter((league) => !LEAGUE_ORDER.includes(league))
 
+  const options = [
+    ...leagueGroups.flatMap((league) =>
+      teams[league].map((team) => ({ value: team, label: team, group: league }))
+    ),
+    ...otherLeagues.flatMap((league) =>
+      teams[league].map((team) => ({ value: team, label: team, group: 'Other' }))
+    ),
+  ]
+
   return (
-    <select
-      value={selectedTeam ?? ''}
-      onChange={(e) => onSelect(e.target.value)}
-      className={`w-full px-2 py-1.5 rounded bg-panel text-text-primary text-sm border ${borderColor} focus:outline-none`}
-    >
-      <option value="">Select Team</option>
-      {leagueGroups.map((league) => (
-        <optgroup key={league} label={league}>
-          {teams[league].map((team) => (
-            <option key={team} value={team}>
-              {team}
-            </option>
-          ))}
-        </optgroup>
-      ))}
-      {otherLeagues.length > 0 && (
-        <optgroup label="Other">
-          {otherLeagues.flatMap((league) =>
-            teams[league].map((team) => (
-              <option key={team} value={team}>
-                {team}
-              </option>
-            ))
-          )}
-        </optgroup>
-      )}
-    </select>
+    <SearchableSelect
+      options={options}
+      value={selectedTeam}
+      onChange={onSelect}
+      placeholder="Select Team"
+      borderColor={borderColor}
+    />
   )
 }

@@ -10,6 +10,7 @@ via a catch-all route registered *after* all API routers so that
 """
 
 import logging
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -57,11 +58,18 @@ app = FastAPI(
 )
 
 # ---------------------------------------------------------------------------
-# CORS middleware -- allow Vite dev server and common local ports
+# CORS middleware -- allow Vite dev server, common local ports, and any
+# additional origins specified via the CORS_ORIGINS env var (comma-separated).
 # ---------------------------------------------------------------------------
+_default_origins = ["http://localhost:5173", "http://localhost:3000"]
+_extra_origins = [
+    o.strip()
+    for o in os.environ.get("CORS_ORIGINS", "").split(",")
+    if o.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=_default_origins + _extra_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
@@ -86,7 +94,9 @@ if DIST_DIR.is_dir():
     @app.get("/{path:path}")
     async def serve_spa(path: str):
         """Serve static files or fall back to index.html for SPA routing."""
-        file_path = DIST_DIR / path
+        file_path = (DIST_DIR / path).resolve()
+        if not file_path.is_relative_to(DIST_DIR.resolve()):
+            return FileResponse(DIST_DIR / "index.html")
         if file_path.is_file():
             return FileResponse(file_path)
         return FileResponse(DIST_DIR / "index.html")

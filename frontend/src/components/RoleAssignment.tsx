@@ -65,15 +65,26 @@ export function RoleAssignment({ side }: RoleAssignmentProps) {
               <select
                 value={currentRole}
                 onChange={(e) => {
-                  const newRole = e.target.value as Role
-                  if (!newRole) return
+                  const newRole = e.target.value as Role | ''
                   // Clear this champion from any previous role assignment
                   for (const r of ROLES) {
                     if (roles[r] === champion) {
                       setRole(side, r, null)
                     }
                   }
-                  setRole(side, newRole, champion)
+                  // If a role was selected (not "-- Role --"), assign it
+                  if (newRole) {
+                    // If the target role is taken by another champion, swap them
+                    const displaced = roles[newRole]
+                    if (displaced && displaced !== champion) {
+                      // Find the old role of the current champion to give to the displaced one
+                      const oldRole = ROLES.find((r) => roles[r] === champion)
+                      if (oldRole) {
+                        setRole(side, oldRole, displaced)
+                      }
+                    }
+                    setRole(side, newRole, champion)
+                  }
                 }}
                 className="bg-panel text-text-primary text-xs rounded px-2 py-1 border border-panel-light focus:border-gold outline-none"
               >
@@ -81,8 +92,8 @@ export function RoleAssignment({ side }: RoleAssignmentProps) {
                 {ROLES.map((role) => {
                   const taken = roles[role] !== null && roles[role] !== champion
                   return (
-                    <option key={role} value={role} disabled={taken}>
-                      {ROLE_LABELS[role]}{taken ? ' (taken)' : ''}
+                    <option key={role} value={role}>
+                      {ROLE_LABELS[role]}{taken ? ` (${roles[role]})` : ''}
                     </option>
                   )
                 })}

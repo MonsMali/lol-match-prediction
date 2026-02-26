@@ -28,9 +28,36 @@ export interface PredictRequest {
   patch?: string | null
 }
 
+export interface InsightFactor {
+  label: string
+  impact_pct: number
+  description: string
+}
+
+export interface ModelMeta {
+  training_patch: string
+  training_year: number
+  domain: string
+}
+
+export interface ChampionSuggestion {
+  role: string
+  champion: string
+  delta_pct: number
+  current_champion: string
+}
+
 export interface PredictResponse {
   blue_win_probability: number
   red_win_probability: number
+  blue_insights: InsightFactor[]
+  red_insights: InsightFactor[]
+  model: ModelMeta
+}
+
+export interface SuggestionsResponse {
+  blue_suggestions: ChampionSuggestion[]
+  red_suggestions: ChampionSuggestion[]
 }
 
 export interface DraftStep {

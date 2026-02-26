@@ -19,7 +19,7 @@ export function BanRow({ bans, side, activeBanIndex, onSlotClick }: BanRowProps)
       {bans.map((ban, i) => {
         const isActive = activeBanIndex === i
         const isEmpty = !ban
-        const clickable = isEmpty && onSlotClick
+        const clickable = !!onSlotClick
         const banInfo = ban ? championLookup.get(ban) : undefined
 
         return (
@@ -35,7 +35,7 @@ export function BanRow({ bans, side, activeBanIndex, onSlotClick }: BanRowProps)
               ${!isActive && !isEmpty ? 'border-transparent' : ''}
               ${!isActive && isEmpty ? 'border-transparent opacity-40' : ''}
               ${clickable ? 'cursor-pointer hover:border-gold/40 hover:opacity-100' : ''}
-              ${!clickable && !isEmpty ? 'cursor-default' : ''}
+              ${!clickable ? 'cursor-default' : ''}
             `}
           >
             {ban ? (

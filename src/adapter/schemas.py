@@ -6,7 +6,7 @@ to avoid external dependencies.
 """
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -55,12 +55,31 @@ class PredictionResult:
             (e.g. "VotingClassifier").
         model_version: Version string for traceability
             (e.g. "enhanced-v1").
+        blue_insights: Per-prediction impact factors for blue side.
+        red_insights: Per-prediction impact factors for red side.
+        training_patch: The latest patch the model was trained on.
+        training_year: The latest year in training data.
     """
 
     blue_win_prob: float
     red_win_prob: float
     model_name: str
     model_version: str
+    blue_insights: list[dict[str, Any]] = field(default_factory=list)
+    red_insights: list[dict[str, Any]] = field(default_factory=list)
+    training_patch: str = "14.18"
+    training_year: int = 2024
+
+
+@dataclass
+class SuggestionResult:
+    """Champion swap suggestions for both sides.
+
+    Computed asynchronously from the primary prediction.
+    """
+
+    blue_suggestions: list[dict[str, Any]] = field(default_factory=list)
+    red_suggestions: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass

@@ -140,20 +140,21 @@ export function countFilledSlots(state: {
 
 const ROLES: Role[] = ['top', 'jungle', 'mid', 'bot', 'support']
 
-/** Build a PredictRequest from current store state */
-export function buildPredictRequest(): PredictRequest {
-  const state = useDraftStore.getState()
+/** Build a PredictRequest from current store state.
+ *  Convenience overload with no args reads from the store directly. */
+export function buildPredictRequest(state?: Pick<DraftState, 'blueTeam' | 'redTeam' | 'bluePicks' | 'redPicks' | 'blueBans' | 'redBans' | 'blueRoles' | 'redRoles'>): PredictRequest {
+  const s = state ?? useDraftStore.getState()
   const bluePicksMap: Record<string, string> = {} as Record<string, string>
   const redPicksMap: Record<string, string> = {} as Record<string, string>
 
   for (const role of ROLES) {
-    bluePicksMap[role] = state.blueRoles[role] ?? state.bluePicks[ROLES.indexOf(role)] ?? 'UNKNOWN'
-    redPicksMap[role] = state.redRoles[role] ?? state.redPicks[ROLES.indexOf(role)] ?? 'UNKNOWN'
+    bluePicksMap[role] = s.blueRoles[role] ?? s.bluePicks[ROLES.indexOf(role)] ?? 'UNKNOWN'
+    redPicksMap[role] = s.redRoles[role] ?? s.redPicks[ROLES.indexOf(role)] ?? 'UNKNOWN'
   }
 
   return {
-    blue_team: state.blueTeam ?? '',
-    red_team: state.redTeam ?? '',
+    blue_team: s.blueTeam ?? '',
+    red_team: s.redTeam ?? '',
     blue_picks: {
       top: bluePicksMap.top,
       jungle: bluePicksMap.jungle,
@@ -168,9 +169,39 @@ export function buildPredictRequest(): PredictRequest {
       bot: redPicksMap.bot,
       support: redPicksMap.support,
     },
-    blue_bans: state.blueBans.filter((b): b is string => b !== null),
-    red_bans: state.redBans.filter((b): b is string => b !== null),
+    blue_bans: s.blueBans.filter((b): b is string => b !== null),
+    red_bans: s.redBans.filter((b): b is string => b !== null),
   }
+}
+
+/** Set a value into the correct slot array and return partial state update. */
+function updateSlot(
+  prev: DraftState,
+  team: Side,
+  action: DraftAction,
+  index: number,
+  value: string | null,
+): Partial<DraftState> {
+  const key = team === 'blue'
+    ? (action === 'ban' ? 'blueBans' : 'bluePicks')
+    : (action === 'ban' ? 'redBans' : 'redPicks')
+  const arr = [...prev[key]]
+  const oldValue = arr[index]
+  arr[index] = value
+
+  const update: Partial<DraftState> = { [key]: arr }
+
+  // Clear role assignment when removing or replacing a pick
+  if (action === 'pick' && oldValue && oldValue !== value) {
+    const rolesKey = team === 'blue' ? 'blueRoles' : 'redRoles'
+    const roles = { ...prev[rolesKey] }
+    for (const r of ROLES) {
+      if (roles[r] === oldValue) roles[r] = null
+    }
+    update[rolesKey] = roles
+  }
+
+  return update
 }
 
 export const useDraftStore = create<DraftState>()((set, get) => ({
@@ -263,75 +294,29 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
   selectChampion: (name: string) => {
     const state = get()
 
-    if (state.mode === 'live') {
-      if (state.currentStep >= DRAFT_SEQUENCE.length) return
-      // Reject duplicate champion selection
+    if (state.mode === 'live' && state.currentStep < DRAFT_SEQUENCE.length) {
       if (state.usedChampions().has(name)) return
-      const step = DRAFT_SEQUENCE[state.currentStep]
-      const { team, action, slotIndex } = step
+      const { team, action, slotIndex } = DRAFT_SEQUENCE[state.currentStep]
 
-      set((prev) => {
-        const update: Partial<DraftState> = { currentStep: prev.currentStep + 1 }
-
-        if (team === 'blue' && action === 'ban') {
-          const arr = [...prev.blueBans]
-          arr[slotIndex] = name
-          update.blueBans = arr
-        } else if (team === 'red' && action === 'ban') {
-          const arr = [...prev.redBans]
-          arr[slotIndex] = name
-          update.redBans = arr
-        } else if (team === 'blue' && action === 'pick') {
-          const arr = [...prev.bluePicks]
-          arr[slotIndex] = name
-          update.bluePicks = arr
-        } else {
-          const arr = [...prev.redPicks]
-          arr[slotIndex] = name
-          update.redPicks = arr
-        }
-
-        return update
-      })
+      set((prev) => ({
+        ...updateSlot(prev, team, action, slotIndex, name),
+        currentStep: prev.currentStep + 1,
+      }))
     } else {
-      // Bulk mode: place into activeSlot, then auto-advance to next empty slot
       const slot = state.activeSlot
       if (!slot) return
-      // Reject duplicate champion selection
-      if (state.usedChampions().has(name)) return
+      const currentInSlot = getSlotArray(state, slot.team, slot.action)[slot.index]
+      if (state.usedChampions().has(name) && name !== currentInSlot) return
 
       set((prev) => {
-        const { team, action, index } = slot
-        const update: Partial<DraftState> = {}
-
-        if (team === 'blue' && action === 'ban') {
-          const arr = [...prev.blueBans]
-          arr[index] = name
-          update.blueBans = arr
-        } else if (team === 'red' && action === 'ban') {
-          const arr = [...prev.redBans]
-          arr[index] = name
-          update.redBans = arr
-        } else if (team === 'blue' && action === 'pick') {
-          const arr = [...prev.bluePicks]
-          arr[index] = name
-          update.bluePicks = arr
-        } else {
-          const arr = [...prev.redPicks]
-          arr[index] = name
-          update.redPicks = arr
-        }
-
-        // Build a temporary view of the state after placement for auto-advance
+        const slotUpdate = updateSlot(prev, slot.team, slot.action, slot.index, name)
         const nextState = {
-          blueBans: update.blueBans ?? prev.blueBans,
-          redBans: update.redBans ?? prev.redBans,
-          bluePicks: update.bluePicks ?? prev.bluePicks,
-          redPicks: update.redPicks ?? prev.redPicks,
+          blueBans: (slotUpdate.blueBans as (string | null)[] | undefined) ?? prev.blueBans,
+          redBans: (slotUpdate.redBans as (string | null)[] | undefined) ?? prev.redBans,
+          bluePicks: (slotUpdate.bluePicks as (string | null)[] | undefined) ?? prev.bluePicks,
+          redPicks: (slotUpdate.redPicks as (string | null)[] | undefined) ?? prev.redPicks,
         }
-        update.activeSlot = findNextEmptySlot(nextState)
-
-        return update
+        return { ...slotUpdate, activeSlot: findNextEmptySlot(nextState) }
       })
     }
   },
@@ -413,39 +398,10 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
     const prevStep = state.currentStep - 1
     const { team, action, slotIndex } = DRAFT_SEQUENCE[prevStep]
 
-    set((prev) => {
-      const update: Partial<DraftState> = { currentStep: prevStep }
-
-      if (team === 'blue' && action === 'ban') {
-        const arr = [...prev.blueBans]; arr[slotIndex] = null; update.blueBans = arr
-      } else if (team === 'red' && action === 'ban') {
-        const arr = [...prev.redBans]; arr[slotIndex] = null; update.redBans = arr
-      } else if (team === 'blue' && action === 'pick') {
-        const champion = prev.bluePicks[slotIndex]
-        const arr = [...prev.bluePicks]; arr[slotIndex] = null; update.bluePicks = arr
-        // Clear any role assignment for this champion
-        if (champion) {
-          const roles = { ...prev.blueRoles }
-          for (const role of ROLES) {
-            if (roles[role] === champion) roles[role] = null
-          }
-          update.blueRoles = roles
-        }
-      } else {
-        const champion = prev.redPicks[slotIndex]
-        const arr = [...prev.redPicks]; arr[slotIndex] = null; update.redPicks = arr
-        // Clear any role assignment for this champion
-        if (champion) {
-          const roles = { ...prev.redRoles }
-          for (const role of ROLES) {
-            if (roles[role] === champion) roles[role] = null
-          }
-          update.redRoles = roles
-        }
-      }
-
-      return update
-    })
+    set((prev) => ({
+      ...updateSlot(prev, team, action, slotIndex, null),
+      currentStep: prevStep,
+    }))
   },
 
   resetDraft: () => {

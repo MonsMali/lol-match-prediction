@@ -1,8 +1,24 @@
+import { useEffect, useCallback } from 'react'
 import { useDraftStore, buildPredictRequest } from '../store/draftStore'
-import { usePrediction } from '../api/predict'
+import { usePrediction, useSuggestions } from '../api/predict'
+import type { InsightFactor, ChampionSuggestion, ModelMeta } from '../types'
 
-export function DraftControls({ onPrediction }: { onPrediction: (blue: number, red: number) => void }) {
-  const isDraftReady = useDraftStore((s) => s.isDraftReady)
+export interface FullPrediction {
+  blue: number
+  red: number
+  blueInsights: InsightFactor[]
+  redInsights: InsightFactor[]
+  blueSuggestions: ChampionSuggestion[]
+  redSuggestions: ChampionSuggestion[]
+  model: ModelMeta
+}
+
+interface DraftControlsProps {
+  onPrediction: (data: FullPrediction | null) => void
+  onSuggestions: (blue: ChampionSuggestion[], red: ChampionSuggestion[]) => void
+}
+
+export function DraftControls({ onPrediction, onSuggestions }: DraftControlsProps) {
   const resetDraft = useDraftStore((s) => s.resetDraft)
   const resetAll = useDraftStore((s) => s.resetAll)
   const seriesFormat = useDraftStore((s) => s.seriesFormat)
@@ -10,42 +26,89 @@ export function DraftControls({ onPrediction }: { onPrediction: (blue: number, r
   const recordGameResult = useDraftStore((s) => s.recordGameResult)
   const blueTeam = useDraftStore((s) => s.blueTeam)
   const redTeam = useDraftStore((s) => s.redTeam)
+  const blueBans = useDraftStore((s) => s.blueBans)
+  const redBans = useDraftStore((s) => s.redBans)
+  const bluePicks = useDraftStore((s) => s.bluePicks)
+  const redPicks = useDraftStore((s) => s.redPicks)
+  const blueRoles = useDraftStore((s) => s.blueRoles)
+  const redRoles = useDraftStore((s) => s.redRoles)
   const prediction = usePrediction()
+  const suggestions = useSuggestions()
 
-  const ready = isDraftReady()
+  const allSlotsFilled = [...blueBans, ...redBans, ...bluePicks, ...redPicks].every((s) => s !== null)
+  const teamsSelected = blueTeam !== null && redTeam !== null
+  const allRolesAssigned =
+    Object.values(blueRoles).every((v) => v !== null) &&
+    Object.values(redRoles).every((v) => v !== null)
+  const ready = allSlotsFilled && teamsSelected && allRolesAssigned
   const seriesComplete = isSeriesComplete()
   const isSeries = seriesFormat !== 'single'
   const hasPrediction = prediction.isSuccess
 
-  function handlePredict() {
+  const handlePredict = useCallback(() => {
+    if (!ready || prediction.isPending) return
     const request = buildPredictRequest()
+
+    // Fast path: prediction + insights (~15ms)
     prediction.mutate(request, {
       onSuccess: (data) => {
-        onPrediction(data.blue_win_probability, data.red_win_probability)
+        onPrediction({
+          blue: data.blue_win_probability,
+          red: data.red_win_probability,
+          blueInsights: data.blue_insights ?? [],
+          redInsights: data.red_insights ?? [],
+          blueSuggestions: [],
+          redSuggestions: [],
+          model: data.model,
+        })
       },
     })
-  }
+
+    // Async path: suggestions (~100ms), streams in separately
+    suggestions.mutate(request, {
+      onSuccess: (data) => {
+        onSuggestions(
+          data.blue_suggestions ?? [],
+          data.red_suggestions ?? [],
+        )
+      },
+    })
+  }, [ready, prediction, suggestions, onPrediction, onSuggestions])
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+        const target = e.target as HTMLElement
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return
+        handlePredict()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handlePredict])
 
   function handleRecordResult(winner: 'blue' | 'red') {
     recordGameResult(winner)
     prediction.reset()
-    onPrediction(0, 0) // Clear displayed prediction
+    suggestions.reset()
+    onPrediction(null)
   }
 
   function handleResetDraft() {
     resetDraft()
     prediction.reset()
+    suggestions.reset()
   }
 
   function handleResetAll() {
     resetAll()
     prediction.reset()
-    onPrediction(0, 0)
+    suggestions.reset()
+    onPrediction(null)
   }
 
   return (
     <div className="flex flex-col gap-2 items-center">
-      {/* Predict + Reset row */}
       <div className="flex gap-2 justify-center flex-wrap">
         <button
           type="button"
@@ -77,7 +140,6 @@ export function DraftControls({ onPrediction }: { onPrediction: (blue: number, r
         </button>
       </div>
 
-      {/* Series result recording -- only in BO3/BO5 after prediction */}
       {isSeries && hasPrediction && !seriesComplete && (
         <div className="flex flex-col items-center gap-1.5 mt-1">
           <span className="text-xs text-text-secondary">Record Game Result</span>
@@ -100,7 +162,6 @@ export function DraftControls({ onPrediction }: { onPrediction: (blue: number, r
         </div>
       )}
 
-      {/* Series complete -- offer new series */}
       {isSeries && seriesComplete && (
         <div className="flex flex-col items-center gap-1.5 mt-1">
           <button

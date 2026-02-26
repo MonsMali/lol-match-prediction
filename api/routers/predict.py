@@ -1,18 +1,28 @@
-"""POST /api/predict endpoint.
+"""POST /api/predict and POST /api/suggestions endpoints.
 
-Accepts a complete draft payload (10 picks by role + 10 bans + team
-names) and returns blue/red win probabilities via the LoLDraftAdapter.
+/api/predict is the fast path (~15ms): returns win probabilities
+and SHAP-based impact insights.
 
-Champion names are validated at the API layer before calling the
-adapter. Unknown team names are accepted with a silent fallback.
+/api/suggestions is the async path (~100ms): returns champion swap
+recommendations. Called separately so the frontend can render the
+probability bar instantly.
 """
 
+import asyncio
 import logging
+from functools import partial
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from api.dependencies import get_adapter
-from api.schemas import PredictRequest, PredictResponse
+from api.schemas import (
+    ChampionSuggestion,
+    InsightFactor,
+    ModelMeta,
+    PredictRequest,
+    PredictResponse,
+    SuggestionsResponse,
+)
 from src.adapter import LoLDraftAdapter
 from src.adapter.normalization import normalize_champion_name, CHAMPION_ALIASES
 
@@ -21,24 +31,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["prediction"])
 
 
-@router.post("/predict", response_model=PredictResponse)
-def predict(
-    payload: PredictRequest,
-    adapter: LoLDraftAdapter = Depends(get_adapter),
-) -> PredictResponse:
-    """Predict match outcome from a complete draft.
-
-    Validates all 20 champion names (10 picks + 10 bans) against the
-    model's known champion set before calling the adapter. Returns 422
-    if any champion is unrecognized after normalization.
-
-    Unknown team names are silently replaced with a fallback team so
-    the prediction can still proceed (per CONTEXT.md decision).
-    """
-    # ------------------------------------------------------------------
-    # 1. Validate all champion names up front (fail fast)
-    # ------------------------------------------------------------------
-    all_champion_names: list[str] = [
+def _validate_champions(
+    payload: PredictRequest, adapter: LoLDraftAdapter
+) -> None:
+    """Validate all 20 champion names. Raises HTTPException on failure."""
+    all_names: list[str] = [
         payload.blue_picks.top,
         payload.blue_picks.jungle,
         payload.blue_picks.mid,
@@ -52,24 +49,21 @@ def predict(
         *payload.blue_bans,
         *payload.red_bans,
     ]
-
-    invalid_champions: list[str] = []
-    for name in all_champion_names:
+    invalid = []
+    for name in all_names:
         try:
             normalize_champion_name(name, adapter.valid_champions, CHAMPION_ALIASES)
         except ValueError:
-            invalid_champions.append(name)
-
-    if invalid_champions:
+            invalid.append(name)
+    if invalid:
         raise HTTPException(
             status_code=422,
-            detail=f"Invalid champion names: {', '.join(invalid_champions)}",
+            detail=f"Invalid champion names: {', '.join(invalid)}",
         )
 
-    # ------------------------------------------------------------------
-    # 2. Build draft dict for the adapter
-    # ------------------------------------------------------------------
-    draft_dict = {
+
+def _build_draft_dict(payload: PredictRequest) -> dict:
+    return {
         "blue_team": payload.blue_team,
         "red_team": payload.red_team,
         "blue_picks": payload.blue_picks.model_dump(),
@@ -79,33 +73,104 @@ def predict(
         "patch": payload.patch,
     }
 
-    # ------------------------------------------------------------------
-    # 3. Call adapter with silent team fallback
-    # ------------------------------------------------------------------
+
+async def _call_with_team_fallback(adapter, method, draft_dict):
+    """Call an adapter method with silent team fallback on unknown teams."""
+    loop = asyncio.get_running_loop()
     try:
-        result = adapter.predict_from_draft(draft_dict)
+        return await loop.run_in_executor(
+            None, partial(method, draft_dict)
+        )
     except ValueError as exc:
         error_msg = str(exc).lower()
-        # If the error is about an unknown team, retry with fallback
-        if "unknown team" in error_msg:
-            fallback_team = sorted(adapter.valid_teams)[0]
-            logger.warning(
-                "Unknown team in prediction request, falling back to '%s': %s",
-                fallback_team,
-                exc,
-            )
-            if "blue" in error_msg or draft_dict["blue_team"] not in adapter.valid_teams:
-                draft_dict["blue_team"] = fallback_team
-            if "red" in error_msg or draft_dict["red_team"] not in adapter.valid_teams:
-                draft_dict["red_team"] = fallback_team
-            try:
-                result = adapter.predict_from_draft(draft_dict)
-            except ValueError as retry_exc:
-                raise HTTPException(status_code=422, detail=str(retry_exc))
-        else:
+        if "unknown team" not in error_msg:
             raise HTTPException(status_code=422, detail=str(exc))
+
+        fallback_team = sorted(adapter.valid_teams)[0]
+        logger.warning(
+            "Unknown team, falling back to '%s': %s", fallback_team, exc
+        )
+        if "blue" in error_msg or draft_dict["blue_team"] not in adapter.valid_teams:
+            draft_dict["blue_team"] = fallback_team
+        if "red" in error_msg or draft_dict["red_team"] not in adapter.valid_teams:
+            draft_dict["red_team"] = fallback_team
+        try:
+            return await loop.run_in_executor(
+                None, partial(method, draft_dict)
+            )
+        except ValueError as retry_exc:
+            raise HTTPException(status_code=422, detail=str(retry_exc))
+
+
+@router.post("/predict", response_model=PredictResponse)
+async def predict(
+    payload: PredictRequest,
+    adapter: LoLDraftAdapter = Depends(get_adapter),
+) -> PredictResponse:
+    """Fast path: win probabilities + SHAP insights (~15ms)."""
+    _validate_champions(payload, adapter)
+    draft_dict = _build_draft_dict(payload)
+
+    result = await _call_with_team_fallback(
+        adapter, adapter.predict_from_draft, draft_dict
+    )
 
     return PredictResponse(
         blue_win_probability=result.blue_win_prob,
         red_win_probability=result.red_win_prob,
+        blue_insights=[
+            InsightFactor(
+                label=ins["label"],
+                impact_pct=ins["impact_pct"],
+                description=ins["description"],
+            )
+            for ins in result.blue_insights
+        ],
+        red_insights=[
+            InsightFactor(
+                label=ins["label"],
+                impact_pct=ins["impact_pct"],
+                description=ins["description"],
+            )
+            for ins in result.red_insights
+        ],
+        model=ModelMeta(
+            training_patch=result.training_patch,
+            training_year=result.training_year,
+        ),
+    )
+
+
+@router.post("/suggestions", response_model=SuggestionsResponse)
+async def suggestions(
+    payload: PredictRequest,
+    adapter: LoLDraftAdapter = Depends(get_adapter),
+) -> SuggestionsResponse:
+    """Async path: champion swap suggestions (~100ms)."""
+    _validate_champions(payload, adapter)
+    draft_dict = _build_draft_dict(payload)
+
+    result = await _call_with_team_fallback(
+        adapter, adapter.compute_draft_suggestions, draft_dict
+    )
+
+    return SuggestionsResponse(
+        blue_suggestions=[
+            ChampionSuggestion(
+                role=s["role"],
+                champion=s["champion"],
+                delta_pct=s["delta_pct"],
+                current_champion=s["current_champion"],
+            )
+            for s in result.blue_suggestions
+        ],
+        red_suggestions=[
+            ChampionSuggestion(
+                role=s["role"],
+                champion=s["champion"],
+                delta_pct=s["delta_pct"],
+                current_champion=s["current_champion"],
+            )
+            for s in result.red_suggestions
+        ],
     )

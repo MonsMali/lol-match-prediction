@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useChampions } from '../api/champions'
-import { useDraftStore } from '../store/draftStore'
+import { useDraftStore, DRAFT_SEQUENCE } from '../store/draftStore'
 import { ChampionIcon } from './ChampionIcon'
 
 interface ChampionGridProps {
@@ -18,14 +18,19 @@ export function ChampionGrid({ onSelect }: ChampionGridProps) {
 
   const used = usedChampions()
 
-  // Determine if selection is allowed
-  const canSelect = mode === 'live' ? currentStep < 20 : activeSlot !== null
+  // Allow selection during live draft, in bulk mode, or when editing after draft complete
+  const isDraftComplete = mode === 'live' && currentStep >= DRAFT_SEQUENCE.length
+  const canSelect = mode === 'live'
+    ? (currentStep < DRAFT_SEQUENCE.length || (isDraftComplete && activeSlot !== null))
+    : activeSlot !== null
 
   // Build context message
   let contextMessage: string | null = null
   if (mode === 'live') {
-    if (currentStep >= 20) {
-      contextMessage = 'Draft complete'
+    if (isDraftComplete && activeSlot) {
+      contextMessage = 'Click a champion to replace the selected slot'
+    } else if (isDraftComplete) {
+      contextMessage = 'Click a slot to edit, or assign roles below'
     } else {
       const step = currentDraftStep()
       if (step) {
@@ -44,20 +49,32 @@ export function ChampionGrid({ onSelect }: ChampionGridProps) {
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) ?? []
 
+  // When editing a slot, the champion currently in that slot should be selectable
+  let editingChampion: string | null = null
+  if (activeSlot && isDraftComplete) {
+    const state = useDraftStore.getState()
+    const { team, action, index } = activeSlot
+    if (team === 'blue') {
+      editingChampion = action === 'ban' ? state.blueBans[index] : state.bluePicks[index]
+    } else {
+      editingChampion = action === 'ban' ? state.redBans[index] : state.redPicks[index]
+    }
+  }
+
   function handleSelect(name: string) {
     if (!canSelect) return
-    if (used.has(name)) return
+    if (used.has(name) && name !== editingChampion) return
     onSelect(name)
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       <input
         type="text"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Search champions..."
-        className="w-full px-3 py-2 rounded bg-panel text-text-primary placeholder-text-secondary
+        className="w-full px-3 py-1.5 rounded bg-panel text-text-primary text-sm placeholder-text-secondary
           border border-transparent focus:border-gold focus:outline-none transition-colors"
       />
 
@@ -67,9 +84,9 @@ export function ChampionGrid({ onSelect }: ChampionGridProps) {
         </p>
       )}
 
-      <div className="overflow-y-auto max-h-[320px] rounded bg-panel/50 p-2">
+      <div className="overflow-y-auto max-h-[360px] lg:max-h-[440px] rounded bg-panel/50 p-1.5">
         {isPending ? (
-          <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-1">
+          <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-1">
             {Array.from({ length: 50 }).map((_, i) => (
               <div
                 key={i}
@@ -78,15 +95,19 @@ export function ChampionGrid({ onSelect }: ChampionGridProps) {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-1">
-            {filtered.map((champion) => (
-              <ChampionIcon
-                key={champion.name}
-                champion={champion}
-                disabled={used.has(champion.name) || !canSelect}
-                onClick={() => handleSelect(champion.name)}
-              />
-            ))}
+          <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-1">
+            {filtered.map((champion) => {
+              const isUsed = used.has(champion.name)
+              const isEditing = champion.name === editingChampion
+              return (
+                <ChampionIcon
+                  key={champion.name}
+                  champion={champion}
+                  disabled={(isUsed && !isEditing) || !canSelect}
+                  onClick={() => handleSelect(champion.name)}
+                />
+              )
+            })}
           </div>
         )}
       </div>

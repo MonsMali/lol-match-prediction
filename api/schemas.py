@@ -35,15 +35,46 @@ class PredictRequest(BaseModel):
     patch: str | None = None
 
 
-class PredictResponse(BaseModel):
-    """Prediction result with win probabilities only.
+class InsightFactor(BaseModel):
+    """A single impact factor explaining part of the prediction."""
 
-    No metadata, no confidence scores, no echoed draft.
-    Probabilities are floats in [0, 1] and sum to 1.0.
-    """
+    label: str
+    impact_pct: float
+    description: str
+
+
+class ChampionSuggestion(BaseModel):
+    """A suggested champion swap that would improve win probability."""
+
+    role: str
+    champion: str
+    delta_pct: float
+    current_champion: str
+
+
+class ModelMeta(BaseModel):
+    """Staleness and provenance metadata for the model."""
+
+    training_patch: str
+    training_year: int
+    domain: str = "professional"
+
+
+class PredictResponse(BaseModel):
+    """Fast path: win probabilities + SHAP insights + model metadata."""
 
     blue_win_probability: float
     red_win_probability: float
+    blue_insights: list[InsightFactor] = []
+    red_insights: list[InsightFactor] = []
+    model: ModelMeta
+
+
+class SuggestionsResponse(BaseModel):
+    """Async path: champion swap suggestions for both sides."""
+
+    blue_suggestions: list[ChampionSuggestion] = []
+    red_suggestions: list[ChampionSuggestion] = []
 
 
 class ChampionInfo(BaseModel):

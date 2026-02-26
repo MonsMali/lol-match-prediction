@@ -17,7 +17,7 @@ Normalization:
 """
 
 from src.adapter.adapter import LoLDraftAdapter
-from src.adapter.schemas import AdapterStatus, DraftInput, PredictionResult
+from src.adapter.schemas import AdapterStatus, DraftInput, PredictionResult, SuggestionResult
 from src.adapter.normalization import normalize_champion_name, normalize_team_name
 
 

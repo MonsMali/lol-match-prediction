@@ -22,6 +22,10 @@ export function TeamPanel({ side }: TeamPanelProps) {
   const setTeam = useDraftStore((s) => s.setTeam)
   const setActiveSlot = useDraftStore((s) => s.setActiveSlot)
 
+  // Allow editing slots when draft is complete (live mode finished) or in bulk mode
+  const isDraftComplete = mode === 'live' && currentStep >= DRAFT_SEQUENCE.length
+  const allowSlotEditing = mode === 'bulk' || isDraftComplete
+
   // Determine active ban index for live mode
   let activeBanIndex: number | null = null
   if (mode === 'live' && currentStep < DRAFT_SEQUENCE.length) {
@@ -29,7 +33,7 @@ export function TeamPanel({ side }: TeamPanelProps) {
     if (step.team === side && step.action === 'ban') {
       activeBanIndex = step.slotIndex
     }
-  } else if (mode === 'bulk' && activeSlot?.team === side && activeSlot.action === 'ban') {
+  } else if (allowSlotEditing && activeSlot?.team === side && activeSlot.action === 'ban') {
     activeBanIndex = activeSlot.index
   }
 
@@ -40,7 +44,7 @@ export function TeamPanel({ side }: TeamPanelProps) {
     if (step.team === side && step.action === 'pick') {
       activePickIndex = step.slotIndex
     }
-  } else if (mode === 'bulk' && activeSlot?.team === side && activeSlot.action === 'pick') {
+  } else if (allowSlotEditing && activeSlot?.team === side && activeSlot.action === 'pick') {
     activePickIndex = activeSlot.index
   }
 
@@ -56,8 +60,15 @@ export function TeamPanel({ side }: TeamPanelProps) {
 
   const borderSide = side === 'blue' ? 'border-l-2 border-l-blue-team' : 'border-r-2 border-r-red-team'
 
+  const sideLabel = side === 'blue' ? 'Blue Side' : 'Red Side'
+  const sideColor = side === 'blue' ? 'text-blue-team' : 'text-red-team'
+
   return (
-    <div className={`flex flex-col gap-3 p-4 bg-panel rounded ${borderSide}`}>
+    <div className={`flex flex-col gap-2 p-3 bg-panel rounded ${borderSide}`}>
+      <div className="flex items-center justify-between">
+        <span className={`text-xs font-semibold uppercase tracking-wider ${sideColor}`}>{sideLabel}</span>
+        {team && <span className="text-sm font-bold text-text-primary">{team}</span>}
+      </div>
       <TeamSelector
         side={side}
         selectedTeam={team}
@@ -70,7 +81,7 @@ export function TeamPanel({ side }: TeamPanelProps) {
           bans={bans}
           side={side}
           activeBanIndex={activeBanIndex}
-          onSlotClick={mode === 'bulk' ? (index) => setActiveSlot(side, 'ban', index) : undefined}
+          onSlotClick={allowSlotEditing ? (index) => setActiveSlot(side, 'ban', index) : undefined}
         />
       </div>
 
@@ -85,7 +96,7 @@ export function TeamPanel({ side }: TeamPanelProps) {
             slotIndex={i}
             isActive={activePickIndex === i}
             onClick={() => {
-              if (mode === 'bulk' && !champion) {
+              if (allowSlotEditing) {
                 setActiveSlot(side, 'pick', i)
               }
             }}
