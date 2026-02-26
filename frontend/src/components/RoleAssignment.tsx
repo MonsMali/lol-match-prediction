@@ -1,7 +1,7 @@
 import type { Side, Role } from '../types'
 import { useDraftStore } from '../store/draftStore'
-
-const DDRAGON_BASE = 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion'
+import { useChampionLookup } from '../hooks/useChampionLookup'
+import { ChampionImage } from './ChampionImage'
 
 const ROLES: Role[] = ['top', 'jungle', 'mid', 'bot', 'support']
 const ROLE_LABELS: Record<Role, string> = {
@@ -17,6 +17,7 @@ interface RoleAssignmentProps {
 }
 
 export function RoleAssignment({ side }: RoleAssignmentProps) {
+  const championLookup = useChampionLookup()
   const picks = useDraftStore((s) => side === 'blue' ? s.bluePicks : s.redPicks)
   const roles = useDraftStore((s) => side === 'blue' ? s.blueRoles : s.redRoles)
   const setRole = useDraftStore((s) => s.setRole)
@@ -48,15 +49,17 @@ export function RoleAssignment({ side }: RoleAssignmentProps) {
         {picks.map((champion, i) => {
           if (!champion) return null
 
+          const championInfo = champion ? championLookup.get(champion) : undefined
           // Find which role this champion is currently assigned to
           const currentRole = ROLES.find((r) => roles[r] === champion) ?? ''
 
           return (
             <div key={i} className="flex items-center gap-2">
-              <img
-                src={`${DDRAGON_BASE}/${champion}.png`}
+              <ChampionImage
+                src={championInfo?.image_url}
                 alt={champion}
-                className="w-8 h-8 rounded object-cover"
+                side={side}
+                className="w-8 h-8 rounded"
               />
               <span className="text-text-primary text-xs flex-1 truncate">{champion}</span>
               <select

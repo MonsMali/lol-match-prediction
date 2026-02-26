@@ -1,4 +1,6 @@
 import type { Side } from '../types'
+import { useChampionLookup } from '../hooks/useChampionLookup'
+import { ChampionImage } from './ChampionImage'
 
 interface BanRowProps {
   bans: (string | null)[]
@@ -7,9 +9,8 @@ interface BanRowProps {
   onSlotClick?: (index: number) => void
 }
 
-const DDRAGON_BASE = 'https://ddragon.leagueoflegends.com/cdn/14.24.1/img/champion'
-
 export function BanRow({ bans, side, activeBanIndex, onSlotClick }: BanRowProps) {
+  const championLookup = useChampionLookup()
   const borderColor = side === 'blue' ? 'border-blue-team' : 'border-red-team'
   const shadowColor = side === 'blue' ? 'shadow-blue-team/30' : 'shadow-red-team/30'
 
@@ -19,6 +20,7 @@ export function BanRow({ bans, side, activeBanIndex, onSlotClick }: BanRowProps)
         const isActive = activeBanIndex === i
         const isEmpty = !ban
         const clickable = isEmpty && onSlotClick
+        const banInfo = ban ? championLookup.get(ban) : undefined
 
         return (
           <button
@@ -38,11 +40,14 @@ export function BanRow({ bans, side, activeBanIndex, onSlotClick }: BanRowProps)
           >
             {ban ? (
               <>
-                <img
-                  src={`${DDRAGON_BASE}/${ban}.png`}
-                  alt={ban}
-                  className={`w-full h-full rounded object-cover ${isActive ? 'grayscale-0 opacity-80' : 'grayscale opacity-60'}`}
-                />
+                <div className={`w-full h-full ${isActive ? 'grayscale-0 opacity-80' : 'grayscale opacity-60'}`}>
+                  <ChampionImage
+                    src={banInfo?.image_url}
+                    alt={ban}
+                    side={side}
+                    className="w-full h-full rounded"
+                  />
+                </div>
                 <span className="absolute inset-0 flex items-center justify-center text-red-team font-bold text-sm">
                   X
                 </span>
