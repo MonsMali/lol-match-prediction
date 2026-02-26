@@ -24,3 +24,7 @@ Thumbs.db
 # Outputs
 outputs/
 *.log
+
+# Frontend build artifacts
+frontend/dist/
+frontend/node_modules/
