@@ -2,19 +2,18 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-24)
+See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Users can simulate a professional draft as it happens live and instantly see the predicted win probability for each team
-**Current focus:** Phase 5 - DDragon Image Fix
+**Current focus:** v1.0 shipped -- planning next milestone
 
 ## Current Position
 
-Phase: 5 (DDragon Image Fix)
-Plan: 1 of 1 in current phase (05-01 complete)
-Status: Phase 05 complete
-Last activity: 2026-02-26 -- Completed 05-01-PLAN.md (DDragon image URL fix)
+Phase: All v1.0 phases complete (1-5)
+Status: Milestone v1.0 shipped
+Last activity: 2026-02-26 -- Completed v1.0 milestone
 
-Progress: [████████████████████] 100%
+Progress: [████████████████████] 100% (v1.0)
 
 ## Performance Metrics
 
@@ -33,10 +32,6 @@ Progress: [████████████████████] 100%
 | 04-integration-deployment | 2/2 | 2 min | 1 min |
 | 05-ddragon-image-fix | 1/1 | 2 min | 2 min |
 
-**Recent Trend:**
-- Last 5 plans: 03-04 (5 min), 03-05 (3 min), 04-01 (1 min), 04-02 (1 min), 05-01 (2 min)
-- Trend: stable-improving
-
 *Updated after each plan completion*
 
 ## Accumulated Context
@@ -44,50 +39,6 @@ Progress: [████████████████████] 100%
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
-
-- [Init]: Single FastAPI service serves both REST API and compiled React SPA as static files -- one Render deployment, no split cold starts
-- [Init]: Riot Data Dragon CDN used browser-direct for champion portraits -- no backend proxying, no bundled assets
-- [Init]: Model upload endpoint (API-07) is included in v1 but must be protected with a secret token header due to joblib pickle RCE risk
-- [Init]: Railway excluded (trial-only as of 2025); Render free tier is the deployment target
-- [01-01]: Production model is VotingClassifier (RF+GBM+LR+SVM) with 27 features, NOT standalone LogisticRegression -- adapter must use enhanced feature set
-- [01-01]: scikit-learn pinned to 1.5.0 -- model fails to load on newer versions
-- [01-01]: ultimate_feature_engineering.joblib is corrupted -- must use standalone lookup dicts (champion_meta_strength, champion_synergies, team_historical_performance)
-- [01-01]: Patch format is float in lookup dicts but string in encoders -- adapter must handle conversion
-- [01-02]: Feature computation targets 27-feature enhanced set, reverse-engineered from scaler statistics (training code not in codebase)
-- [01-02]: Unseen LabelEncoder values map to -1 (graceful degradation)
-- [01-02]: League defaults to LCK and split to Summer when not inferrable -- minimal impact on predictions
-- [01-03]: Memory footprint confirmed at ~168 MB RSS -- 33% of 512 MB Render budget, leaving 344 MB headroom for FastAPI
-- [02-01]: Team names use canonical full names from training data (Gen.G not GenG, Hanwha Life Esports not HLE)
-- [02-01]: DDragon version pinned to 14.24.1
-- [02-01]: Health endpoint does not use get_adapter dependency -- always responds even during loading
-- [02-02]: Champion validation at API layer before adapter call -- collects all invalid names in single 422 response
-- [02-02]: Unknown teams silently fall back to first sorted valid team (no user-facing error)
-- [02-02]: predict endpoint uses sync def for auto-threading of blocking ML inference
-- [02-03]: Test prediction uses object.__new__ to bypass singleton for artifact validation in isolation
-- [02-03]: Production requirements pin scikit-learn==1.5.0 and exclude training-only deps
-- [03-01]: Vite dev proxy for /api and /health avoids CORS in development -- API_BASE defaults to empty string
-- [03-01]: apiFetch generic wrapper centralizes error handling and Content-Type headers for all API calls
-- [03-01]: Draft store uses getSlotArray helper for mode-switching recalculation
-- [03-02]: ChampionIcon uses React.memo to avoid re-rendering 167 icons on every state change
-- [03-02]: BanRow and PickSlot construct DDragon URLs directly rather than looking up from useChampions data (SUPERSEDED by 05-01)
-- [05-01]: No image retry on error -- show team-colored SVG silhouette immediately
-- [05-01]: Grayscale filter applied via wrapper div around ChampionImage in BanRow to preserve component encapsulation
-- [03-02]: DraftControls builds PredictRequest with role-to-champion mapping fallback
-- [03-03]: Phase labels derived from step ranges (0-5, 6-11, 12-15, 16-19) rather than separate phase state variable
-- [03-03]: Undo action decrements currentStep and clears slot rather than maintaining history stack
-- [03-03]: ChampionGrid disables all icons when draft complete or no active slot to prevent accidental selections
-- [03-04]: buildPredictRequest exported from store module as single source of truth for API request construction
-- [03-04]: setRole accepts string|null to properly clear role assignments for isDraftReady compatibility
-- [03-04]: RoleAssignment renders per-team when 5 picks filled, regardless of mode
-- [03-05]: SeriesTracker is visually subtle in Single mode (just a dropdown), expands only when BO3/BO5 is selected
-- [03-05]: recordGameResult resets draft internally while preserving teams and series state
-- [03-05]: isSeriesComplete is a computed getter on the store, not a separate state variable
-- [04-01]: SPA catch-all route must be registered AFTER all API routers to preserve JSON responses
-- [04-01]: DIST_DIR guard (if is_dir) allows dev mode without a frontend build present
-- [Phase 04]: Used raw fetch for WarmUpScreen health polling -- works independently of QueryClient
-- [Phase 04]: Inline CSS for WarmUpScreen avoids Tailwind class-loading race during cold start
-- [Phase 04]: autoDeploy: false in render.yaml prevents accidental deployments
 
 ### Pending Todos
 
@@ -95,16 +46,13 @@ None.
 
 ### Blockers/Concerns
 
-- [Phase 1 RESOLVED]: All INFER-01 through INFER-04 requirements validated with 13 passing tests
-- [Phase 1 RESOLVED]: RAM footprint measured at ~168 MB for all artifacts -- well within Render free tier limits
-- [Phase 1 RESOLVED]: scikit-learn version confirmed as 1.5.0 via artifact inspection
-- [Phase 1 RESOLVED]: Feature computation for Plan 02 successfully targets the 27-feature enhanced set
-- [Phase 1 RESOLVED]: ultimate_feature_engineering.joblib corruption handled -- standalone dicts sufficient for 27-feature model
-- [Phase 1 MINOR]: League inference hardcoded to LCK -- low impact on predictions, worth noting in API documentation
-- [Phase 3 risk]: Step-by-step live draft mode requires handling UNKNOWN champion tokens for partial drafts -- validate with a test call before building the LIVE mode backend endpoint
+All v1.0 blockers resolved. Known tech debt carried forward:
+- render.yaml env var MODEL_UPLOAD_TOKEN does not match code's ADMIN_TOKEN
+- Dead isPredicting state in DraftBoard.tsx
+- scikit-learn pinned to 1.5.0 (model incompatible with newer versions)
 
 ## Session Continuity
 
-Last session: 2026-02-26T10:19:27Z
-Stopped at: Completed 05-01-PLAN.md -- DDragon image URL fix (phase 05 complete)
+Last session: 2026-02-26
+Stopped at: v1.0 milestone completed and archived
 Resume file: None
