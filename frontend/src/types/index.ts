@@ -47,11 +47,19 @@ export interface ChampionSuggestion {
   current_champion: string
 }
 
+export interface PickImpact {
+  role: string
+  champion: string
+  impact_pct: number
+}
+
 export interface PredictResponse {
   blue_win_probability: number
   red_win_probability: number
   blue_insights: InsightFactor[]
   red_insights: InsightFactor[]
+  blue_pick_impacts: PickImpact[]
+  red_pick_impacts: PickImpact[]
   model: ModelMeta
 }
 

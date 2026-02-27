@@ -1,13 +1,15 @@
 import { useEffect, useCallback } from 'react'
 import { useDraftStore, buildPredictRequest } from '../store/draftStore'
 import { usePrediction, useSuggestions } from '../api/predict'
-import type { InsightFactor, ChampionSuggestion, ModelMeta } from '../types'
+import type { InsightFactor, PickImpact, ChampionSuggestion, ModelMeta } from '../types'
 
 export interface FullPrediction {
   blue: number
   red: number
   blueInsights: InsightFactor[]
   redInsights: InsightFactor[]
+  bluePickImpacts: PickImpact[]
+  redPickImpacts: PickImpact[]
   blueSuggestions: ChampionSuggestion[]
   redSuggestions: ChampionSuggestion[]
   model: ModelMeta
@@ -57,6 +59,8 @@ export function DraftControls({ onPrediction, onSuggestions }: DraftControlsProp
           red: data.red_win_probability,
           blueInsights: data.blue_insights ?? [],
           redInsights: data.red_insights ?? [],
+          bluePickImpacts: data.blue_pick_impacts ?? [],
+          redPickImpacts: data.red_pick_impacts ?? [],
           blueSuggestions: [],
           redSuggestions: [],
           model: data.model,

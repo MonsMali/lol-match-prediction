@@ -10,7 +10,7 @@ import { ChampionGrid } from './ChampionGrid'
 import { InsightPanel } from './InsightPanel'
 import { SuggestionPanel } from './SuggestionPanel'
 import { ModelBanner } from './ModelBanner'
-import type { InsightFactor, ChampionSuggestion, ModelMeta } from '../types'
+import type { InsightFactor, PickImpact, ChampionSuggestion, ModelMeta } from '../types'
 
 interface PredictionEntry {
   blue: number
@@ -25,6 +25,8 @@ export interface FullPrediction {
   red: number
   blueInsights: InsightFactor[]
   redInsights: InsightFactor[]
+  bluePickImpacts: PickImpact[]
+  redPickImpacts: PickImpact[]
   blueSuggestions: ChampionSuggestion[]
   redSuggestions: ChampionSuggestion[]
   model: ModelMeta
@@ -164,6 +166,8 @@ export function DraftBoard() {
               <InsightPanel
                 blueInsights={prediction.blueInsights}
                 redInsights={prediction.redInsights}
+                bluePickImpacts={prediction.bluePickImpacts}
+                redPickImpacts={prediction.redPickImpacts}
                 blueTeam={blueTeam ?? 'Blue'}
                 redTeam={redTeam ?? 'Red'}
               />
@@ -209,6 +213,8 @@ export function DraftBoard() {
             <InsightPanel
               blueInsights={prediction.blueInsights}
               redInsights={prediction.redInsights}
+              bluePickImpacts={prediction.bluePickImpacts}
+              redPickImpacts={prediction.redPickImpacts}
               blueTeam={blueTeam ?? 'Blue'}
               redTeam={redTeam ?? 'Red'}
             />
