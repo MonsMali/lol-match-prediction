@@ -93,12 +93,16 @@ class CompleteTargetDatasetCreator:
             print(f"    Loaded: {original_size:,} total matches")
             
             #  CRITICAL: Only extract PRE-MATCH information (no data leakage!)
+            # NOTE: gamelength is included for historical champion profiling
+            # (early/late game strength). It is aggregated across past matches,
+            # never used as a feature from the current match being predicted.
             pre_match_columns = [
                 'gameid', 'league', 'date', 'patch', 'split', 'playoffs', 'year', 'game',
                 'teamname', 'team', 'side', 'result',  # Core info
                 'champion',  # Individual champion (will map to positions)
                 'position',  # Position info
                 'ban1', 'ban2', 'ban3', 'ban4', 'ban5',  # Bans
+                'gamelength',  # For historical champion early/late game profiling
                 # Champion picks by position (if available)
                 'top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion'
             ]
@@ -271,7 +275,8 @@ class CompleteTargetDatasetCreator:
                 'game': first_row.get('game', 1),
                 'team': team,
                 'side': first_row.get('side', 'Blue'),
-                'result': first_row.get('result', 0)
+                'result': first_row.get('result', 0),
+                'game_length': first_row.get('gamelength', 30)
             }
             
             # Add bans (same for all players in team)

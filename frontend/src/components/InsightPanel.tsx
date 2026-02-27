@@ -10,7 +10,6 @@ interface InsightPanelProps {
 function InsightList({ insights, side }: { insights: InsightFactor[]; side: 'blue' | 'red' }) {
   if (insights.length === 0) return null
 
-  const colorClass = side === 'blue' ? 'text-blue-team' : 'text-red-team'
   const barBg = side === 'blue' ? 'bg-blue-team' : 'bg-red-team'
 
   return (

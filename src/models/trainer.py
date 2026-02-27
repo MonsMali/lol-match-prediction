@@ -60,6 +60,29 @@ except ImportError:
 
 warnings.filterwarnings('ignore')
 
+# GPU Detection
+GPU_AVAILABLE = False
+GPU_DEVICE_NAME = "N/A"
+try:
+    import torch
+    GPU_AVAILABLE = torch.cuda.is_available()
+    if GPU_AVAILABLE:
+        GPU_DEVICE_NAME = torch.cuda.get_device_name(0)
+        print(f"GPU detected: {GPU_DEVICE_NAME}")
+    else:
+        print("No GPU detected. Training will use CPU.")
+except ImportError:
+    # Try XGBoost's built-in GPU check as fallback
+    try:
+        _test = xgb.XGBClassifier(tree_method='gpu_hist', n_estimators=1)
+        _test.fit(np.array([[0]]), np.array([0]))
+        GPU_AVAILABLE = True
+        GPU_DEVICE_NAME = "CUDA (detected via XGBoost)"
+        print(f"GPU detected via XGBoost: CUDA available")
+    except Exception:
+        print("No GPU detected. Training will use CPU.")
+
+
 class UltimateLoLPredictor:
     """
     Ultimate League of Legends match prediction system combining:
@@ -479,7 +502,9 @@ class UltimateLoLPredictor:
                 },
                 'XGBoost': {
                     'model': xgb.XGBClassifier(
-                        random_state=42, n_jobs=-1, eval_metric='logloss'
+                        random_state=42, n_jobs=-1, eval_metric='logloss',
+                        tree_method='gpu_hist' if GPU_AVAILABLE else 'hist',
+                        gpu_id=0 if GPU_AVAILABLE else None
                     ),
                     'params': {
                         'n_estimators': [200],
@@ -490,7 +515,8 @@ class UltimateLoLPredictor:
                 },
                 'LightGBM': {
                     'model': lgb.LGBMClassifier(
-                        random_state=42, n_jobs=-1, class_weight='balanced', verbose=-1
+                        random_state=42, n_jobs=-1, class_weight='balanced', verbose=-1,
+                        device='gpu' if GPU_AVAILABLE else 'cpu'
                     ),
                     'params': {
                         'n_estimators': [200],
@@ -540,7 +566,9 @@ class UltimateLoLPredictor:
                 },
                 'XGBoost': {
                     'model': xgb.XGBClassifier(
-                        random_state=42, n_jobs=-1, eval_metric='logloss'
+                        random_state=42, n_jobs=-1, eval_metric='logloss',
+                        tree_method='gpu_hist' if GPU_AVAILABLE else 'hist',
+                        gpu_id=0 if GPU_AVAILABLE else None
                     ),
                     'params': {
                         'n_estimators': [200, 300],
@@ -553,7 +581,8 @@ class UltimateLoLPredictor:
                 },
                 'LightGBM': {
                     'model': lgb.LGBMClassifier(
-                        random_state=42, n_jobs=-1, class_weight='balanced', verbose=-1
+                        random_state=42, n_jobs=-1, class_weight='balanced', verbose=-1,
+                        device='gpu' if GPU_AVAILABLE else 'cpu'
                     ),
                     'params': {
                         'n_estimators': [200, 300],
@@ -603,7 +632,8 @@ class UltimateLoLPredictor:
         if CATBOOST_AVAILABLE:
             models_config['CatBoost'] = {
                 'model': cb.CatBoostClassifier(
-                    random_state=42, verbose=False, auto_class_weights='Balanced'
+                    random_state=42, verbose=False, auto_class_weights='Balanced',
+                    task_type='GPU' if GPU_AVAILABLE else 'CPU'
                 ),
                 'params': {
                     'iterations': [200, 300],
@@ -614,24 +644,46 @@ class UltimateLoLPredictor:
                 'use_scaled': False
             }
         
+        if GPU_AVAILABLE:
+            print(f"\n  GPU Acceleration: Enabled ({GPU_DEVICE_NAME})")
+        else:
+            print(f"\n  GPU Acceleration: Disabled (using CPU)")
+
         # Train each model with hyperparameter optimization
         for name, config in models_config.items():
             print(f"\n Training {name}...")
-            
+
             model = config['model']
             params = config['params']
             use_scaled = config['use_scaled']
-            
+
             # Select appropriate data
             X_train_data = self.X_train_scaled if use_scaled else self.X_train
             X_val_data = self.X_val_scaled if use_scaled else self.X_val
-            
-            # Hyperparameter optimization
+
+            # Hyperparameter optimization with GPU fallback
             grid_search = GridSearchCV(
                 model, params, cv=3, scoring='f1', n_jobs=-1, verbose=0
             )
-            
-            grid_search.fit(X_train_data, self.y_train)
+
+            try:
+                grid_search.fit(X_train_data, self.y_train)
+            except Exception as gpu_error:
+                if GPU_AVAILABLE and name in ('XGBoost', 'LightGBM', 'CatBoost'):
+                    print(f"   GPU training failed for {name}, falling back to CPU: {gpu_error}")
+                    if name == 'XGBoost':
+                        model.set_params(tree_method='hist', gpu_id=None)
+                    elif name == 'LightGBM':
+                        model.set_params(device='cpu')
+                    elif name == 'CatBoost':
+                        model.set_params(task_type='CPU')
+                    grid_search = GridSearchCV(
+                        model, params, cv=3, scoring='f1', n_jobs=-1, verbose=0
+                    )
+                    grid_search.fit(X_train_data, self.y_train)
+                else:
+                    raise
+
             best_model = grid_search.best_estimator_
             
             print(f"   Best params: {grid_search.best_params_}")

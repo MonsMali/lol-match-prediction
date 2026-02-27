@@ -192,6 +192,11 @@ class AdvancedFeatureEngineering:
             ('sup_champion', 'Support')
         ]
 
+        # Ensure game_length column exists (default to 30 min if missing)
+        if 'game_length' not in self.df.columns:
+            print("    game_length column not found, using default (30 min)")
+            self.df['game_length'] = 30
+
         # Melt champion columns into long format: one row per (match, champion, position)
         frames = []
         for col, position in champion_col_positions:

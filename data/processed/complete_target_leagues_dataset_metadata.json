@@ -1,0 +1,86 @@
+{
+  "creation_date": "2026-02-27T10:50:11.443691",
+  "total_matches": 41188,
+  "leagues_included": [
+    "LPL",
+    "WLDs",
+    "MSI",
+    "LCK",
+    "LCS",
+    "LEC"
+  ],
+  "years_covered": [
+    "2014",
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025",
+    "2026"
+  ],
+  "date_range": {
+    "start": "2014-01-14T17:52:02",
+    "end": "2026-02-26T12:55:32"
+  },
+  "processing_stats": {
+    "files_processed": 13,
+    "total_rows_read": 1140588,
+    "target_league_matches": 252264,
+    "final_matches": 41188,
+    "leagues_found": "{'AL', 'UPL', 'EUM', 'EM', 'PCS', 'CISC', 'LIT', 'IC', 'NEST', 'KeSPA', 'Riot', 'VL', 'TCS', 'LMS', 'EPL', 'LES', 'EWC', 'LRN', 'SLO', 'TSC', 'HLL', 'CBLOL', 'LVP SL', 'LCK', 'IGNIS', 'UGP', 'IEM', 'HC', 'BRCC', 'DDH', 'NACL', 'BM', 'LMF', 'BIG', 'GLL', 'CDF', 'CCWS', 'AC', 'UKLC', 'CLS', 'LDL', 'EU LCS', 'EGL', 'MSC', 'LFL2', 'EU CS', 'SL (LATAM)', 'LHE', 'BL', 'HW', 'LEC', 'NASG', 'LSPL', 'OTBLX', 'MSI', 'ASCI', 'ROL', 'CK', 'LFL', 'TCL', 'LAS', 'GLLPA', 'LGL', 'ASI', 'LTA S', 'LTA N', 'LCSA', 'GPL', 'CBLOLA', 'LPLOL', 'FST', 'IWCI', 'LPL', 'LCL', 'NA LCS', 'EBL', 'DL', 'CU', 'PGC', 'NEXO', 'VCS', 'LCKC', 'LCP', 'GSG', 'NLC', 'PRM', 'HM', 'LTA', 'PCL', 'OPL', 'HS', 'LRS', 'DCup', 'LJLA', 'RCL', 'EL', 'CT', 'AOL', 'OCS', 'NLC Aurora Open', 'LJL', 'PGN', 'LCS', 'TPL', 'LLA', 'NERD', 'WLDs', 'UL', 'LLN', 'ESLOL', 'OGN', 'TAL', 'NA CS', 'PRMP', 'USP', 'RL', 'EBLPA', 'CD', 'Asia Master', 'GL', 'LJLCS', 'LCO'}",
+    "years_processed": [
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025,
+      2026
+    ],
+    "data_quality": {}
+  },
+  "league_distribution": {
+    "LPL": 13444,
+    "LCK": 10158,
+    "LEC": 7023,
+    "LCS": 6825,
+    "WLDs": 2459,
+    "MSI": 1279
+  },
+  "columns": [
+    "gameid",
+    "league",
+    "date",
+    "patch",
+    "split",
+    "playoffs",
+    "year",
+    "game",
+    "team",
+    "side",
+    "result",
+    "game_length",
+    "ban1",
+    "ban2",
+    "ban3",
+    "ban4",
+    "ban5",
+    "top_champion",
+    "jng_champion",
+    "mid_champion",
+    "bot_champion",
+    "sup_champion"
+  ]
+}

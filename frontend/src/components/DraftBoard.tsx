@@ -220,7 +220,7 @@ export function DraftBoard() {
             />
           </>
         )}
-        <DraftControls onPrediction={handlePrediction} />
+        <DraftControls onPrediction={handlePrediction} onSuggestions={handleSuggestions} />
       </div>
 
       {/* Prediction history */}

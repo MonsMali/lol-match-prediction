@@ -19,6 +19,17 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full details.
 
 </details>
 
+## Future Ideas
+
+### Auto-Refresh Colab Notebook
+Create a single Colab notebook that, in one "Run All" click:
+1. Downloads the latest Oracle's Elixir raw data for all years
+2. Regenerates the processed dataset (with `game_length`)
+3. Retrains all models with GPU acceleration
+4. Saves the new `.joblib` files back to Google Drive
+
+This keeps the model up to date with new patches and meta shifts without any infrastructure. Could optionally be scheduled with Colab Pro's scheduler to run monthly.
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
