@@ -1,0 +1,38 @@
+# Version control
+.git
+.gitignore
+
+# Virtual environments
+.venv
+venv
+env
+
+# Data and notebooks (not needed for inference)
+data/
+notebooks/
+outputs/
+results/
+previous_run*/
+
+# Frontend source (built in stage 1, only dist is needed in stage 2)
+frontend/node_modules
+frontend/dist
+
+# Dev/training files
+tests/
+scripts/
+docs/
+*.md
+thesis.pdf
+setup.py
+
+# IDE and OS
+.vscode
+.idea
+__pycache__
+*.pyc
+.DS_Store
+Thumbs.db
+
+# Render config (not needed on HF)
+render.yaml
