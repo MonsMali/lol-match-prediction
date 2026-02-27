@@ -1,19 +1,13 @@
 """Exact SHAP-based per-prediction feature impact explanation.
 
-Uses TreeExplainer in interventional mode with probability output
-for RandomForest and GradientBoosting. Produces deterministic,
-exact SHAP values in probability space (~2ms total).
-
-SVM and LogisticRegression are excluded: SVM has no exact
-decomposition (RBF kernel), and LinearExplainer outputs in a
-different scale (raw coefficient space) that cannot be naively
-combined with tree probability-space values.
+Uses LinearExplainer for the Logistic Regression model. This is
+exact and fast (~1ms), producing deterministic SHAP values in
+log-odds space that are converted to probability-space impacts.
 """
 
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -28,187 +22,201 @@ from src.adapter.features import EXPECTED_FEATURES
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Human-readable labels for each feature
+# ---------------------------------------------------------------------------
 _FEATURE_LABELS: dict[str, dict[str, str]] = {
-    "team_avg_meta_strength": {
-        "label": "Champion meta strength",
+    "team_avg_winrate": {
+        "label": "Champion pool strength",
+        "high": "strong champion pool",
+        "low": "weak champion pool",
+    },
+    "team_meta_strength": {
+        "label": "Meta alignment",
         "high": "strong meta picks",
-        "low": "weak meta picks",
+        "low": "off-meta picks",
     },
-    "team_avg_synergy": {
-        "label": "Team synergy",
-        "high": "high champion synergy",
-        "low": "low champion synergy",
+    "team_meta_consistency": {
+        "label": "Draft consistency",
+        "high": "consistently strong picks",
+        "low": "uneven pick strength",
     },
-    "team_composition_strength": {
-        "label": "Composition strength",
-        "high": "strong overall composition",
-        "low": "weak overall composition",
+    "meta_advantage": {
+        "label": "Meta advantage",
+        "high": "above-average meta draft",
+        "low": "below-average meta draft",
     },
-    "team_historical_winrate": {
-        "label": "Team historical form",
+    "team_overall_winrate": {
+        "label": "Team strength",
         "high": "strong historical record",
         "low": "weak historical record",
     },
-    "team_max_meta_strength": {
-        "label": "Strongest pick in meta",
-        "high": "a dominant meta pick",
-        "low": "no standout meta pick",
+    "team_recent_winrate": {
+        "label": "Recent form",
+        "high": "winning recently",
+        "low": "losing recently",
     },
-    "team_min_meta_strength": {
-        "label": "Weakest pick in meta",
-        "high": "no liability picks",
-        "low": "a liability in the draft",
+    "team_form_trend": {
+        "label": "Form trend",
+        "high": "trending upward",
+        "low": "trending downward",
     },
-    "team_meta_variance": {
-        "label": "Draft consistency",
-        "high": "uneven draft strength",
-        "low": "consistent draft strength",
+    "team_experience": {
+        "label": "Team experience",
+        "high": "experienced roster",
+        "low": "limited experience",
     },
-    "team_max_synergy": {
-        "label": "Best champion pairing",
-        "high": "a strong champion pairing",
-        "low": "no standout synergy pair",
+    "team_lane_advantage": {
+        "label": "Lane matchups",
+        "high": "favorable lane matchups",
+        "low": "unfavorable lane matchups",
     },
-    "team_min_synergy": {
-        "label": "Weakest champion pairing",
-        "high": "no weak pairings",
-        "low": "a weak champion pairing",
+    "lane_advantage_consistency": {
+        "label": "Lane consistency",
+        "high": "consistent lane strength",
+        "low": "uneven lane matchups",
     },
-    "team_synergy_variance": {
-        "label": "Synergy consistency",
-        "high": "uneven synergy across pairs",
-        "low": "consistent synergy",
+    "strongest_lane_advantage": {
+        "label": "Best lane matchup",
+        "high": "a dominant lane matchup",
+        "low": "no standout lane",
     },
-    "meta_synergy_product": {
-        "label": "Meta x Synergy",
-        "high": "meta picks that also synergize",
-        "low": "meta picks that clash",
+    "weakest_lane_advantage": {
+        "label": "Weakest lane",
+        "high": "no lane liability",
+        "low": "a vulnerable lane",
     },
-    "meta_synergy_ratio": {
-        "label": "Meta vs Synergy balance",
-        "high": "individually strong picks over team play",
-        "low": "team play over individual strength",
+    "team_archetype_advantage": {
+        "label": "Archetype advantage",
+        "high": "favorable playstyle matchup",
+        "low": "unfavorable playstyle matchup",
     },
-    "historical_meta_product": {
-        "label": "Team form x Meta",
-        "high": "a strong team on strong picks",
-        "low": "team or picks are weak",
+    "team_historical_advantage": {
+        "label": "Head-to-head record",
+        "high": "strong against opponent",
+        "low": "weak against opponent",
     },
-    "composition_strength_gap": {
-        "label": "Draft vs Team form gap",
-        "high": "draft exceeds team baseline",
-        "low": "draft below team baseline",
+    "team_matchup_consistency": {
+        "label": "Matchup consistency",
+        "high": "consistent vs opponents",
+        "low": "inconsistent vs opponents",
     },
-    "ban_pressure_ratio": {
-        "label": "Ban pressure",
-        "high": "bans targeted the opponent",
-        "low": "bans did not pressure picks",
+    "lane_meta_synergy": {
+        "label": "Lane-meta synergy",
+        "high": "meta picks in favorable lanes",
+        "low": "meta picks in weak lanes",
+    },
+    "meta_form_interaction": {
+        "label": "Meta x Form",
+        "high": "strong team on strong meta picks",
+        "low": "form or meta is weak",
+    },
+    "scaling_experience_interaction": {
+        "label": "Scaling x Experience",
+        "high": "experienced team with scaling comp",
+        "low": "scaling comp without experience",
     },
     "side_blue": {
         "label": "Side advantage",
         "high": "blue side advantage",
         "low": "red side advantage",
     },
+    "high_priority_bans": {
+        "label": "Ban pressure",
+        "high": "targeted high-priority bans",
+        "low": "low-impact bans",
+    },
+    "composition_balance": {
+        "label": "Composition balance",
+        "high": "diverse scaling profile",
+        "low": "one-dimensional scaling",
+    },
+    "team_popularity": {
+        "label": "Pick popularity",
+        "high": "popular, proven picks",
+        "low": "niche picks",
+    },
+    "team_flexibility": {
+        "label": "Champion flexibility",
+        "high": "flexible champion picks",
+        "low": "narrow champion picks",
+    },
+    "team_scaling": {
+        "label": "Team scaling",
+        "high": "strong late-game scaling",
+        "low": "weak late-game scaling",
+    },
+    "team_early_strength": {
+        "label": "Early game power",
+        "high": "strong early game",
+        "low": "weak early game",
+    },
+    "team_late_strength": {
+        "label": "Late game power",
+        "high": "strong late game",
+        "low": "weak late game",
+    },
 }
 
+# Features to suppress from insight display (constant or non-informative)
 _SUPPRESS_FEATURES = {
-    "champion_diversity",
+    "champion_count",
+    "composition_historical_winrate",
     "ban_count",
     "ban_diversity",
-    "team_champions_banned",
     "playoffs",
     "year",
-    "league_encoded",
-    "team_encoded",
-    "side_encoded",
-    "patch_encoded",
-    "split_encoded",
+    "lanes_with_advantage",
+    "favorable_matchups",
+    "unfavorable_matchups",
+    "league_target_encoded",
+    "team_target_encoded",
+    "patch_target_encoded",
+    "split_target_encoded",
+    "top_champion_target_encoded",
+    "jng_champion_target_encoded",
+    "mid_champion_target_encoded",
+    "bot_champion_target_encoded",
+    "sup_champion_target_encoded",
 }
 
 _MAX_INSIGHTS = 5
 _MIN_IMPACT = 0.005  # 0.5 percentage points
 
 
-@dataclass
-class EnsembleExplainer:
-    """Weight-averaged exact SHAP explainers for tree estimators.
+def create_explainer(model: Any, scaler: Any) -> Any | None:
+    """Create a SHAP LinearExplainer for the Logistic Regression model.
 
-    All explainers output probability-space values, so they can be
-    directly averaged.
-    """
-
-    explainers: list[tuple[str, Any]]  # (estimator_name, TreeExplainer)
-    weights: list[float]               # normalized weights
-
-    def shap_values(self, X: np.ndarray) -> np.ndarray:
-        """Compute weight-averaged SHAP values in probability space.
-
-        Returns (n_samples, n_features) for the positive class.
-        """
-        weighted_sum = np.zeros((X.shape[0], X.shape[1]))
-
-        for (name, exp), w in zip(self.explainers, self.weights):
-            vals = exp.shap_values(X)
-
-            # TreeExplainer output varies by model:
-            # - RF: (n_samples, n_features, 2) -- take class 1
-            # - GBM: (n_samples, n_features) -- already positive class
-            if isinstance(vals, list):
-                vals = vals[1]
-            elif isinstance(vals, np.ndarray) and vals.ndim == 3:
-                vals = vals[:, :, 1]
-
-            weighted_sum += w * vals
-
-        return weighted_sum
-
-
-def create_explainer(model: Any, scaler: Any) -> EnsembleExplainer | None:
-    """Create exact SHAP explainers for the TreeEnsemble.
-
-    The model is a _TreeEnsemble with .rf, .gbm, .rf_w, .gbm_w
-    attributes. Both estimators get interventional TreeExplainer
-    with model_output='probability'.
+    Uses the scaler mean as background data. LinearExplainer produces
+    exact SHAP values for linear models.
     """
     if not SHAP_AVAILABLE:
         logger.warning("shap not installed -- SHAP insights disabled")
         return None
+
     try:
         background = np.zeros((1, len(EXPECTED_FEATURES)))
-
-        explainers: list[tuple[str, Any]] = []
-        used_weights: list[float] = []
-
-        for name, est, w in [
-            ("RF", model.rf, model.rf_w),
-            ("GBM", model.gbm, model.gbm_w),
-        ]:
-            exp = shap.TreeExplainer(
-                est,
-                data=background,
-                feature_perturbation="interventional",
-                model_output="probability",
-            )
-            explainers.append((name, exp))
-            used_weights.append(w)
-            logger.info("TreeExplainer (probability) ready for %s", name)
-
-        return EnsembleExplainer(explainers=explainers, weights=used_weights)
-
+        explainer = shap.LinearExplainer(
+            model,
+            background,
+            feature_perturbation="interventional",
+        )
+        logger.info("LinearExplainer ready for LogisticRegression")
+        return explainer
     except Exception:
-        logger.warning("Failed to initialize explainers", exc_info=True)
+        logger.warning("Failed to initialize LinearExplainer", exc_info=True)
         return None
 
 
 def compute_impact_insights(
-    explainer: EnsembleExplainer | None,
+    explainer: Any | None,
     scaled_features: np.ndarray,
     side_label: str,
 ) -> list[dict[str, Any]]:
     """Compute human-readable impact insights for a single prediction.
 
     Deterministic: the same input always produces the same output.
-    Returns top factors by absolute impact in probability space.
+    Returns top factors by absolute impact.
     """
     if explainer is None:
         return []
@@ -219,6 +227,10 @@ def compute_impact_insights(
         logger.warning("SHAP value computation failed", exc_info=True)
         return []
 
+    # LinearExplainer may return list [class0, class1] or just class 1
+    if isinstance(shap_values, list):
+        shap_values = shap_values[1] if len(shap_values) > 1 else shap_values[0]
+
     values = shap_values.flatten()
     if len(values) != len(EXPECTED_FEATURES):
         logger.warning(
@@ -227,11 +239,17 @@ def compute_impact_insights(
         )
         return []
 
+    # Convert log-odds SHAP values to approximate probability impact
+    # For LR: sigmoid'(0) = 0.25, so prob_impact ~ shap_value * 0.25
+    # This is a first-order approximation near p=0.5
+    prob_scale = 0.25
+
     candidates = []
     for i, feat_name in enumerate(EXPECTED_FEATURES):
         if feat_name in _SUPPRESS_FEATURES:
             continue
-        impact = float(values[i])
+        raw_impact = float(values[i])
+        impact = raw_impact * prob_scale
         if abs(impact) < _MIN_IMPACT:
             continue
 

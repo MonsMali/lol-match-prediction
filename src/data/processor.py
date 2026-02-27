@@ -101,6 +101,7 @@ class CompleteTargetDatasetCreator:
                 'teamname', 'team', 'side', 'result',  # Core info
                 'champion',  # Individual champion (will map to positions)
                 'position',  # Position info
+                'playername',  # Player name per position
                 'ban1', 'ban2', 'ban3', 'ban4', 'ban5',  # Bans
                 'gamelength',  # For historical champion early/late game profiling
                 # Champion picks by position (if available)
@@ -284,37 +285,46 @@ class CompleteTargetDatasetCreator:
                 ban_col = f'ban{i}'
                 team_match[ban_col] = first_row.get(ban_col, 'NoBan')
             
-            # Pivot champion positions to columns
+            # Pivot champion positions and player names to columns
             position_champion_map = {}
+            position_player_map = {}
             for _, player in group.iterrows():
                 position = player.get('position')
                 champion = player.get('champion')
-                
+                playername = player.get('playername')
+
                 if pd.notna(position) and pd.notna(champion) and position != 'team':
                     # Map positions to expected column names (more flexible)
                     position_mapping = {
-                        'top': 'top_champion',
-                        'jng': 'jng_champion', 
-                        'jungle': 'jng_champion',
-                        'jgl': 'jng_champion',
-                        'mid': 'mid_champion',
-                        'middle': 'mid_champion',
-                        'bot': 'bot_champion',
-                        'adc': 'bot_champion',
-                        'carry': 'bot_champion',
-                        'sup': 'sup_champion',
-                        'support': 'sup_champion',
-                        'supp': 'sup_champion'
+                        'top': 'top',
+                        'jng': 'jng',
+                        'jungle': 'jng',
+                        'jgl': 'jng',
+                        'mid': 'mid',
+                        'middle': 'mid',
+                        'bot': 'bot',
+                        'adc': 'bot',
+                        'carry': 'bot',
+                        'sup': 'sup',
+                        'support': 'sup',
+                        'supp': 'sup'
                     }
-                    
+
                     mapped_position = position_mapping.get(position.lower())
                     if mapped_position:
-                        position_champion_map[mapped_position] = champion
-            
+                        position_champion_map[f'{mapped_position}_champion'] = champion
+                        if pd.notna(playername):
+                            position_player_map[f'{mapped_position}_player'] = str(playername)
+
             # Add champion columns
             required_positions = ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']
             for pos in required_positions:
                 team_match[pos] = position_champion_map.get(pos, 'Unknown')
+
+            # Add player name columns
+            required_players = ['top_player', 'jng_player', 'mid_player', 'bot_player', 'sup_player']
+            for pos in required_players:
+                team_match[pos] = position_player_map.get(pos, 'Unknown')
             
             # Be more lenient - allow up to 2 unknown champions
             unknown_champions = sum(1 for pos in required_positions if team_match[pos] == 'Unknown')

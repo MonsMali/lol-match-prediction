@@ -19,9 +19,11 @@ from api.schemas import (
     ChampionSuggestion,
     InsightFactor,
     ModelMeta,
+    PickImpact,
     PredictRequest,
     PredictResponse,
     SuggestionsResponse,
+    TeamContextResponse,
 )
 from src.adapter import LoLDraftAdapter
 from src.adapter.normalization import normalize_champion_name, CHAMPION_ALIASES
@@ -63,15 +65,25 @@ def _validate_champions(
 
 
 def _build_draft_dict(payload: PredictRequest) -> dict:
-    return {
+    bp = payload.blue_picks
+    rp = payload.red_picks
+    result: dict = {
         "blue_team": payload.blue_team,
         "red_team": payload.red_team,
-        "blue_picks": payload.blue_picks.model_dump(),
-        "red_picks": payload.red_picks.model_dump(),
+        "blue_picks": {"top": bp.top, "jungle": bp.jungle, "mid": bp.mid, "bot": bp.bot, "support": bp.support},
+        "red_picks": {"top": rp.top, "jungle": rp.jungle, "mid": rp.mid, "bot": rp.bot, "support": rp.support},
         "blue_bans": payload.blue_bans,
         "red_bans": payload.red_bans,
         "patch": payload.patch,
     }
+    # Pass player names if provided
+    blue_players = {r: getattr(bp, f"{r}_player") for r in ("top", "jungle", "mid", "bot", "support") if getattr(bp, f"{r}_player", None)}
+    red_players = {r: getattr(rp, f"{r}_player") for r in ("top", "jungle", "mid", "bot", "support") if getattr(rp, f"{r}_player", None)}
+    if blue_players:
+        result["blue_players"] = blue_players
+    if red_players:
+        result["red_players"] = red_players
+    return result
 
 
 async def _call_with_team_fallback(adapter, method, draft_dict):
@@ -115,6 +127,25 @@ async def predict(
         adapter, adapter.predict_from_draft, draft_dict
     )
 
+    blue_ctx = None
+    if result.blue_team_context:
+        tc = result.blue_team_context
+        blue_ctx = TeamContextResponse(
+            historical_winrate=tc.historical_winrate,
+            recent_winrate=tc.recent_winrate,
+            form_trend=tc.form_trend,
+            meta_adaptation=tc.meta_adaptation,
+        )
+    red_ctx = None
+    if result.red_team_context:
+        tc = result.red_team_context
+        red_ctx = TeamContextResponse(
+            historical_winrate=tc.historical_winrate,
+            recent_winrate=tc.recent_winrate,
+            form_trend=tc.form_trend,
+            meta_adaptation=tc.meta_adaptation,
+        )
+
     return PredictResponse(
         blue_win_probability=result.blue_win_prob,
         red_win_probability=result.red_win_prob,
@@ -134,6 +165,24 @@ async def predict(
             )
             for ins in result.red_insights
         ],
+        blue_pick_impacts=[
+            PickImpact(
+                role=p.role,
+                champion=p.champion,
+                impact_pct=p.impact_pct,
+            )
+            for p in result.blue_pick_impacts
+        ],
+        red_pick_impacts=[
+            PickImpact(
+                role=p.role,
+                champion=p.champion,
+                impact_pct=p.impact_pct,
+            )
+            for p in result.red_pick_impacts
+        ],
+        blue_team_context=blue_ctx,
+        red_team_context=red_ctx,
         model=ModelMeta(
             training_patch=result.training_patch,
             training_year=result.training_year,

@@ -16,7 +16,14 @@ export interface TeamDraft {
   mid: string
   bot: string
   support: string
+  top_player?: string | null
+  jungle_player?: string | null
+  mid_player?: string | null
+  bot_player?: string | null
+  support_player?: string | null
 }
+
+export type Rosters = Record<string, Record<Role, string>>
 
 export interface PredictRequest {
   blue_team: string
@@ -53,6 +60,13 @@ export interface PickImpact {
   impact_pct: number
 }
 
+export interface TeamContext {
+  historical_winrate: number
+  recent_winrate: number
+  form_trend: number
+  meta_adaptation: number
+}
+
 export interface PredictResponse {
   blue_win_probability: number
   red_win_probability: number
@@ -60,6 +74,8 @@ export interface PredictResponse {
   red_insights: InsightFactor[]
   blue_pick_impacts: PickImpact[]
   red_pick_impacts: PickImpact[]
+  blue_team_context: TeamContext | null
+  red_team_context: TeamContext | null
   model: ModelMeta
 }
 

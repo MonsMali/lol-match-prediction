@@ -9,8 +9,9 @@ import { DraftControls } from './DraftControls'
 import { ChampionGrid } from './ChampionGrid'
 import { InsightPanel } from './InsightPanel'
 import { SuggestionPanel } from './SuggestionPanel'
+import { TeamStrengthPanel } from './TeamStrengthPanel'
 import { ModelBanner } from './ModelBanner'
-import type { InsightFactor, PickImpact, ChampionSuggestion, ModelMeta } from '../types'
+import type { InsightFactor, PickImpact, ChampionSuggestion, ModelMeta, TeamContext } from '../types'
 
 interface PredictionEntry {
   blue: number
@@ -29,6 +30,8 @@ export interface FullPrediction {
   redPickImpacts: PickImpact[]
   blueSuggestions: ChampionSuggestion[]
   redSuggestions: ChampionSuggestion[]
+  blueTeamContext: TeamContext | null
+  redTeamContext: TeamContext | null
   model: ModelMeta
 }
 
@@ -163,6 +166,12 @@ export function DraftBoard() {
           />
           {prediction && (
             <>
+              <TeamStrengthPanel
+                blueContext={prediction.blueTeamContext}
+                redContext={prediction.redTeamContext}
+                blueTeam={blueTeam ?? 'Blue'}
+                redTeam={redTeam ?? 'Red'}
+              />
               <InsightPanel
                 blueInsights={prediction.blueInsights}
                 redInsights={prediction.redInsights}
@@ -210,6 +219,12 @@ export function DraftBoard() {
         />
         {prediction && (
           <>
+            <TeamStrengthPanel
+              blueContext={prediction.blueTeamContext}
+              redContext={prediction.redTeamContext}
+              blueTeam={blueTeam ?? 'Blue'}
+              redTeam={redTeam ?? 'Red'}
+            />
             <InsightPanel
               blueInsights={prediction.blueInsights}
               redInsights={prediction.redInsights}

@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react'
 import { useDraftStore, buildPredictRequest } from '../store/draftStore'
 import { usePrediction, useSuggestions } from '../api/predict'
-import type { InsightFactor, PickImpact, ChampionSuggestion, ModelMeta } from '../types'
+import type { InsightFactor, PickImpact, ChampionSuggestion, ModelMeta, TeamContext } from '../types'
 
 export interface FullPrediction {
   blue: number
@@ -12,6 +12,8 @@ export interface FullPrediction {
   redPickImpacts: PickImpact[]
   blueSuggestions: ChampionSuggestion[]
   redSuggestions: ChampionSuggestion[]
+  blueTeamContext: TeamContext | null
+  redTeamContext: TeamContext | null
   model: ModelMeta
 }
 
@@ -63,6 +65,8 @@ export function DraftControls({ onPrediction, onSuggestions }: DraftControlsProp
           redPickImpacts: data.red_pick_impacts ?? [],
           blueSuggestions: [],
           redSuggestions: [],
+          blueTeamContext: data.blue_team_context ?? null,
+          redTeamContext: data.red_team_context ?? null,
           model: data.model,
         })
       },

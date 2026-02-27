@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Side, DraftAction, DraftMode, SeriesFormat, Role, DraftStep, PredictRequest } from '../types'
+import type { Side, DraftAction, DraftMode, SeriesFormat, Role, DraftStep, PredictRequest, Rosters } from '../types'
 
 // The 20-step professional draft sequence
 export const DRAFT_SEQUENCE: DraftStep[] = [
@@ -57,6 +57,9 @@ interface DraftState {
   redTeam: string | null
   blueRoles: Record<Role, string | null>
   redRoles: Record<Role, string | null>
+  bluePlayers: Record<Role, string | null>
+  redPlayers: Record<Role, string | null>
+  rosters: Rosters
 
   // Mode and state machine
   mode: DraftMode
@@ -81,6 +84,8 @@ interface DraftState {
   setActiveSlot: (team: Side, action: DraftAction, index: number) => void
   setTeam: (side: Side, name: string) => void
   setRole: (side: Side, role: Role, champion: string | null) => void
+  setPlayer: (side: Side, role: Role, player: string | null) => void
+  setRosters: (rosters: Rosters) => void
   setMode: (mode: DraftMode) => void
   setSeriesFormat: (format: SeriesFormat) => void
   recordGameResult: (winner: Side) => void
@@ -142,7 +147,7 @@ const ROLES: Role[] = ['top', 'jungle', 'mid', 'bot', 'support']
 
 /** Build a PredictRequest from current store state.
  *  Convenience overload with no args reads from the store directly. */
-export function buildPredictRequest(state?: Pick<DraftState, 'blueTeam' | 'redTeam' | 'bluePicks' | 'redPicks' | 'blueBans' | 'redBans' | 'blueRoles' | 'redRoles'>): PredictRequest {
+export function buildPredictRequest(state?: Pick<DraftState, 'blueTeam' | 'redTeam' | 'bluePicks' | 'redPicks' | 'blueBans' | 'redBans' | 'blueRoles' | 'redRoles' | 'bluePlayers' | 'redPlayers'>): PredictRequest {
   const s = state ?? useDraftStore.getState()
   const bluePicksMap: Record<string, string> = {} as Record<string, string>
   const redPicksMap: Record<string, string> = {} as Record<string, string>
@@ -151,6 +156,9 @@ export function buildPredictRequest(state?: Pick<DraftState, 'blueTeam' | 'redTe
     bluePicksMap[role] = s.blueRoles[role] ?? s.bluePicks[ROLES.indexOf(role)] ?? 'UNKNOWN'
     redPicksMap[role] = s.redRoles[role] ?? s.redPicks[ROLES.indexOf(role)] ?? 'UNKNOWN'
   }
+
+  const bp = s.bluePlayers
+  const rp = s.redPlayers
 
   return {
     blue_team: s.blueTeam ?? '',
@@ -161,6 +169,11 @@ export function buildPredictRequest(state?: Pick<DraftState, 'blueTeam' | 'redTe
       mid: bluePicksMap.mid,
       bot: bluePicksMap.bot,
       support: bluePicksMap.support,
+      ...(bp?.top ? { top_player: bp.top } : {}),
+      ...(bp?.jungle ? { jungle_player: bp.jungle } : {}),
+      ...(bp?.mid ? { mid_player: bp.mid } : {}),
+      ...(bp?.bot ? { bot_player: bp.bot } : {}),
+      ...(bp?.support ? { support_player: bp.support } : {}),
     },
     red_picks: {
       top: redPicksMap.top,
@@ -168,6 +181,11 @@ export function buildPredictRequest(state?: Pick<DraftState, 'blueTeam' | 'redTe
       mid: redPicksMap.mid,
       bot: redPicksMap.bot,
       support: redPicksMap.support,
+      ...(rp?.top ? { top_player: rp.top } : {}),
+      ...(rp?.jungle ? { jungle_player: rp.jungle } : {}),
+      ...(rp?.mid ? { mid_player: rp.mid } : {}),
+      ...(rp?.bot ? { bot_player: rp.bot } : {}),
+      ...(rp?.support ? { support_player: rp.support } : {}),
     },
     blue_bans: s.blueBans.filter((b): b is string => b !== null),
     red_bans: s.redBans.filter((b): b is string => b !== null),
@@ -214,6 +232,9 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
   redTeam: null,
   blueRoles: { ...EMPTY_ROLES },
   redRoles: { ...EMPTY_ROLES },
+  bluePlayers: { ...EMPTY_ROLES },
+  redPlayers: { ...EMPTY_ROLES },
+  rosters: {},
   mode: 'live',
   currentStep: 0,
   activeSlot: null,
@@ -326,10 +347,18 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
   },
 
   setTeam: (side: Side, name: string) => {
+    const rosters = get().rosters
+    const roster = rosters[name]
+    const players: Record<Role, string | null> = { ...EMPTY_ROLES }
+    if (roster) {
+      for (const role of ROLES) {
+        players[role] = roster[role] ?? null
+      }
+    }
     if (side === 'blue') {
-      set({ blueTeam: name })
+      set({ blueTeam: name, bluePlayers: players })
     } else {
-      set({ redTeam: name })
+      set({ redTeam: name, redPlayers: players })
     }
   },
 
@@ -340,6 +369,19 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
       }
       return { redRoles: { ...prev.redRoles, [role]: champion } }
     })
+  },
+
+  setPlayer: (side: Side, role: Role, player: string | null) => {
+    set((prev) => {
+      if (side === 'blue') {
+        return { bluePlayers: { ...prev.bluePlayers, [role]: player } }
+      }
+      return { redPlayers: { ...prev.redPlayers, [role]: player } }
+    })
+  },
+
+  setRosters: (rosters: Rosters) => {
+    set({ rosters })
   },
 
   setMode: (mode: DraftMode) => {
@@ -412,6 +454,8 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
       redPicks: createEmptySlots(),
       blueRoles: { ...EMPTY_ROLES },
       redRoles: { ...EMPTY_ROLES },
+      bluePlayers: { ...EMPTY_ROLES },
+      redPlayers: { ...EMPTY_ROLES },
       currentStep: 0,
       activeSlot: null,
     })
@@ -427,6 +471,8 @@ export const useDraftStore = create<DraftState>()((set, get) => ({
       redTeam: null,
       blueRoles: { ...EMPTY_ROLES },
       redRoles: { ...EMPTY_ROLES },
+      bluePlayers: { ...EMPTY_ROLES },
+      redPlayers: { ...EMPTY_ROLES },
       mode: 'live',
       currentStep: 0,
       activeSlot: null,

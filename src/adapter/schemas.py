@@ -36,6 +36,8 @@ class DraftInput:
     red_picks: dict[str, str]
     blue_bans: list[str]
     red_bans: list[str]
+    blue_players: Optional[dict[str, str]] = None
+    red_players: Optional[dict[str, str]] = None
     patch: Optional[str] = None
 
 
@@ -67,8 +69,52 @@ class PredictionResult:
     model_version: str
     blue_insights: list[dict[str, Any]] = field(default_factory=list)
     red_insights: list[dict[str, Any]] = field(default_factory=list)
+    blue_pick_impacts: list[PickImpact] = field(default_factory=list)
+    red_pick_impacts: list[PickImpact] = field(default_factory=list)
+    blue_team_context: "TeamContext | None" = None
+    red_team_context: "TeamContext | None" = None
     training_patch: str = "14.18"
     training_year: int = 2024
+
+
+@dataclass
+class PickImpact:
+    """Marginal impact of a single champion pick on win probability.
+
+    Computed via leave-one-out: replace the champion with a neutral
+    baseline and measure the probability delta.
+
+    Attributes:
+        role: Position (top, jungle, mid, bot, support).
+        champion: Champion display name.
+        impact_pct: Percentage-point change in win probability
+            attributable to this pick (positive = helps, negative = hurts).
+    """
+
+    role: str
+    champion: str
+    impact_pct: float
+
+
+@dataclass
+class TeamContext:
+    """Team-level context surfaced in the prediction response.
+
+    These values are derived from the lookup dicts and represent
+    the team's historical strength independent of the current draft.
+
+    Attributes:
+        historical_winrate: Team's overall win rate (0-1).
+        recent_winrate: Win rate over last 10 matches (0-1).
+        form_trend: Recent minus overall winrate (positive = hot streak).
+        meta_adaptation: Team's average meta strength minus 0.5
+            (positive = above-average meta picks).
+    """
+
+    historical_winrate: float
+    recent_winrate: float
+    form_trend: float
+    meta_adaptation: float
 
 
 @dataclass

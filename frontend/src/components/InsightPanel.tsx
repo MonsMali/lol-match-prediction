@@ -136,7 +136,7 @@ export function InsightPanel({
       {hasInsights && (
         <div>
           <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3 text-center">
-            Key Factors
+            Draft Analysis
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div>

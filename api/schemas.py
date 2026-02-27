@@ -16,6 +16,11 @@ class TeamDraft(BaseModel):
     mid: str
     bot: str
     support: str
+    top_player: str | None = None
+    jungle_player: str | None = None
+    mid_player: str | None = None
+    bot_player: str | None = None
+    support_player: str | None = None
 
 
 class PredictRequest(BaseModel):
@@ -52,6 +57,14 @@ class ChampionSuggestion(BaseModel):
     current_champion: str
 
 
+class PickImpact(BaseModel):
+    """Marginal impact of a single champion pick on win probability."""
+
+    role: str
+    champion: str
+    impact_pct: float
+
+
 class ModelMeta(BaseModel):
     """Staleness and provenance metadata for the model."""
 
@@ -60,13 +73,26 @@ class ModelMeta(BaseModel):
     domain: str = "professional"
 
 
+class TeamContextResponse(BaseModel):
+    """Team-level context surfaced alongside the prediction."""
+
+    historical_winrate: float
+    recent_winrate: float
+    form_trend: float
+    meta_adaptation: float
+
+
 class PredictResponse(BaseModel):
-    """Fast path: win probabilities + SHAP insights + model metadata."""
+    """Fast path: win probabilities + SHAP insights + pick impacts + model metadata."""
 
     blue_win_probability: float
     red_win_probability: float
     blue_insights: list[InsightFactor] = []
     red_insights: list[InsightFactor] = []
+    blue_pick_impacts: list[PickImpact] = []
+    red_pick_impacts: list[PickImpact] = []
+    blue_team_context: TeamContextResponse | None = None
+    red_team_context: TeamContextResponse | None = None
     model: ModelMeta
 
 
@@ -95,6 +121,12 @@ class TeamListResponse(BaseModel):
     """Teams grouped by league."""
 
     teams: dict[str, list[str]]
+
+
+class RosterResponse(BaseModel):
+    """Team rosters: team name -> role -> player name."""
+
+    rosters: dict[str, dict[str, str]]
 
 
 class HealthResponse(BaseModel):

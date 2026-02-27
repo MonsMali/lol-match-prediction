@@ -8,7 +8,8 @@ major league appear under the "Other" key.
 from fastapi import APIRouter, Depends
 
 from api.dependencies import get_adapter
-from api.schemas import TeamListResponse
+from api.roster_data import ROSTERS
+from api.schemas import RosterResponse, TeamListResponse
 from api.team_data import TEAMS_BY_LEAGUE
 from src.adapter import LoLDraftAdapter
 
@@ -41,3 +42,9 @@ async def list_teams(
         result["Other"] = other
 
     return TeamListResponse(teams=result)
+
+
+@router.get("/rosters", response_model=RosterResponse)
+async def list_rosters() -> RosterResponse:
+    """Return current team rosters (role -> player name)."""
+    return RosterResponse(rosters=ROSTERS)

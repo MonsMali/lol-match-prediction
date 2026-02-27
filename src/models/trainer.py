@@ -477,7 +477,183 @@ class UltimateLoLPredictor:
         print(f"   Train: {self.y_train.value_counts(normalize=True).round(3).to_dict()}")
         print(f"   Val: {self.y_val.value_counts(normalize=True).round(3).to_dict()}")
         print(f"   Test: {self.y_test.value_counts(normalize=True).round(3).to_dict()}")
-    
+
+    # =========================================================================
+    # LEAKAGE-FREE PIPELINE
+    # Split first, then compute statistics from training data only.
+    # =========================================================================
+
+    def _compute_split_indices(self, df, method='stratified_temporal',
+                               train_size=0.70, val_size=0.15, test_size=0.15):
+        """Compute train/val/test index sets without touching features.
+
+        Args:
+            df: pd.DataFrame with 'date' and 'year' columns.
+            method: 'stratified_temporal' (year-wise) or 'pure_temporal'.
+            train_size, val_size, test_size: Split ratios (must sum to 1.0).
+
+        Returns:
+            (train_indices, val_indices, test_indices) -- lists of DataFrame index values.
+        """
+        assert abs(train_size + val_size + test_size - 1.0) < 1e-6, \
+            "Split sizes must sum to 1.0"
+
+        df_sorted = df.sort_values('date')
+
+        if method == 'pure_temporal':
+            total = len(df_sorted)
+            train_end = int(total * train_size)
+            val_end = int(total * (train_size + val_size))
+
+            train_idx = df_sorted.index[:train_end].tolist()
+            val_idx = df_sorted.index[train_end:val_end].tolist()
+            test_idx = df_sorted.index[val_end:].tolist()
+
+        else:  # stratified_temporal
+            years = sorted(df_sorted['year'].unique())
+            train_idx, val_idx, test_idx = [], [], []
+
+            for year in years:
+                year_data = df_sorted[df_sorted['year'] == year].sort_values('date')
+                n = len(year_data)
+                if n < 10:
+                    print(f"    Skipping {year}: only {n} matches")
+                    continue
+
+                t_end = int(n * train_size)
+                v_end = int(n * (train_size + val_size))
+
+                indices = year_data.index.tolist()
+                train_idx.extend(indices[:t_end])
+                val_idx.extend(indices[t_end:v_end])
+                test_idx.extend(indices[v_end:])
+
+                print(f"   {year}: {t_end} train, {v_end - t_end} val, {n - v_end} test")
+
+        return train_idx, val_idx, test_idx
+
+    def prepare_features_leakage_free(self, split_method='stratified_temporal',
+                                       train_size=0.70, val_size=0.15, test_size=0.15):
+        """Leakage-free feature preparation: split first, then compute stats.
+
+        Orchestrates the full pipeline:
+        1. Load raw data and handle missing values
+        2. Compute split indices (temporal)
+        3. Derive all aggregate statistics from training data only
+        4. Create features for each split using training-derived stats
+        5. Fit target encoders on train, transform all splits
+        6. Align columns across splits (fill missing with 0.5)
+        7. Scale: fit_transform on train, transform on val/test
+
+        Args:
+            split_method: 'stratified_temporal' or 'pure_temporal'
+            train_size, val_size, test_size: Split ratios.
+        """
+        print("LEAKAGE-FREE FEATURE PREPARATION")
+        print("=" * 80)
+        print(f"   Method: {split_method}")
+        print(f"   Split: {train_size:.0%} train / {val_size:.0%} val / {test_size:.0%} test")
+
+        fe = self.feature_engineering
+
+        # Step 1: Load raw data
+        print("\n Step 1: Loading raw data...")
+        fe.df = pd.read_csv(fe.data_path)
+        print(f"    Loaded dataset: {fe.df.shape}")
+        fe._handle_missing_values()
+
+        # Step 2: Compute split indices on raw data
+        print(f"\n Step 2: Computing {split_method} split indices...")
+        train_idx, val_idx, test_idx = self._compute_split_indices(
+            fe.df, method=split_method,
+            train_size=train_size, val_size=val_size, test_size=test_size
+        )
+        print(f"    Train: {len(train_idx)}, Val: {len(val_idx)}, Test: {len(test_idx)}")
+
+        train_df = fe.df.loc[train_idx]
+        val_df = fe.df.loc[val_idx]
+        test_df = fe.df.loc[test_idx]
+
+        # Step 3: Compute aggregate statistics from training data ONLY
+        print("\n Step 3: Computing statistics from training data only...")
+        fe.analyze_from_subset(train_df)
+
+        # Step 4: Create features for each split using training-derived stats
+        print("\n Step 4: Creating features for each split...")
+        print("    Creating train features...")
+        X_train = fe.create_features_for_split(train_df)
+        print("    Creating val features...")
+        X_val = fe.create_features_for_split(val_df)
+        print("    Creating test features...")
+        X_test = fe.create_features_for_split(test_df)
+
+        # Step 5: Fit target encoders on training, transform all splits
+        print("\n Step 5: Encoding categorical features...")
+        fe.fit_target_encoders(train_df)
+        X_train = fe.apply_encoding_to_split(X_train, train_df)
+        X_val = fe.apply_encoding_to_split(X_val, val_df)
+        X_test = fe.apply_encoding_to_split(X_test, test_df)
+
+        # Step 6: Align columns across splits (union + fill missing with 0.5)
+        print("\n Step 6: Aligning columns across splits...")
+        all_columns = sorted(set(X_train.columns) | set(X_val.columns) | set(X_test.columns))
+
+        for col in all_columns:
+            if col not in X_train.columns:
+                X_train[col] = 0.5
+            if col not in X_val.columns:
+                X_val[col] = 0.5
+            if col not in X_test.columns:
+                X_test[col] = 0.5
+
+        # Ensure consistent column order
+        X_train = X_train[all_columns]
+        X_val = X_val[all_columns]
+        X_test = X_test[all_columns]
+
+        print(f"    Aligned to {len(all_columns)} columns")
+
+        # Store unscaled data
+        self.X_train = X_train
+        self.X_val = X_val
+        self.X_test = X_test
+        self.y_train = fe.df.loc[train_idx, 'result']
+        self.y_val = fe.df.loc[val_idx, 'result']
+        self.y_test = fe.df.loc[test_idx, 'result']
+
+        # Combined X/y for compatibility with other methods
+        self.X = pd.concat([X_train, X_val, X_test])
+        self.y = pd.concat([self.y_train, self.y_val, self.y_test])
+
+        # Step 7: Scale features
+        print("\n Step 7: Scaling features...")
+        self.scaler = StandardScaler()
+        self.X_train_scaled = self.scaler.fit_transform(X_train)
+        self.X_val_scaled = self.scaler.transform(X_val)
+        self.X_test_scaled = self.scaler.transform(X_test)
+
+        # Convert back to DataFrames
+        self.X_train_scaled = pd.DataFrame(
+            self.X_train_scaled, columns=all_columns, index=X_train.index)
+        self.X_val_scaled = pd.DataFrame(
+            self.X_val_scaled, columns=all_columns, index=X_val.index)
+        self.X_test_scaled = pd.DataFrame(
+            self.X_test_scaled, columns=all_columns, index=X_test.index)
+
+        # Summary
+        print(f"\n LEAKAGE-FREE PREPARATION COMPLETE")
+        print(f"    Training:   {self.X_train_scaled.shape}")
+        print(f"    Validation: {self.X_val_scaled.shape}")
+        print(f"    Test:       {self.X_test_scaled.shape}")
+        print(f"    Features:   {len(all_columns)}")
+
+        print(f"\n CLASS DISTRIBUTIONS:")
+        print(f"   Train: {self.y_train.value_counts(normalize=True).round(3).to_dict()}")
+        print(f"   Val: {self.y_val.value_counts(normalize=True).round(3).to_dict()}")
+        print(f"   Test: {self.y_test.value_counts(normalize=True).round(3).to_dict()}")
+
+        return self.X, self.y
+
     def train_advanced_models(self, quick_mode=False):
         """Train multiple advanced ML models."""
         print(f"\n TRAINING ADVANCED MODEL SUITE")
@@ -1077,6 +1253,16 @@ class UltimateLoLPredictor:
         joblib.dump(self.scaler, os.path.join(models_dir, 'ultimate_scaler.joblib'))
         joblib.dump(self.feature_engineering, os.path.join(models_dir, 'ultimate_feature_engineering.joblib'))
 
+        # Save player performance artifacts (for production adapter)
+        if hasattr(self.feature_engineering, 'player_performance') and self.feature_engineering.player_performance:
+            joblib.dump(self.feature_engineering.player_performance,
+                        os.path.join(models_dir, 'player_performance.joblib'))
+            print(f"      player_performance.joblib ({len(self.feature_engineering.player_performance)} players)")
+        if hasattr(self.feature_engineering, 'player_champion_mastery') and self.feature_engineering.player_champion_mastery:
+            joblib.dump(self.feature_engineering.player_champion_mastery,
+                        os.path.join(models_dir, 'player_champion_mastery.joblib'))
+            print(f"      player_champion_mastery.joblib")
+
         # Save ensemble config if available
         if hasattr(self, 'ensemble_config'):
             joblib.dump(self.ensemble_config, os.path.join(models_dir, 'ensemble_config.joblib'))
@@ -1195,26 +1381,41 @@ class UltimateLoLPredictor:
         }
 
 def main(quick_mode=False, use_stratified_temporal=False, use_enhanced_v2=False,
-         use_temporal_weighting=False, calibrate_probs=True, quantify_uncertainty=True):
+         use_temporal_weighting=False, calibrate_probs=True, quantify_uncertainty=True,
+         leakage_free=True, split_method='stratified_temporal',
+         train_size=0.70, val_size=0.15, test_size=0.15):
     """Main execution function.
 
     Args:
         quick_mode: Reduce hyperparameter search for faster training
-        use_stratified_temporal: Use stratified temporal split (meta-aware)
-        use_enhanced_v2: Use enhanced v2 features (side selection, patch transition, etc.)
+        use_stratified_temporal: Use stratified temporal split (legacy pipeline only)
+        use_enhanced_v2: Use enhanced v2 features (legacy pipeline only)
         use_temporal_weighting: Apply temporal sample weighting during training
         calibrate_probs: Apply probability calibration on test set
         quantify_uncertainty: Compute bootstrap confidence intervals
+        leakage_free: Use the leakage-free pipeline (default True). When True,
+            split_method/train_size/val_size/test_size control the split.
+            When False, falls back to the legacy pipeline.
+        split_method: 'stratified_temporal' or 'pure_temporal' (leakage_free only)
+        train_size: Training set proportion (leakage_free only)
+        val_size: Validation set proportion (leakage_free only)
+        test_size: Test set proportion (leakage_free only)
     """
     print("ULTIMATE LEAGUE OF LEGENDS MATCH PREDICTION SYSTEM")
     if quick_mode:
         print("RUNNING IN QUICK MODE - Reduced training time")
-    if use_stratified_temporal:
-        print("USING STRATIFIED TEMPORAL SPLIT - Meta-aware methodology")
+    if leakage_free:
+        print("USING LEAKAGE-FREE PIPELINE - Stats computed from training data only")
+        print(f"   Split method: {split_method}")
+        print(f"   Ratios: {train_size:.0%}/{val_size:.0%}/{test_size:.0%}")
     else:
-        print("USING PURE TEMPORAL SPLIT - Academic rigor methodology")
-    if use_enhanced_v2:
-        print("USING ENHANCED V2 FEATURES - Side selection, patch transition, extended interactions")
+        # Legacy pipeline
+        if use_stratified_temporal:
+            print("USING STRATIFIED TEMPORAL SPLIT - Meta-aware methodology")
+        else:
+            print("USING PURE TEMPORAL SPLIT - Academic rigor methodology")
+        if use_enhanced_v2:
+            print("USING ENHANCED V2 FEATURES")
     if use_temporal_weighting:
         print("USING TEMPORAL WEIGHTING - Recent matches weighted higher")
     print("=" * 80)
@@ -1222,14 +1423,19 @@ def main(quick_mode=False, use_stratified_temporal=False, use_enhanced_v2=False,
     # Initialize ultimate predictor
     predictor = UltimateLoLPredictor()
 
-    # Prepare advanced features (with optional v2 enhancements)
-    X, y = predictor.prepare_advanced_features(use_enhanced_v2=use_enhanced_v2)
-
-    # Split data using chosen methodology
-    if use_stratified_temporal:
-        predictor.split_data_stratified_temporal()
+    if leakage_free:
+        # New leakage-free pipeline: split first, then compute stats
+        X, y = predictor.prepare_features_leakage_free(
+            split_method=split_method,
+            train_size=train_size, val_size=val_size, test_size=test_size
+        )
     else:
-        predictor.split_data_temporally()
+        # Legacy pipeline (deprecated -- kept for comparison)
+        X, y = predictor.prepare_advanced_features(use_enhanced_v2=use_enhanced_v2)
+        if use_stratified_temporal:
+            predictor.split_data_stratified_temporal()
+        else:
+            predictor.split_data_temporally()
 
     # Apply temporal weighting if requested
     if use_temporal_weighting:
@@ -1276,26 +1482,27 @@ def main(quick_mode=False, use_stratified_temporal=False, use_enhanced_v2=False,
 if __name__ == "__main__":
     # Configuration options:
     #
-    # Option 1: Pure temporal (academic rigor)
-    # predictor, results = main(quick_mode=False, use_stratified_temporal=False)
+    # Option 1: Leakage-free pipeline (DEFAULT -- recommended)
+    # predictor, results = main(leakage_free=True, split_method='stratified_temporal')
     #
-    # Option 2: Stratified temporal (meta-aware)
-    # predictor, results = main(quick_mode=False, use_stratified_temporal=True)
+    # Option 2: Leakage-free with pure temporal split
+    # predictor, results = main(leakage_free=True, split_method='pure_temporal')
     #
-    # Option 3: Enhanced v2 features with temporal weighting
+    # Option 3: Legacy pipeline (deprecated -- for comparison only)
     # predictor, results = main(
-    #     quick_mode=False,
+    #     leakage_free=False,
     #     use_stratified_temporal=True,
-    #     use_enhanced_v2=True,
-    #     use_temporal_weighting=True
+    #     use_enhanced_v2=True
     # )
     #
-    # Current: Stratified temporal with all enhancements
+    # Current: Leakage-free stratified temporal (70/15/15)
     predictor, results = main(
         quick_mode=False,
-        use_stratified_temporal=True,
-        use_enhanced_v2=True,
-        use_temporal_weighting=False,  # Can be enabled
+        leakage_free=True,
+        split_method='stratified_temporal',
+        train_size=0.70,
+        val_size=0.15,
+        test_size=0.15,
         calibrate_probs=True,
         quantify_uncertainty=True
-    ) 
+    )

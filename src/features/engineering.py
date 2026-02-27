@@ -8,6 +8,17 @@ import warnings
 import os
 warnings.filterwarnings('ignore')
 
+from src.features.formulas import (
+    META_STRENGTH_WIN_WEIGHT,
+    META_STRENGTH_POP_WEIGHT,
+    META_STRENGTH_POP_CAP,
+    DEFAULT_META,
+    DEFAULT_WINRATE,
+    DEFAULT_CHAMPION_CHAR,
+    DEFAULT_TEAM_PERF,
+    CANONICAL_48_FEATURES,
+)
+
 class AdvancedFeatureEngineering:
     """
     Advanced feature engineering for League of Legends match prediction.
@@ -118,7 +129,10 @@ class AdvancedFeatureEngineering:
         
         # Calculate player performance metrics
         self._calculate_player_metrics()
-        
+
+        # Analyze individual player performance and champion mastery
+        self._analyze_player_performance()
+
         #  NEW: Add recent form and momentum features
         self._add_temporal_momentum_features()
         
@@ -150,6 +164,14 @@ class AdvancedFeatureEngineering:
             self.df[col] = self.df[col].replace('None', 'NoBan')
             self.df[col] = self.df[col].fillna('NoBan')
         
+        # Fill player name data
+        player_cols = [col for col in self.df.columns if '_player' in col.lower()]
+        for col in player_cols:
+            self.df[col] = self.df[col].astype(str)
+            self.df[col] = self.df[col].replace('nan', 'Unknown')
+            self.df[col] = self.df[col].replace('None', 'Unknown')
+            self.df[col] = self.df[col].fillna('Unknown')
+
         # Fill other critical categorical fields
         categorical_cols = ['patch', 'split', 'league', 'team']
         for col in categorical_cols:
@@ -181,7 +203,13 @@ class AdvancedFeatureEngineering:
         print(f"    Dataset shape after cleaning: {self.df.shape}")
     
     def _analyze_champion_characteristics(self):
-        """Analyze champion characteristics and roles (vectorized)."""
+        """Analyze champion characteristics and roles (vectorized).
+
+        NOTE: game_length is post-match data and is NOT used here.
+        Early/late game strength is no longer computed (it required
+        game_length which constitutes data leakage). Instead we rely
+        on win_rate, pick diversity, and position flexibility.
+        """
         print(f"\n ANALYZING CHAMPION CHARACTERISTICS")
 
         champion_col_positions = [
@@ -192,21 +220,15 @@ class AdvancedFeatureEngineering:
             ('sup_champion', 'Support')
         ]
 
-        # Ensure game_length column exists (default to 30 min if missing)
-        if 'game_length' not in self.df.columns:
-            print("    game_length column not found, using default (30 min)")
-            self.df['game_length'] = 30
-
         # Melt champion columns into long format: one row per (match, champion, position)
         frames = []
         for col, position in champion_col_positions:
-            temp = self.df[['result', 'game_length']].copy()
+            temp = self.df[['result']].copy()
             temp['champion'] = self.df[col]
             temp['position'] = position
             frames.append(temp)
 
         long_df = pd.concat(frames, ignore_index=True)
-        long_df['game_length'] = long_df['game_length'].fillna(30)
 
         # Filter out Unknown/NaN champions
         long_df = long_df[long_df['champion'].notna() & (long_df['champion'] != 'Unknown')]
@@ -216,12 +238,6 @@ class AdvancedFeatureEngineering:
 
         games = grouped['result'].count()
         wins = grouped['result'].sum()
-        avg_game_length = grouped['game_length'].mean()
-
-        # Early/late game wins (only for winning matches)
-        win_rows = long_df[long_df['result'] == 1]
-        early_wins = win_rows[win_rows['game_length'] < 25].groupby('champion')['result'].count()
-        late_wins = win_rows[win_rows['game_length'] > 35].groupby('champion')['result'].count()
 
         # Position flexibility: number of unique positions per champion
         positions_per_champ = long_df.groupby('champion')['position'].apply(set)
@@ -233,19 +249,14 @@ class AdvancedFeatureEngineering:
             total_wins = wins[champion]
             win_rate = total_wins / total_games
 
-            e_wins = early_wins.get(champion, 0)
-            l_wins = late_wins.get(champion, 0)
-            early_ratio = e_wins / total_wins if total_wins > 0 else 0
-            late_ratio = l_wins / total_wins if total_wins > 0 else 0
-
             pos_set = positions_per_champ[champion]
 
             self.champion_characteristics[champion] = {
                 'win_rate': win_rate,
-                'avg_game_length': avg_game_length[champion],
-                'early_game_strength': early_ratio,
-                'late_game_strength': late_ratio,
-                'scaling_factor': late_ratio - early_ratio,
+                'avg_game_length': 30,  # Placeholder -- not used in features
+                'early_game_strength': 0.5,  # Removed: required post-match game_length
+                'late_game_strength': 0.5,   # Removed: required post-match game_length
+                'scaling_factor': 0,          # Removed: derived from early/late
                 'flexibility': len(pos_set),
                 'primary_position': max(pos_set) if pos_set else 'Unknown'
             }
@@ -299,7 +310,10 @@ class AdvancedFeatureEngineering:
         merged['pick_rate'] = merged['games'] / (merged['total_games'] * 2)
         merged['ban_rate'] = merged['bans'] / (merged['total_games'] * 2)
         merged['popularity'] = merged['pick_rate'] + merged['ban_rate']
-        merged['meta_strength'] = (merged['win_rate'] * 0.7) + (merged['popularity'].clip(upper=0.5) * 0.3)
+        merged['meta_strength'] = (
+            merged['win_rate'] * META_STRENGTH_WIN_WEIGHT
+            + merged['popularity'].clip(upper=META_STRENGTH_POP_CAP) * META_STRENGTH_POP_WEIGHT
+        )
 
         # Store results
         for _, row in merged.iterrows():
@@ -558,26 +572,55 @@ class AdvancedFeatureEngineering:
         return archetypes
     
     def _calculate_player_metrics(self):
-        """Calculate player performance and champion mastery (vectorized)."""
+        """Calculate player performance and champion mastery (vectorized).
+
+        IMPORTANT: All rolling/cumulative stats use shift(1) to exclude the
+        current match's result, preventing same-row target leakage.
+        Stats are stored per-row (by DataFrame index) so each match gets
+        the team's performance *before* that match, not a global snapshot.
+        """
         print(f"\n CALCULATING PLAYER METRICS")
 
         # Sort chronologically for rolling metrics
         df_sorted = self.df.sort_values('date').copy()
 
-        # Use groupby + expanding/rolling for team-level metrics
-        df_sorted['cumulative_games'] = df_sorted.groupby('team').cumcount() + 1
-        df_sorted['cumulative_wins'] = df_sorted.groupby('team')['result'].cumsum()
-        df_sorted['overall_winrate'] = df_sorted['cumulative_wins'] / df_sorted['cumulative_games']
+        # Cumulative games BEFORE this match (shift by 1)
+        df_sorted['cumulative_games'] = df_sorted.groupby('team').cumcount()  # 0-based = games before this one
+        # Cumulative wins BEFORE this match
+        df_sorted['cumulative_wins'] = (
+            df_sorted.groupby('team')['result']
+            .transform(lambda x: x.cumsum().shift(1).fillna(0))
+        )
+        # Overall win rate using only prior matches
+        df_sorted['overall_winrate'] = np.where(
+            df_sorted['cumulative_games'] > 0,
+            df_sorted['cumulative_wins'] / df_sorted['cumulative_games'],
+            0.5  # No history yet
+        )
 
-        # Rolling last-10 win rate
+        # Rolling last-10 win rate BEFORE this match (shift 1)
         df_sorted['recent_winrate'] = (
             df_sorted.groupby('team')['result']
-            .transform(lambda x: x.rolling(10, min_periods=1).mean())
+            .transform(lambda x: x.rolling(10, min_periods=1).mean().shift(1))
+            .fillna(0.5)
         )
 
         df_sorted['form_trend'] = df_sorted['recent_winrate'] - df_sorted['overall_winrate']
 
-        # Store the FINAL snapshot per team (last row for each team after sorting)
+        # Store PER-ROW metrics (keyed by DataFrame index) so each match
+        # gets the team's performance as of that date, not a global snapshot.
+        self.team_historical_performance_per_row = {}
+        for idx in df_sorted.index:
+            self.team_historical_performance_per_row[idx] = {
+                'overall_winrate': df_sorted.at[idx, 'overall_winrate'],
+                'recent_winrate': df_sorted.at[idx, 'recent_winrate'],
+                'form_trend': df_sorted.at[idx, 'form_trend'],
+                'games_played': int(df_sorted.at[idx, 'cumulative_games'])
+            }
+
+        # Also store per-team final snapshot for backward compatibility
+        # (used by production predictor for new predictions)
+        self.team_historical_performance = {}
         last_per_team = df_sorted.groupby('team').last()
         for team in last_per_team.index:
             row = last_per_team.loc[team]
@@ -589,7 +632,125 @@ class AdvancedFeatureEngineering:
             }
 
         print(f"    Calculated performance metrics for {len(self.team_historical_performance)} teams")
-    
+        print(f"    Stored {len(self.team_historical_performance_per_row)} per-row metrics (leak-free)")
+
+    def _analyze_player_performance(self):
+        """Calculate individual player performance and champion mastery (vectorized).
+
+        All rolling/cumulative stats use shift(1) to exclude the current match,
+        preventing same-row target leakage. Stats are stored per-row (by DataFrame
+        index) and per-player (final snapshot for production use).
+        """
+        print(f"\n ANALYZING PLAYER PERFORMANCE")
+
+        player_cols = ['top_player', 'jng_player', 'mid_player', 'bot_player', 'sup_player']
+        champion_cols = ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']
+        role_names = ['top', 'jungle', 'mid', 'bot', 'support']
+
+        # Check if player columns exist
+        available_player_cols = [c for c in player_cols if c in self.df.columns]
+        if not available_player_cols:
+            print("    No player columns found in dataset, skipping player analysis")
+            self.player_performance_per_row = {}
+            self.player_performance = {}
+            return
+
+        df_sorted = self.df.sort_values('date').copy()
+
+        # Melt into long format: one row per (match_idx, role, player, champion, result)
+        frames = []
+        for pcol, ccol, role in zip(player_cols, champion_cols, role_names):
+            if pcol not in df_sorted.columns:
+                continue
+            temp = df_sorted[['date', 'result']].copy()
+            temp['player'] = df_sorted[pcol]
+            temp['champion'] = df_sorted[ccol] if ccol in df_sorted.columns else 'Unknown'
+            temp['role'] = role
+            temp['orig_idx'] = df_sorted.index
+            frames.append(temp)
+
+        if not frames:
+            self.player_performance_per_row = {}
+            self.player_performance = {}
+            return
+
+        long_df = pd.concat(frames, ignore_index=True)
+        long_df = long_df[long_df['player'] != 'Unknown']
+
+        # --- Per-player overall stats (shift 1) ---
+        long_df = long_df.sort_values('date')
+        long_df['cum_games'] = long_df.groupby('player').cumcount()  # 0-based = games before this one
+        long_df['cum_wins'] = (
+            long_df.groupby('player')['result']
+            .transform(lambda x: x.cumsum().shift(1).fillna(0))
+        )
+        long_df['player_overall_winrate'] = np.where(
+            long_df['cum_games'] > 0,
+            long_df['cum_wins'] / long_df['cum_games'],
+            0.5
+        )
+        long_df['player_recent_winrate'] = (
+            long_df.groupby('player')['result']
+            .transform(lambda x: x.rolling(10, min_periods=1).mean().shift(1))
+            .fillna(0.5)
+        )
+
+        # --- Per-player-champion mastery stats (shift 1) ---
+        long_df['pc_cum_games'] = long_df.groupby(['player', 'champion']).cumcount()
+        long_df['pc_cum_wins'] = (
+            long_df.groupby(['player', 'champion'])['result']
+            .transform(lambda x: x.cumsum().shift(1).fillna(0))
+        )
+        long_df['champ_mastery'] = np.where(
+            long_df['pc_cum_games'] > 0,
+            long_df['pc_cum_wins'] / long_df['pc_cum_games'],
+            0.5
+        )
+        long_df['champ_games'] = long_df['pc_cum_games']
+
+        # --- Assemble per-row dict keyed by (orig_idx, role) ---
+        # Group by original index to collect all 5 roles per match row
+        self.player_performance_per_row = {}
+        for orig_idx in df_sorted.index:
+            mask = long_df['orig_idx'] == orig_idx
+            row_data = long_df[mask]
+            role_dict = {}
+            for _, prow in row_data.iterrows():
+                role_dict[prow['role']] = {
+                    'winrate': float(prow['player_overall_winrate']),
+                    'recent_winrate': float(prow['player_recent_winrate']),
+                    'games': int(prow['cum_games']),
+                    'champ_mastery': float(prow['champ_mastery']),
+                    'champ_games': int(prow['champ_games']),
+                }
+            self.player_performance_per_row[orig_idx] = role_dict
+
+        # --- Per-player final snapshot (for production predictions) ---
+        self.player_performance = {}
+        last_per_player = long_df.groupby('player').last()
+        for player in last_per_player.index:
+            row = last_per_player.loc[player]
+            self.player_performance[player] = {
+                'winrate': float(row['player_overall_winrate']),
+                'recent_winrate': float(row['player_recent_winrate']),
+                'games': int(row['cum_games']),
+            }
+
+        # --- Per-player-champion mastery snapshot (for production) ---
+        self.player_champion_mastery = {}
+        last_per_pc = long_df.groupby(['player', 'champion']).last()
+        for (player, champion) in last_per_pc.index:
+            if player not in self.player_champion_mastery:
+                self.player_champion_mastery[player] = {}
+            row = last_per_pc.loc[(player, champion)]
+            self.player_champion_mastery[player][champion] = {
+                'mastery': float(row['champ_mastery']),
+                'games': int(row['champ_games']),
+            }
+
+        print(f"    Analyzed {len(self.player_performance)} unique players")
+        print(f"    Stored {len(self.player_performance_per_row)} per-row player metrics (leak-free)")
+
     def create_advanced_features(self):
         """Create the complete set of advanced features."""
         print(f"\n CREATING ADVANCED FEATURE SET")
@@ -669,10 +830,14 @@ class AdvancedFeatureEngineering:
             
             features['high_priority_bans'] = high_priority_bans
             
-            # 4. TEAM PERFORMANCE FEATURES
-            team = match['team']
-            team_perf = self.team_historical_performance.get(team, {})
-            
+            # 4. TEAM PERFORMANCE FEATURES (per-row, leak-free)
+            has_per_row = hasattr(self, 'team_historical_performance_per_row') and self.team_historical_performance_per_row
+            if has_per_row and idx in self.team_historical_performance_per_row:
+                team_perf = self.team_historical_performance_per_row[idx]
+            else:
+                team = match['team']
+                team_perf = self.team_historical_performance.get(team, {})
+
             features.update({
                 'team_overall_winrate': team_perf.get('overall_winrate', 0.5),
                 'team_recent_winrate': team_perf.get('recent_winrate', 0.5),
@@ -1053,25 +1218,112 @@ class AdvancedFeatureEngineering:
         
         features_df['high_priority_bans'] = ban_matrix.apply(get_high_priority_bans, axis=1)
         
-        #  4. VECTORIZED TEAM PERFORMANCE
+        #  4. VECTORIZED TEAM PERFORMANCE (per-row, leak-free)
         print("    Vectorizing team performance...")
-        team_series = self.df['team'].fillna('Unknown')
-        
         default_perf = {'overall_winrate': 0.5, 'recent_winrate': 0.5, 'form_trend': 0, 'games_played': 0}
-        
+
+        has_per_row = hasattr(self, 'team_historical_performance_per_row') and self.team_historical_performance_per_row
+
         for metric in ['overall_winrate', 'recent_winrate', 'form_trend', 'games_played']:
+            metric_values = []
+            for idx in self.df.index:
+                # Try per-row first (for training split rows)
+                if has_per_row and idx in self.team_historical_performance_per_row:
+                    metric_values.append(
+                        self.team_historical_performance_per_row[idx][metric]
+                    )
+                else:
+                    # Fall back to per-team snapshot (for val/test split rows)
+                    team = self.df.at[idx, 'team'] if 'team' in self.df.columns else 'Unknown'
+                    perf = self.team_historical_performance.get(team, default_perf)
+                    metric_values.append(perf[metric])
+
+            values = pd.Series(metric_values, index=self.df.index)
+
             if metric == 'games_played':
-                # Normalize experience
-                values = team_series.map(
-                    lambda x: min(self.team_historical_performance.get(x, default_perf)[metric] / 100, 1)
-                )
-                features_df['team_experience'] = values
+                features_df['team_experience'] = (values / 100).clip(upper=1.0)
             else:
-                values = team_series.map(
-                    lambda x: self.team_historical_performance.get(x, default_perf)[metric]
-                )
                 features_df[f'team_{metric}'] = values
         
+        #  4b. VECTORIZED PLAYER PERFORMANCE
+        print("    Vectorizing player performance...")
+        has_player_per_row = hasattr(self, 'player_performance_per_row') and self.player_performance_per_row
+        has_player_snapshot = hasattr(self, 'player_performance') and self.player_performance
+
+        player_cols = ['top_player', 'jng_player', 'mid_player', 'bot_player', 'sup_player']
+        role_names_for_player = ['top', 'jungle', 'mid', 'bot', 'support']
+        has_player_cols = all(c in self.df.columns for c in player_cols)
+
+        if has_player_cols and (has_player_per_row or has_player_snapshot):
+            default_player_stats = {'winrate': 0.5, 'recent_winrate': 0.5, 'games': 0, 'champ_mastery': 0.5, 'champ_games': 0}
+
+            avg_winrates = []
+            avg_recents = []
+            avg_experience = []
+            avg_mastery = []
+            min_mastery = []
+            player_form = []
+
+            for idx in self.df.index:
+                role_stats = []
+                if has_player_per_row and idx in self.player_performance_per_row:
+                    pr = self.player_performance_per_row[idx]
+                    for role in role_names_for_player:
+                        role_stats.append(pr.get(role, default_player_stats))
+                elif has_player_snapshot:
+                    for pcol, ccol in zip(player_cols, ['top_champion', 'jng_champion', 'mid_champion', 'bot_champion', 'sup_champion']):
+                        pname = self.df.at[idx, pcol] if pcol in self.df.columns else 'Unknown'
+                        cname = self.df.at[idx, ccol] if ccol in self.df.columns else 'Unknown'
+                        pdata = self.player_performance.get(pname, {})
+                        cm = 0.5
+                        if hasattr(self, 'player_champion_mastery') and pname in self.player_champion_mastery:
+                            cm = self.player_champion_mastery[pname].get(cname, {}).get('mastery', 0.5)
+                        role_stats.append({
+                            'winrate': pdata.get('winrate', 0.5),
+                            'recent_winrate': pdata.get('recent_winrate', 0.5),
+                            'games': pdata.get('games', 0),
+                            'champ_mastery': cm,
+                            'champ_games': 0,
+                        })
+                else:
+                    role_stats = [default_player_stats] * 5
+
+                if not role_stats:
+                    role_stats = [default_player_stats] * 5
+
+                wrs = [s['winrate'] for s in role_stats]
+                recs = [s['recent_winrate'] for s in role_stats]
+                gms = [min(s['games'] / 100, 1.0) for s in role_stats]
+                msts = [s['champ_mastery'] for s in role_stats]
+                forms = [s['recent_winrate'] - s['winrate'] for s in role_stats]
+
+                avg_winrates.append(np.mean(wrs))
+                avg_recents.append(np.mean(recs))
+                avg_experience.append(np.mean(gms))
+                avg_mastery.append(np.mean(msts))
+                min_mastery.append(min(msts))
+                player_form.append(np.mean(forms))
+
+            features_df['team_avg_player_winrate'] = pd.Series(avg_winrates, index=self.df.index)
+            features_df['team_avg_player_recent'] = pd.Series(avg_recents, index=self.df.index)
+            features_df['team_avg_player_experience'] = pd.Series(avg_experience, index=self.df.index)
+            features_df['team_avg_champion_mastery'] = pd.Series(avg_mastery, index=self.df.index)
+            features_df['team_min_champion_mastery'] = pd.Series(min_mastery, index=self.df.index)
+            features_df['team_player_form'] = pd.Series(player_form, index=self.df.index)
+            features_df['player_mastery_experience_interaction'] = (
+                features_df['team_avg_champion_mastery'] * features_df['team_avg_player_experience']
+            )
+            print(f"       Added 7 player performance features")
+        else:
+            print("       Player data not available, using defaults")
+            features_df['team_avg_player_winrate'] = 0.5
+            features_df['team_avg_player_recent'] = 0.5
+            features_df['team_avg_player_experience'] = 0.5
+            features_df['team_avg_champion_mastery'] = 0.5
+            features_df['team_min_champion_mastery'] = 0.5
+            features_df['team_player_form'] = 0.0
+            features_df['player_mastery_experience_interaction'] = 0.25
+
         #  5. CONTEXTUAL FEATURES (VECTORIZED)
         print("    Adding contextual features...")
         features_df['playoffs'] = (self.df.get('playoffs', 0) == 1).astype(int)
@@ -2090,6 +2342,156 @@ class AdvancedFeatureEngineering:
         }
 
         return summary
+
+    # =========================================================================
+    # LEAKAGE-FREE TRAINING METHODS
+    # These methods support split-first-then-compute pipelines where aggregate
+    # statistics are derived from training data only.
+    # =========================================================================
+
+    def analyze_from_subset(self, data_subset):
+        """Compute all aggregate statistics from a training subset only.
+
+        Temporarily swaps self.df to the given subset, runs all analysis
+        methods (which read self.df), then restores the original DataFrame.
+        This ensures champion_meta_strength, team_historical_performance,
+        ban_priority, etc. are computed from training data only.
+
+        Args:
+            data_subset: pd.DataFrame -- the training rows to derive stats from.
+        """
+        print("\n LEAKAGE-FREE ANALYSIS: Computing stats from training subset only")
+        print(f"    Training subset size: {len(data_subset)} rows")
+
+        original_df = self.df
+        self.df = data_subset.copy()
+
+        # Re-run all analysis methods on the training subset
+        self._handle_missing_values()
+        self._analyze_champion_characteristics()
+        self._calculate_meta_indicators()
+        self._analyze_pickban_strategy()
+        self._calculate_team_dynamics()
+        self._analyze_historical_matchups()
+        self._calculate_player_metrics()
+        self._analyze_player_performance()
+        self._add_temporal_momentum_features()
+        self._investigate_target_leakage()
+        self._add_meta_shift_detection()
+
+        # Restore the full dataset
+        self.df = original_df
+        print("    Analysis complete -- stats derived from training data only")
+
+    def create_features_for_split(self, split_df):
+        """Create features for a specific split using pre-computed statistics.
+
+        Temporarily sets self.df to the split's rows, calls the vectorized
+        feature creation (which reads self.df for row data but uses the
+        pre-computed dicts for lookups), then restores self.df.
+
+        Args:
+            split_df: pd.DataFrame -- rows for this split (train, val, or test).
+
+        Returns:
+            pd.DataFrame of engineered features for the split.
+        """
+        original_df = self.df
+        self.df = split_df.copy()
+
+        # Ensure missing values are handled in this subset
+        self._handle_missing_values()
+
+        # Create features using pre-computed statistics (from analyze_from_subset)
+        features = self.create_advanced_features_vectorized()
+
+        # Restore the full dataset
+        self.df = original_df
+        return features
+
+    def fit_target_encoders(self, train_df):
+        """Fit TargetEncoder instances on training data only.
+
+        Args:
+            train_df: pd.DataFrame -- training rows (must include 'result' column).
+        """
+        print("\n FITTING TARGET ENCODERS ON TRAINING DATA ONLY")
+
+        target = train_df['result']
+        self.target_encoders = {}
+        self.label_encoders = {}
+
+        categorical_cols = ['league', 'team', 'patch', 'split']
+        champion_cols = ['top_champion', 'jng_champion', 'mid_champion',
+                         'bot_champion', 'sup_champion']
+        player_cols = ['top_player', 'jng_player', 'mid_player',
+                       'bot_player', 'sup_player']
+
+        all_cols = categorical_cols + champion_cols + [c for c in player_cols if c in train_df.columns]
+
+        for col in all_cols:
+            if col not in train_df.columns:
+                continue
+
+            col_data = (train_df[col].astype(str)
+                        .replace({'nan': 'Unknown', 'None': 'Unknown'})
+                        .fillna('Unknown'))
+
+            try:
+                encoder = TargetEncoder(random_state=42)
+                encoder.fit(col_data.values.reshape(-1, 1), target)
+                self.target_encoders[col] = encoder
+            except Exception as e:
+                print(f"    TargetEncoder failed for {col}: {e}, falling back to LabelEncoder")
+                le = LabelEncoder()
+                le.fit(col_data)
+                self.label_encoders[col] = le
+
+        print(f"    Fitted {len(self.target_encoders)} target encoders, "
+              f"{len(self.label_encoders)} label encoders")
+
+    def apply_encoding_to_split(self, features_df, split_df):
+        """Transform a split's features using pre-fitted encoders.
+
+        Args:
+            features_df: pd.DataFrame -- engineered features for this split.
+            split_df: pd.DataFrame -- raw data for this split (for categorical columns).
+
+        Returns:
+            pd.DataFrame with encoded columns appended.
+        """
+        categorical_cols = ['league', 'team', 'patch', 'split']
+        champion_cols = ['top_champion', 'jng_champion', 'mid_champion',
+                         'bot_champion', 'sup_champion']
+        player_cols = ['top_player', 'jng_player', 'mid_player',
+                       'bot_player', 'sup_player']
+        all_cols = categorical_cols + champion_cols + [c for c in player_cols if c in split_df.columns]
+
+        for col in all_cols:
+            if col not in split_df.columns:
+                continue
+
+            col_data = (split_df[col].astype(str)
+                        .replace({'nan': 'Unknown', 'None': 'Unknown'})
+                        .fillna('Unknown'))
+
+            if col in self.target_encoders:
+                encoded = self.target_encoders[col].transform(
+                    col_data.values.reshape(-1, 1)
+                )
+                features_df[f'{col}_target_encoded'] = encoded.flatten()
+            elif col in self.label_encoders:
+                le = self.label_encoders[col]
+                # Handle unseen categories by mapping to 'Unknown'
+                known_classes = set(le.classes_)
+                safe_data = col_data.map(
+                    lambda x: x if x in known_classes else 'Unknown'
+                )
+                if 'Unknown' not in known_classes:
+                    le.classes_ = np.append(le.classes_, 'Unknown')
+                features_df[f'{col}_label_encoded'] = le.transform(safe_data)
+
+        return features_df
 
 
 def main(use_vectorized=True, use_enhanced_v2=True):

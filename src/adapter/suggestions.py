@@ -34,17 +34,24 @@ def build_suggestion_features(
     bans: list[str],
     team: str,
     side: str,
-    patch_float: float,
+    patch: str,
     year: int,
     league: str,
     playoffs: int,
     split: str,
-    meta_strength: dict,
-    synergies: dict,
-    team_perf: dict,
-    encoders: dict,
+    champion_characteristics: dict,
+    champion_meta_strength: dict,
+    champion_popularity: dict,
+    team_historical_performance: dict,
+    ban_priority: dict,
+    lane_advantages: dict,
+    champion_archetypes: dict,
+    archetype_advantages: dict,
+    team_advantages: dict,
+    target_encoders: dict,
     all_champions: set[str],
     opponent_picks: dict[str, str],
+    matchups: dict | None = None,
 ) -> tuple[list[tuple[str, str]], list[list[float]]]:
     """Build feature vectors for all candidate swaps.
 
@@ -60,8 +67,8 @@ def build_suggestion_features(
 
     meta_on_patch = {
         champ: strength
-        for (p, champ), strength in meta_strength.items()
-        if p == patch_float and champ not in committed
+        for (p, champ), strength in champion_meta_strength.items()
+        if p == patch and champ not in committed
     }
 
     if not meta_on_patch:
@@ -74,15 +81,21 @@ def build_suggestion_features(
         bans=bans,
         team=team,
         side=side,
-        patch_float=patch_float,
+        patch=patch,
         year=year,
         league=league,
         playoffs=playoffs,
         split=split,
-        meta_strength=meta_strength,
-        synergies=synergies,
-        team_perf=team_perf,
-        encoders=encoders,
+        champion_characteristics=champion_characteristics,
+        champion_meta_strength=champion_meta_strength,
+        champion_popularity=champion_popularity,
+        team_historical_performance=team_historical_performance,
+        ban_priority=ban_priority,
+        lane_advantages=lane_advantages,
+        champion_archetypes=champion_archetypes,
+        archetype_advantages=archetype_advantages,
+        team_advantages=team_advantages,
+        target_encoders=target_encoders,
     )
 
     keys: list[tuple[str, str]] = []
@@ -111,14 +124,7 @@ def resolve_suggestions(
     current_picks: dict[str, str],
     current_win_prob: float,
 ) -> list[dict[str, Any]]:
-    """Convert raw probabilities into ranked, deduplicated suggestions.
-
-    Args:
-        keys: (role, candidate) tuples from build_suggestion_features.
-        probas: Model probabilities for each candidate swap.
-        current_picks: The original role->champion mapping.
-        current_win_prob: The current side's win probability.
-    """
+    """Convert raw probabilities into ranked, deduplicated suggestions."""
     raw: list[dict[str, Any]] = []
     for (role, candidate), prob in zip(keys, probas):
         delta = float(prob) - current_win_prob

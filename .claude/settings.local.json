@@ -19,7 +19,10 @@
       "Bash(pip install:*)",
       "Bash(wc:*)",
       "Bash(sort:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(rm:*)",
+      "Bash(git tag:*)",
+      "Bash(.venv/bin/python3:*)"
     ]
   }
 }

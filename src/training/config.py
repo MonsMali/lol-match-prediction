@@ -77,8 +77,8 @@ class TrainingConfig:
 
     # Training parameters
     rolling_window_months: int = 12  # Training window for rolling retrain
-    validation_size: float = 0.2     # Validation set proportion
-    test_size: float = 0.1           # Test set proportion
+    validation_size: float = 0.15    # Validation set proportion
+    test_size: float = 0.15          # Test set proportion
 
     # Promotion criteria (new model must beat baseline by at least this much)
     promotion_auc_margin: float = 0.005   # New model must be 0.5% better on AUC
