@@ -17,7 +17,7 @@ pinned: false
 - **Email**: [luis.viegas.conceicao@gmail.com](mailto:luis.viegas.conceicao@gmail.com)
 - **Master's Thesis**: Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework
 - **Thesis Paper**: [Full Document (PDF)](Thesis/Novel%20Temporal%20Validation%20for%20Evolving%20Competitive%20Environments%20-%20A%20League%20of%20Legends%20Machine%20Learning%20Framework.pdf)
-
+- **Predictor live [![Here](https://huggingface.co/spaces/MonsMayli/LoL-Draft-Predictor)]
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/luisfvconceicao/)
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/MonsMali/lol-match-prediction)
 
