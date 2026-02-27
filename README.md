@@ -1,3 +1,12 @@
+---
+title: LoL Draft Predictor
+emoji: "\U0001F3AE"
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # League of Legends Match Prediction System
 
 > **Novel Temporal Validation for Evolving Competitive Environments - A League of Legends Machine Learning Framework**
