@@ -17,7 +17,12 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
-import shap
+
+try:
+    import shap
+    SHAP_AVAILABLE = True
+except ImportError:
+    SHAP_AVAILABLE = False
 
 from src.adapter.features import EXPECTED_FEATURES
 
@@ -165,6 +170,9 @@ def create_explainer(model: Any, scaler: Any) -> EnsembleExplainer | None:
     attributes. Both estimators get interventional TreeExplainer
     with model_output='probability'.
     """
+    if not SHAP_AVAILABLE:
+        logger.warning("shap not installed -- SHAP insights disabled")
+        return None
     try:
         background = np.zeros((1, len(EXPECTED_FEATURES)))
 
