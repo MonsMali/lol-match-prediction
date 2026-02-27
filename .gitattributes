@@ -2,3 +2,4 @@ models/production/best_model.joblib filter=lfs diff=lfs merge=lfs -text
 *.joblib filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
 *.pdf filter=lfs diff=lfs merge=lfs -text
+models/champion_matchups.joblib filter=lfs diff=lfs merge=lfs -text
